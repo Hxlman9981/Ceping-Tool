@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>小学教育测评系统 V4.0 分卷版</title>
+    <title>小学教育测评系统 V4.0</title>
     <style>
         :root {
             --bg-primary: #F5F5DC;
@@ -123,7 +123,6 @@
     <div id="toast" class="toast"></div>
 
 <script>
-/* ==================== 第零卷：通用工具函数 ==================== */
 function shuffleArray(arr) {
     const result = [...arr];
     for(let i = result.length - 1; i > 0; i--) {
@@ -157,7 +156,6 @@ function showToast(msg) {
     setTimeout(() => toast.classList.remove('show'), 2000);
 }
 
-/* ==================== 第一卷：全局配置 ==================== */
 const CONFIG = {
     VERSION: '4.0',
     STORAGE_PREFIX: 'edu_test_v40_',
@@ -177,7 +175,6 @@ const CONFIG = {
 function gcd(a,b){while(b){[a,b]=[b,a%b]}return a}
 function lcm(a,b){return a*b/gcd(a,b)}
 
-/* ==================== 第二卷：数学引擎 ==================== */
 const MathEngine = {
     curriculum: {
         '1_1': { topics: ['10以内加减', '20以内不进位', '认识图形', '比较大小', '数的组成', '简单应用', '认识钟表', '找规律'], difficulty: [1, 1, 1, 1, 1, 1, 1, 1] },
@@ -391,7 +388,6 @@ const MathEngine = {
     }
 };
 
-/* ==================== 第三卷：语文引擎 ==================== */
 const ChineseEngine = {
     data: {
         '1_1': {
@@ -641,7 +637,6 @@ const ChineseEngine = {
     }
 };
 
-/* ==================== 第四卷：英语引擎 ==================== */
 const EnglishEngine = {
     vocabulary: {
         '1_1': {words:['apple','book','cat','dog','egg','fish','girl','hand','ice','juice','kite','lion','monkey','nose','orange','panda','queen','ruler','sun','tiger'], trans:{apple:'苹果',book:'书',cat:'猫',dog:'狗',egg:'蛋',fish:'鱼',girl:'女孩',hand:'手',ice:'冰',juice:'果汁',kite:'风筝',lion:'狮子',monkey:'猴子',nose:'鼻子',orange:'橙子',panda:'熊猫',queen:'女王',ruler:'尺子',sun:'太阳',tiger:'老虎'}},
@@ -829,7 +824,6 @@ const EnglishEngine = {
     }
 };
 
-/* ==================== 第五卷：常识引擎 ==================== */
 const CommonEngine = {
     data: {
         '1_1': [
@@ -969,7 +963,6 @@ const CommonEngine = {
     }
 };
 
-/* ==================== 第六卷：主应用逻辑 ==================== */
 const App = {
     state: {
         page: 'home',
@@ -1107,7 +1100,6 @@ const App = {
         const {questions, currentIndex, answers, confirmed, startTime, paper} = this.state;
         const q = questions[currentIndex];
         const total = questions.length;
-        const hasAnswer = answers[currentIndex] !== undefined;
         const isConfirmed = confirmed[currentIndex];
         
         const answeredCount = Object.keys(answers).length;
@@ -1154,6 +1146,10 @@ const App = {
         const tagHtml = subjTag ? `<span class="tag ${subjTag.tag}">${subjTag.name}</span>` : '';
         const diffHtml = q.difficulty ? `<span class="difficulty-badge diff-${q.difficulty===1?'easy':q.difficulty===2?'medium':'hard'}">${q.difficulty===1?'简单':q.difficulty===2?'中等':'困难'}</span>` : '';
         
+        const isLast = currentIndex === total - 1;
+        const nextBtnText = isLast ? '✅ 提交' : '➡️ 下一题';
+        const nextBtnClass = isConfirmed ? 'btn-success' : 'btn-warning';
+        
         container.innerHTML = `
             <div class="container">
                 <div class="card">
@@ -1168,8 +1164,8 @@ const App = {
                 </div>
                 <div class="grid-3" style="margin-top:16px">
                     <button class="btn" onclick="App.prevQuestion()" ${currentIndex===0?'disabled':''}>⬅️ 上一题</button>
-                    <button class="btn ${hasAnswer&&!isConfirmed?'btn-success':'btn-warning'}" onclick="App.confirmOrNext()" ${!hasAnswer?'disabled':''}>
-                        ${isConfirmed ? (currentIndex === total-1 ? '✅ 提交' : '➡️ 下一题') : '✓ 确认答案'}
+                    <button class="btn ${nextBtnClass}" onclick="App.nextOrSubmit()" ${!isConfirmed?'disabled':''}>
+                        ${nextBtnText}
                     </button>
                     <button class="btn" onclick="App.nextQuestion()" ${currentIndex===total-1?'disabled':''}>➡️ 下一题</button>
                 </div>
@@ -1369,21 +1365,17 @@ const App = {
     selectOption(idx) {
         if(this.state.confirmed[this.state.currentIndex]) return;
         this.state.answers[this.state.currentIndex] = idx;
+        this.state.confirmed[this.state.currentIndex] = true; // 点击即确认，自动显示解析
         this.render();
     },
     
-    confirmOrNext() {
-        const {currentIndex, questions, answers, confirmed} = this.state;
-        if(!confirmed[currentIndex]) {
-            this.state.confirmed[currentIndex] = true;
-            this.render();
+    nextOrSubmit() {
+        const {currentIndex, questions} = this.state;
+        if(currentIndex === questions.length - 1) {
+            this.submitQuiz();
         } else {
-            if(currentIndex === questions.length - 1) {
-                this.submitQuiz();
-            } else {
-                this.state.currentIndex++;
-                this.render();
-            }
+            this.state.currentIndex++;
+            this.render();
         }
     },
     
@@ -1513,58 +1505,55 @@ document.addEventListener('DOMContentLoaded', () => {
     App.init();
 });
 </script>
-<!-- ===== 试用限制模块（每年级10题，每日限1次） ===== -->
-<!-- 必须放在 </body> 之前 -->
 
+<!-- ===== 试用限制模块（每年级10题，每日限1次） ===== -->
 <div id="trial-lock-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:99999; justify-content:center; align-items:center; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
   <div style="background:#fff; width:90%; max-width:380px; border-radius:20px; padding:28px 24px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.4);">
     <div style="font-size:56px; margin-bottom:8px;">☕</div>
     <h2 style="margin:0 0 10px 0; color:#222; font-size:22px;">试用结束</h2>
     <p style="color:#555; font-size:15px; line-height:1.7; margin-bottom:6px;">
       今日<strong style="color:#e65100;">10题</strong>试用已完成！
-    </p >
+    </p>
     <p style="color:#777; font-size:14px; line-height:1.6; margin-bottom:20px;">
       完整版包含 1-6年级全部题库<br>
       每日随机20题 · 详细解析 · 薄弱点分析
-    </p >
+    </p>
     
     <div style="background:#fff8e1; border-radius:10px; padding:14px; margin-bottom:20px; border:1px solid #ffe082;">
       <div style="font-size:13px; color:#f57f17; margin-bottom:8px; font-weight:bold;">☕ 解锁仅需一杯奶茶钱</div>
-      <div style="font-size:18px; color:#333; font-weight:bold; letter-spacing:1px;" id="trial-wechat-display">你的微信号</div>
+      <div style="font-size:18px; color:#333; font-weight:bold; letter-spacing:1px;" id="trial-wechat-display">18778629849</div>
     </div>
     
     <button onclick="trialCopyWx()" style="width:100%; background:#07c160; color:#fff; border:none; padding:14px; border-radius:10px; font-size:16px; cursor:pointer; margin-bottom:10px; font-weight:bold;">
       📋 复制微信号
     </button>
     
-    <button onclick="trialClose()" style="width:100%; background:#f5f5f5; color:#666; border:none; padding:12px; border-radius:10px; font-size:14px; cursor:pointer;">
-      明天再来
+    <button onclick="trialClose()" style="width:100%; background:#f5f5f5; color:#666; border:none; padding:12px; border-radius:10px; font-size:14px; cursor:pointer; margin-bottom:10px;">
+      🏠 返回首页
+    </button>
+    
+    <button onclick="trialRefresh()" style="width:100%; background:#e3f2fd; color:#1565c0; border:1px solid #bbdefb; padding:12px; border-radius:10px; font-size:14px; cursor:pointer;">
+      🔄 明天再来（刷新）
     </button>
   </div>
 </div>
 
 <script>
 (function(){
-  // ================== 配置区（只改这里） ==================
   var CFG = {
-    limit: 10,                          // 每年级免费题数
-    wechat: '18778629849',                  // ← 改成你的微信号！
+    limit: 10,
+    wechat: '18778629849',
     storageKey: 'trial_done_' + new Date().toDateString().replace(/\s/g,'_')
   };
   
-  // ================== 状态 ==================
-  var count = 0;           // 已答题数（本次打开）
-  var locked = false;      // 是否已锁定
-  var todayDone = false;   // 今日是否已用完
+  var count = 0;
+  var locked = false;
+  var todayDone = false;
   
-  // 检查今日是否已用完
   try {
     if (localStorage.getItem(CFG.storageKey) === 'yes') todayDone = true;
   } catch(e) {}
   
-  // ================== 核心函数 ==================
-  
-  // 显示锁定层
   function lock() {
     locked = true;
     var el = document.getElementById('trial-lock-screen');
@@ -1572,13 +1561,18 @@ document.addEventListener('DOMContentLoaded', () => {
     try { localStorage.setItem(CFG.storageKey, 'yes'); } catch(e) {}
   }
   
-  // 关闭锁定层
   window.trialClose = function() {
-    var el = document.getElementById('trial-lock-screen');
-    if (el) el.style.display = 'none';
+    if (typeof App !== 'undefined' && App.goHome) {
+      App.goHome();
+    } else {
+      window.location.reload();
+    }
   };
   
-  // 复制微信号
+  window.trialRefresh = function() {
+    window.location.reload();
+  };
+  
   window.trialCopyWx = function() {
     var wx = CFG.wechat;
     if (navigator.clipboard) {
@@ -1592,7 +1586,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   
-  // 更新顶部提示
   function updateTip() {
     var tip = document.getElementById('trial-top-tip');
     if (!tip) return;
@@ -1601,35 +1594,24 @@ document.addEventListener('DOMContentLoaded', () => {
     tip.innerHTML = '🎁 试用版：每年级限做' + CFG.limit + '题（剩余' + remain + '题） | 完整版+v：' + CFG.wechat;
   }
   
-  // ================== 拦截按钮点击 ==================
-  
   document.addEventListener('click', function(e){
     var btn = e.target;
     var text = (btn.innerText || btn.textContent || '').trim();
-    
-    // 匹配"下一题/提交/继续/确认/查看结果/完成"等按钮
     var isNext = /下一|提交|继续|确认|查看结果|完成/.test(text);
     if (!isNext) return;
-    
-    // 如果今日已锁，直接拦截并弹窗
     if (todayDone || locked) {
       e.stopPropagation();
       e.preventDefault();
       lock();
       return false;
     }
-    
-    // 计数+1，更新提示
     count++;
     updateTip();
-    
-    // 达到10题，延迟弹窗（让原逻辑先记录答案）
     if (count >= CFG.limit) {
       setTimeout(lock, 80);
     }
   }, true);
   
-  // 移动端触摸也拦截
   document.addEventListener('touchend', function(e){
     if (!locked && !todayDone) return;
     var text = (e.target.innerText || e.target.textContent || '').trim();
@@ -1639,21 +1621,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, {passive:false});
   
-  // ================== 页面加载初始化 ==================
-  
   window.addEventListener('load', function(){
-    // 设置弹窗里的微信号
     var disp = document.getElementById('trial-wechat-display');
     if (disp) disp.textContent = CFG.wechat;
     
-    // 如果今日已用完
     if (todayDone) {
       var bar = document.createElement('div');
       bar.style.cssText = 'position:fixed; top:0; left:0; width:100%; background:#ff9800; color:#fff; text-align:center; padding:10px; font-size:14px; z-index:99998; font-family:sans-serif;';
       bar.innerHTML = '🔒 今日试用已用完 | 解锁完整版+v：' + CFG.wechat + ' <span style="text-decoration:underline; margin-left:8px; cursor:pointer;" onclick="trialCopyWx()">[复制]</span>';
       document.body.appendChild(bar);
-      
-      // 如果正在答题界面，直接弹窗
       var quiz = document.querySelector('.quiz, #quiz, .question-box, [class*="question"], [id*="question"], .test-container');
       if (quiz && quiz.offsetParent !== null) {
         setTimeout(lock, 600);
@@ -1661,7 +1637,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
-    // 未用完：顶部显示剩余题数
     var tip = document.createElement('div');
     tip.id = 'trial-top-tip';
     tip.style.cssText = 'position:fixed; top:0; left:0; width:100%; background:#e3f2fd; color:#1565c0; text-align:center; padding:9px; font-size:13px; z-index:99998; font-family:sans-serif; border-bottom:1px solid #bbdefb;';
