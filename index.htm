@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小学教育测评系统 V4.0 分卷版</title>
+    <style>
+        :root {
+            --bg-primary: #F5F5DC;
+            --bg-card: #FFFEF0;
+            --text-primary: #2C3E50;
+            --text-secondary: #5D6D7E;
+            --accent: #D35400;
+            --success: #27AE60;
+            --success-light: #D5F5E3;
+            --error: #C0392B;
+            --error-light: #FADBD8;
+            --warning: #F39C12;
+            --warning-light: #FCF3CF;
+            --info: #3498DB;
+            --info-light: #EBF5FB;
+            --border: #D5C8A0;
+            --shadow: rgba(0,0,0,0.08);
+            --radius: 16px;
+            --font-base: 18px;
+            --font-lg: 20px;
+            --font-xl: 26px;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        body {
+            background: var(--bg-primary);
+            font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            font-size: var(--font-base);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        .container { max-width: 800px; margin: 0 auto; padding: 16px; }
+        h1 { font-size: var(--font-xl); text-align: center; margin: 24px 0 16px; color: var(--accent); font-weight: 700; }
+        h2 { font-size: var(--font-lg); margin: 20px 0 12px; font-weight: 700; }
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 12px 0;
+            box-shadow: 0 2px 12px var(--shadow);
+            border: 1px solid var(--border);
+        }
+        .btn {
+            display: block; width: 100%; padding: 14px; margin: 10px 0;
+            border: 2px solid var(--border); border-radius: 12px;
+            font-size: var(--font-lg); font-weight: 600; cursor: pointer;
+            transition: all 0.2s; text-align: center; min-height: 56px;
+            background: white; color: var(--text-primary);
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 12px rgba(211,84,0,0.3); }
+        .btn-success { background: var(--success); color: white; border-color: var(--success); }
+        .btn-warning { background: var(--warning); color: white; border-color: var(--warning); }
+        .btn-info { background: var(--info); color: white; border-color: var(--info); }
+        .btn-option { text-align: left; padding: 16px 20px 16px 52px; font-weight: 500; position: relative; }
+        .btn-option::before {
+            content: attr(data-label); position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            width: 28px; height: 28px; border-radius: 50%; background: var(--bg-primary); border: 2px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; color: var(--text-secondary);
+        }
+        .btn-option.selected { border-color: var(--accent); background: #FFF5E6; box-shadow: 0 0 0 3px rgba(211,84,0,0.1); }
+        .btn-option.selected::before { background: var(--accent); color: white; border-color: var(--accent); }
+        .btn-option.correct { border-color: var(--success); background: var(--success-light); }
+        .btn-option.correct::before { content: "✓"; background: var(--success); color: white; border-color: var(--success); }
+        .btn-option.wrong { border-color: var(--error); background: var(--error-light); }
+        .btn-option.wrong::before { content: "✕"; background: var(--error); color: white; border-color: var(--error); }
+        .btn-option.disabled { opacity: 0.6; pointer-events: none; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+        @media (max-width: 480px) { .grid-4 { grid-template-columns: 1fr 1fr; } :root { --font-base: 16px; --font-lg: 18px; --font-xl: 22px; } }
+        .progress-bar { height: 10px; background: #E8E0C5; border-radius: 5px; overflow: hidden; margin: 16px 0; }
+        .progress-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; border-radius: 5px; }
+        .explanation {
+            background: var(--info-light); border-left: 4px solid var(--info); padding: 16px; margin-top: 16px;
+            border-radius: 0 12px 12px 0; display: none;
+        }
+        .explanation.show { display: block; animation: slideDown 0.3s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .result-ring { width: 160px; height: 160px; margin: 20px auto; position: relative; }
+        .ring-bg { fill: none; stroke: #E8E0C5; stroke-width: 12; }
+        .ring-fill { fill: none; stroke: var(--accent); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+        .ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .ring-score { font-size: 42px; font-weight: 800; color: var(--accent); }
+        .stat-row { display: flex; justify-content: space-around; margin: 20px 0; text-align: center; }
+        .stat-item .num { font-size: 32px; font-weight: 700; display: block; }
+        .stat-item.correct .num { color: var(--success); }
+        .stat-item.wrong .num { color: var(--error); }
+        .wrong-list { max-height: 400px; overflow-y: auto; margin: 16px 0; }
+        .wrong-item { background: white; border-radius: 12px; padding: 16px; margin: 10px 0; border: 1px solid var(--border); }
+        .wrong-item .q-exp { margin-top: 10px; padding: 12px; background: var(--bg-primary); border-radius: 8px; font-size: 16px; }
+        .toast {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85); color: white; padding: 16px 28px;
+            border-radius: 12px; font-size: var(--font-lg); z-index: 1000;
+            pointer-events: none; opacity: 0; transition: opacity 0.3s;
+        }
+        .toast.show { opacity: 1; }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; vertical-align: middle; }
+        .tag-math { background: #EBF5FB; color: #2874A6; }
+        .tag-chinese { background: #F5EEF8; color: #8E44AD; }
+        .tag-english { background: #E8F8F5; color: #1E8449; }
+        .tag-common { background: #FEF9E7; color: #B7950B; }
+        .info-box { background: #EBF5FB; border: 1px solid #AED6F1; border-radius: 12px; padding: 16px; margin: 16px 0; font-size: 15px; color: #1B4F72; }
+        .difficulty-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 8px; }
+        .diff-easy { background: #D5F5E3; color: #27AE60; }
+        .diff-medium { background: #FCF3CF; color: #D4AC0D; }
+        .diff-hard { background: #FADBD8; color: #C0392B; }
+        .paper-badge { display:inline-block; padding:4px 12px; border-radius:8px; font-size:14px; font-weight:700; margin-left:8px; background:#8E44AD; color:white; }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <div id="toast" class="toast"></div>
+
+<script>
+/* ==================== 第零卷：通用工具函数 ==================== */
+function shuffleArray(arr) {
+    const result = [...arr];
+    for(let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
+
+function shuffleOptions(options, correctIndex) {
+    const arr = options.map((text, idx) => ({ text, isCorrect: idx === correctIndex }));
+    for(let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return { 
+        options: arr.map(o => o.text), 
+        correctIndex: arr.findIndex(o => o.isCorrect) 
+    };
+}
+
+function questionFingerprint(q) {
+    const core = q.question.replace(/[0-9\s\(\)\[\]\{\}\,\.\?\!\:\;\+\-\*\/\=\<\>\%]+/g, '').substring(0, 20);
+    return `${q.type || 'mix'}_${core}`;
+}
+
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+/* ==================== 第一卷：全局配置 ==================== */
+const CONFIG = {
+    VERSION: '4.0',
+    STORAGE_PREFIX: 'edu_test_v40_',
+    GRADES: [1,2,3,4,5,6],
+    TERMS: [1, 2],
+    PAPERS: ['A', 'B'],
+    SUBJECTS: [
+        {id: 'math', name: '数学', tag: 'tag-math'},
+        {id: 'chinese', name: '语文', tag: 'tag-chinese'},
+        {id: 'english', name: '英语', tag: 'tag-english'},
+        {id: 'common', name: '常识', tag: 'tag-common'},
+        {id: 'mix', name: '综合', tag: ''}
+    ],
+    COUNTS: [10, 20, 30, 50]
+};
+
+function gcd(a,b){while(b){[a,b]=[b,a%b]}return a}
+function lcm(a,b){return a*b/gcd(a,b)}
+
+/* ==================== 第二卷：数学引擎 ==================== */
+const MathEngine = {
+    curriculum: {
+        '1_1': { topics: ['10以内加减', '20以内不进位', '认识图形', '比较大小', '数的组成', '简单应用', '认识钟表', '找规律'], difficulty: [1, 1, 1, 1, 1, 1, 1, 1] },
+        '1_2': { topics: ['20以内退位减法', '整十数加减', '人民币认识', '找规律', '100以内数', '进位加法', '简单统计'], difficulty: [1, 1, 1, 1, 1, 2, 1] },
+        '2_1': { topics: ['100以内加减', '表内乘法', '长度单位', '角的认识', '观察物体', '简单推理'], difficulty: [2, 2, 1, 2, 2, 2] },
+        '2_2': { topics: ['表内除法', '万以内数', '克与千克', '逻辑推理', '有余数除法', '近似数'], difficulty: [2, 2, 1, 3, 3, 2] },
+        '3_1': { topics: ['万以内加减', '多位数乘一位数', '分数初步', '时间计算', '周长', '估算'], difficulty: [2, 2, 3, 2, 2, 2] },
+        '3_2': { topics: ['除数是一位数', '两位数乘两位数', '小数初步', '面积', '年月日', '平均数'], difficulty: [3, 3, 3, 3, 2, 3] },
+        '4_1': { topics: ['大数认识', '公顷平方千米', '三位数乘两位数', '除数是两位数', '角与平行垂直', '条形统计图'], difficulty: [2, 3, 3, 3, 3, 2] },
+        '4_2': { topics: ['四则运算', '运算定律', '小数意义', '三角形', '小数加减', '平均数与条形图', '数学广角'], difficulty: [3, 3, 3, 3, 3, 3, 4] },
+        '5_1': { topics: ['小数乘法', '位置数对', '小数除法', '可能性', '简易方程', '多边形面积'], difficulty: [3, 2, 3, 3, 4, 4] },
+        '5_2': { topics: ['因数倍数', '长方体正方体', '分数意义', '分数加减', '折线统计图', '找次品'], difficulty: [3, 4, 3, 3, 3, 4] },
+        '6_1': { topics: ['分数乘法', '位置方向', '分数除法', '比', '圆', '百分数'], difficulty: [4, 2, 4, 4, 4, 4] },
+        '6_2': { topics: ['负数', '百分数二', '圆柱圆锥', '比例', '鸽巢原理', '数与代数总复习'], difficulty: [3, 4, 4, 4, 4, 4] }
+    },
+
+    templates: {
+        '1_1': [
+            {topic:'10以内加减', diff:1, fn:(s)=>{const a=(s*13)%9+1,b=(s*7)%9+1,c=a+b;return{q:`小明有${a}支铅笔，小红又给他${b}支，现在有几支？`,a:[c,c+1,c-1,c+2],e:`应用题分析：原有${a}支+得到${b}支=现在${c}支。加法应用题要找准"原有"和"增加"的数量。`}}},
+            {topic:'10以内加减', diff:1, fn:(s)=>{const a=(s*17)%9+2,b=(s*11)%9+1,c=a-b;return{q:`树上有${a}只鸟，飞走${b}只，还剩几只？`,a:[c,c+1,c-1,a+b],e:`减法应用题：总数${a}只-飞走${b}只=剩下${c}只。注意"飞走"要用减法。`}}},
+            {topic:'20以内不进位', diff:1, fn:(s)=>{const a=(s*3)%5+11,b=(s*5)%5+1,c=a+b;return{q:`${a} + ${b} = ?`,a:[c,c+10,c-10,c+1],e:`20以内不进位加法：个位${a%10}+${b}=${a%10+b}，十位${Math.floor(a/10)}不变，结果${c}。注意个位相加不满10，十位直接写1。`}}},
+            {topic:'认识图形', diff:1, fn:(s)=>{const shapes=['长方体','正方体','圆柱','球'];const t=shapes[s%4];const others=shapes.filter(x=>x!==t);return{q:`下面哪个是${t}？（认识立体图形）`,a:[t,others[0],others[1],others[2]],e:`立体图形特征：${t}${t==='球'?'——圆圆的，表面光滑，能滚动':t==='圆柱'?'——上下两个圆面，中间是曲面，能滚动':t==='正方体'?'——6个面都是正方形，12条棱长度相等':'——6个面都是长方形（可能有2个正方形面），相对的面相同'}。`}}},
+            {topic:'比较大小', diff:1, fn:(s)=>{const a=(s*23)%10+1,b=(s*29)%10+1;return{q:`${a} ○ ${b}，圆圈里填？`,a:[a>b?'>':a<b?'<':'=',a>b?'<':a<b?'>':'≠','≥','≤'],e:`比较大小：${a}${a>b?'大于':a<b?'小于':'等于'}${b}，填"${a>b?'>':a<b?'<':'='}"。开口朝大数，尖尖朝小数。`}}},
+            {topic:'数的组成', diff:1, fn:(s)=>{const a=(s*43)%5+1,b=(s*47)%5+1,c=a*10+b;return{q:`${a}个十和${b}个一组成的数是？`,a:[c,a+b,a*b,a*10],e:`数位概念：${a}个十是${a*10}，${b}个一是${b}，合起来是${c}。十位上的数字表示几个十，个位上的数字表示几个一。`}}},
+            {topic:'简单应用', diff:1, fn:(s)=>{const items=['苹果','梨','桃','橘子'];const a=(s*53)%5+1,b=(s*59)%5+1,c=a+b;return{q:`盘子里有${a}个${items[s%4]}，又放进${b}个，一共有几个？`,a:[c,a-b,a*b,c+1],e:`加法应用题分析："有${a}个"是原有数量，"放进${b}个"是增加数量，求"一共"用加法：${a}+${b}=${c}个。`}}},
+            {topic:'认识钟表', diff:1, fn:(s)=>{const n=(s*71)%12+1;return{q:`${n}时整，时针指向${n>12?n-12:n}，分针指向？`,a:['12','6','3','9'],e:`钟表认识：整点时，分针永远指向12，时针指向几就是几时。${n}时整，分针指向12。`}}},
+            {topic:'找规律', diff:1, fn:(s)=>{const start=(s*79)%5+1,d=(s*83)%3+1;const n1=start+d,n2=start+2*d,n3=start+3*d,n4=start+4*d;return{q:`找规律填数：${start}，${n1}，${n2}，___，___`,a:[`${n3}，${n4}`,`${n2}，${n3}`,`${n4}，${n3+d}`,`${start}，${n1}`],e:`找规律：观察相邻两数的差，${n1}-${start}=${d}，${n2}-${n1}=${d}，每次增加${d}，所以后面是${n3}、${n4}。`}}},
+            {topic:'10以内加减', diff:1, fn:(s)=>{const n=(s*89)%10+1;return{q:`与${n}相邻的两个数是？`,a:[`${n-1}和${n+1}`,`${n-2}和${n+2}`,`${n}和${n+1}`,`${n-1}和${n}`],e:`相邻数：${n}前面一个数是${n-1}，后面一个数是${n+1}。相邻的两个数相差1。`}}}
+        ],
+        '1_2': [
+            {topic:'20以内退位减法', diff:2, fn:(s)=>{const a=(s*13)%9+11,b=(s*7)%9+2,c=a-b;return{q:`${a} - ${b} = ?（退位减法）`,a:[c,c+10,a+b,c-1],e:`退位减法详解：个位${a%10}减${b}不够减，向十位借1当10，变成${10+a%10}-${b}=${10+a%10-b}，十位1被借走剩0，结果${c}。记住口诀：不够减，向前借，借一当十再减。`}}},
+            {topic:'整十数加减', diff:1, fn:(s)=>{const a=((s*17)%9+1)*10,b=((s*11)%9+1)*10,c=a+b;return{q:`${a} + ${b} = ?`,a:[c,c+10,c-10,c+100],e:`整十数加法：${a}是${a/10}个十，${b}是${b/10}个十，${a/10}个十加${b/10}个十=${(a+b)/10}个十，即${c}。整十数相加，十位相加，个位写0。`}}},
+            {topic:'人民币认识', diff:1, fn:(s)=>{const coins=[1,2,5,10];const c=coins[s%4];const n=(s*19)%5+2;return{q:`${n}枚${c}角硬币，一共多少角？`,a:[n*c,c+n,c*n+1,c],e:`人民币计算：${n}枚${c}角=${n}×${c}=${n*c}角。1元=10角，${n*c>=10?'='+Math.floor(n*c/10)+'元'+(n*c%10?n*c%10+'角':'')+'，要会进行单位换算':''}。`}}},
+            {topic:'找规律', diff:1, fn:(s)=>{const st=(s*23)%10+1,d=(s*29)%3+2;return{q:`找规律：${st}，${st+d}，${st+2*d}，__，__`,a:[`${st+3*d}，${st+4*d}`,`${st+d}，${st+2*d}`,`${st+4*d}，${st+5*d}`,`${st+2*d}，${st+3*d}`],e:`规律分析：观察数列，${st+d}-${st}=${d}，${st+2*d}-${st+d}=${d}，相邻两数差都是${d}（等差数列）。所以接下来是${st+3*d}、${st+4*d}。`}}},
+            {topic:'100以内数', diff:1, fn:(s)=>{const n=(s*31)%50+20;return{q:`${n}里面有___个十和___个一`,a:[`${Math.floor(n/10)}，${n%10}`,`${n%10}，${Math.floor(n/10)}`,`${n}，0`,`0，${n}`],e:`数位分析：${n}的十位是${Math.floor(n/10)}，表示${Math.floor(n/10)}个十；个位是${n%10}，表示${n%10}个一。${n}=${Math.floor(n/10)}×10+${n%10}×1。`}}},
+            {topic:'进位加法', diff:2, fn:(s)=>{const a=(s*37)%20+10,b=(s*41)%10+1,c=a+b;return{q:`${a} + ${b} = ?（进位加法）`,a:[c,c-10,c+10,c-1],e:`进位加法详解：个位${a%10}+${b}=${a%10+b}${a%10+b>=10?'，满十要向十位进1':''}。十位${Math.floor(a/10)}${a%10+b>=10?'+1（进位）':''}=${Math.floor(c/10)}，结果${c}。`}}},
+            {topic:'简单统计', diff:1, fn:(s)=>{const colors=['红','黄','蓝','绿'];const counts=[3,4,5,6];const idx=s%4;const total=counts.reduce((a,b)=>a+b,0);return{q:`统计：${colors.map((c,i)=>c+counts[i]+'个').join('，')}，一共几个？`,a:[total,total-1,total+1,counts[idx]],e:`加法统计：${counts.join('+')}=${total}个。统计总数要把各部分数量相加。`}}},
+            {topic:'人民币认识', diff:1, fn:(s)=>{const n=(s*43)%5+1;return{q:`1张5元+${n}张1元=？元`,a:[5+n,5*n,5-n,5],e:`人民币计算：1张5元是5元，${n}张1元是${n}元，一共5+${n}=${5+n}元。计算时单位统一（都是元），直接相加。`}}},
+            {topic:'20以内退位减法', diff:2, fn:(s)=>{const a=(s*47)%10+11,b=(s*53)%9+2,c=a-b;return{q:`小明有${a}颗糖，分给同学${b}颗，还剩几颗？`,a:[c,c+10,c-10,a+b],e:`退位减法应用：总数${a}颗-分出去${b}颗=剩下${c}颗。个位${a%10}减${b}不够，向十位借1，${10+a%10}-${b}=${10+a%10-b}，结果${c}。`}}},
+            {topic:'100以内数', diff:1, fn:(s)=>{const n=(s*59)%20+20;return{q:`${n}前面第3个数是？`,a:[n-3,n+3,n-2,n-1],e:`往前数：${n}前面第1个${n-1}，第2个${n-2}，第3个${n-3}。"前面"表示比${n}小的数，用减法。`}}}
+        ],
+        '2_1': [
+            {topic:'100以内加减', diff:2, fn:(s)=>{const a=(s*13)%50+20,b=(s*7)%50+20,c=a+b;return{q:`${a} + ${b} = ?（列竖式计算）`,a:[c,c+10,c-10,c+1],e:`100以内加法竖式：相同数位对齐，从个位加起。个位${a%10}+${b%10}=${(a%10+b%10)%10}${a%10+b%10>=10?'，满十向十位进1':''}；十位${Math.floor(a/10)}+${Math.floor(b/10)}${a%10+b%10>=10?'+1（进位）':''}=${Math.floor(c/10)}。结果${c}。`}}},
+            {topic:'表内乘法', diff:2, fn:(s)=>{const a=(s*17)%8+2,b=(s*11)%8+2,c=a*b;return{q:`${a} × ${b} = ?（想口诀）`,a:[c,a+b,c+1,c-1],e:`表内乘法：想口诀"${a} ${b} ${c}"（如二三得六）。乘法是求几个相同加数的和的简便运算，${a}×${b}表示${b}个${a}相加。`}}},
+            {topic:'长度单位', diff:1, fn:(s)=>{const cm=(s*19)%100+1;return{q:`${cm}厘米 = ?米`,a:[(cm/100)+'米',cm+'米',(cm*100)+'米',(cm/10)+'米'],e:`单位换算：1米=100厘米，小单位化大单位要除以进率。${cm}÷100=${cm/100}米。记住：米、分米、厘米相邻进率都是10。`}}},
+            {topic:'角的认识', diff:2, fn:(s)=>{const types=['锐角','直角','钝角'];const t=types[s%3];const others=types.filter(x=>x!==t);return{q:`下面哪个角是${t}？（三角板比一比）`,a:[t,others[0],others[1],'平角'],e:`角的分类：${t==='锐角'?'小于90°（比直角小）':t==='直角'?'等于90°（三角板上的角）':'大于90°小于180°（比直角大，比平角小）'}。用三角板的直角去比：小于直角是锐角，等于直角是直角，大于直角是钝角。`}}},
+            {topic:'观察物体', diff:2, fn:(s)=>{const views=['前面','后面','左面','右面','上面'];const v=views[s%5];return{q:`观察长方体，从${v}看，看到的是什么图形？`,a:[v==='上面'?'长方形或正方形':'长方形', '圆形', '三角形', '梯形'],e:`观察物体：长方体从${v}看，看到的是长方形（特殊情况下可能是正方形）。从不同方向观察同一物体，看到的形状可能不同。`}}},
+            {topic:'简单推理', diff:2, fn:(s)=>{const names=['小明','小红','小刚'][s%3];return{q:`三人比赛，${names}不是第一也不是最后，他是第几？`,a:['第二名','第一名','第三名','无法确定'],e:`逻辑推理：一共三人，不是第一也不是最后，那只能是第二。这是排除法推理，先确定"不是"什么，再确定"是"什么。`}}},
+            {topic:'表内乘法', diff:2, fn:(s)=>{const n=(s*29)%8+2;return{q:`${n}的乘法口诀中，积最大的一句是？`,a:[`${n}九=${n*9}`,`${n}一=${n}`,`${n}五=${n*5}`,`${n}二=${n*2}`],e:`乘法口诀规律：1-9中，乘数越大积越大。${n}×9=${n*9}是最大的。熟记口诀表，能快速判断大小。`}}},
+            {topic:'100以内加减', diff:2, fn:(s)=>{const a=(s*31)%50+30,b=(s*37)%50+20,c=a-b;return{q:`${a} - ${b} = ?（退位减法）`,a:[c,c+10,a+b,c-1],e:`100以内退位减法：个位${a%10}-${b%10}${a%10>=b%10?'':'不够减，向十位借1当10'}，${a%10>=b%10?'直接减':`${10+a%10}-${b%10}=${10+a%10-b}`}；十位${Math.floor(a/10)}${a%10>=b%10?'':'-1（被借走）'}=${Math.floor(c/10)}。结果${c}。`}}},
+            {topic:'长度单位', diff:1, fn:(s)=>{const m=(s*41)%10+1;return{q:`${m}米 = ?厘米`,a:[m*100+'厘米',m+'厘米',m/100+'厘米',m*10+'厘米'],e:`单位换算：1米=100厘米，大单位化小单位要乘进率。${m}×100=${m*100}厘米。米→分米→厘米，每步×10。`}}},
+            {topic:'表内乘法', diff:2, fn:(s)=>{const a=(s*43)%8+2,b=(s*47)%8+1;return{q:`${a}个${b}相加，写成乘法算式是？`,a:[`${a}×${b}或${b}×${a}`,`${a}+${b}`,`${a}个${b}`,`${a}-${b}`],e:`乘法意义：${a}个${b}相加=${a}×${b}（或${b}×${a}）。乘法是加法的简便运算，几个相同的数相加，可以写成乘法。`}}}
+        ],
+        '2_2': [
+            {topic:'表内除法', diff:2, fn:(s)=>{const a=(s*13)%8+2,b=(s*7)%8+2,c=a*b;return{q:`${c} ÷ ${a} = ?（想乘法算除法）`,a:[b,b+1,b-1,a],e:`除法与乘法关系：除法是乘法的逆运算。想${a}×？=${c}，口诀"${a} ${b} ${c}"，所以商是${b}。被除数÷除数=商。`}}},
+            {topic:'万以内数', diff:2, fn:(s)=>{const n=((s*17)%50+1)*100;return{q:`${n}读作？`,a:[n+'',n+100+'',n-100+'',n+10+''],e:`万以内读数：从高位读起，${n}末尾2个0不读，读作"${n}"。注意：中间有0要读"零"，末尾有0不读。`}}},
+            {topic:'克与千克', diff:1, fn:(s)=>{const g=(s*19)%10*100+500;return{q:`${g}克 = ?千克`,a:[g/1000+'千克',g+'千克',g/100+'千克',g/10+'千克'],e:`质量单位换算：1千克=1000克，小单位化大单位除以进率1000。${g}÷1000=${g/1000}千克。1千克大约是两袋盐的重量。`}}},
+            {topic:'逻辑推理', diff:3, fn:(s)=>{const total=(s*23)%20+10,eat=(s*29)%5+3,c=total-eat;return{q:`共${total}颗糖，吃${eat}颗，剩多少？验算怎么写？`,a:[`${c}颗；验算：${c}+${eat}=${total}或${total}-${c}=${eat}`,`${c}颗；不用验算`,`${c}颗；验算：${total}+${eat}`,`${c}颗；验算：${total}-${eat}`],e:`减法验算方法：差+减数=被减数，或被减数-差=减数。${total}-${eat}=${c}，验算：${c}+${eat}=${total}，说明计算正确。验算是检查答案是否正确的好方法。`}}},
+            {topic:'有余数除法', diff:3, fn:(s)=>{const a=(s*31)%20+10,b=(s*37)%5+2,q=Math.floor(a/b),r=a%b;return{q:`${a}里面最多有___个${b}，余___`,a:[`${q}，${r}`,`${q+1}，${b-r}`,`${q}，0`,`${a}，0`],e:`有余数除法：${a}÷${b}=${q}……${r}。余数必须比除数小（${r}<${b}）。求"最多有几个"就是求商，用除法。`}}},
+            {topic:'近似数', diff:2, fn:(s)=>{const n=(s*41)%100+100;return{q:`${n}最接近的整百数是？`,a:[Math.round(n/100)*100,n,n+100,n-100],e:`四舍五入到百位：看十位数字${Math.floor(n/10)%10}，${Math.floor(n/10)%10>=5?'≥5向百位进1':'<5百位不变'}，后面写00。${n}≈${Math.round(n/100)*100}。`}}},
+            {topic:'表内除法', diff:2, fn:(s)=>{const a=(s*43)%8+2,b=(s*47)%8+2,c=a*b;return{q:`根据"${a} ${b} ${c}"这句口诀，写出两道除法算式`,a:[`${c}÷${a}=${b}，${c}÷${b}=${a}`,`${c}÷${a}=${b}`,`${a}÷${b}=${c}`,`${a}×${b}=${c}`],e:`口诀与乘除法：一句口诀可以写一道乘法和两道除法。${a}×${b}=${c}，所以${c}÷${a}=${b}，${c}÷${b}=${a}。乘除法是互逆运算。`}}},
+            {topic:'万以内数', diff:2, fn:(s)=>{const a=(s*53)%5000+1000,b=(s*59)%5000+1000;return{q:`${a}和${b}哪个大？大多少？`,a:[`${Math.max(a,b)}大，大${Math.abs(a-b)}`,`${Math.min(a,b)}大`,`一样大`,`无法比较`],e:`万以内数比较：位数相同从高位比起，${a}的千位${Math.floor(a/1000)}${Math.floor(a/1000)>Math.floor(b/1000)?'>':Math.floor(a/1000)<Math.floor(b/1000)?'<':'='}${b}的千位${Math.floor(b/1000)}。大数-小数=相差数。`}}},
+            {topic:'克与千克', diff:1, fn:(s)=>{const items=['苹果','香蕉','橘子'];const w=[200,150,100][s%3];const n=(s*61)%5+2;return{q:`1个${items[s%3]}约${w}克，${n}个约多少克？合多少千克？`,a:[`${n*w}克，合${n*w/1000}千克`,`${n+w}克`,`${n*w}克，合${n*w}克`,`${w}克`],e:`乘法应用+单位换算：${w}×${n}=${n*w}克。1000克=1千克，${n*w}克=${n*w/1000}千克。注意问题有两问，要答完整。`}}},
+            {topic:'有余数除法', diff:3, fn:(s)=>{const a=(s*67)%30+10,b=(s*71)%4+2;return{q:`${a}个同学，每${b}人一组，可分几组？剩几人？`,a:[`${Math.floor(a/b)}组${a%b}人`,`${a}组`,`${b}组`,`${a+b}组`],e:`有余数除法应用：${a}÷${b}=${Math.floor(a/b)}（组）……${a%b}（人）。商表示组数，余数表示剩下的人数。余数必须比除数小。`}}}
+        ],
+        '3_1': [
+            {topic:'万以内加减', diff:2, fn:(s)=>{const a=(s*13)%5000+1000,b=(s*7)%5000+1000,c=a+b;return{q:`${a} + ${b} = ?（列竖式，注意进位）`,a:[c,c+1000,c-1000,c+100],e:`万以内加法：相同数位对齐，从个位加起，哪一位满十向前一位进1。${a}+${b}=${c}。验算：交换加数位置和不变，${b}+${a}=${c}。`}}},
+            {topic:'多位数乘一位数', diff:2, fn:(s)=>{const a=(s*17)%900+100,b=(s*11)%8+2,c=a*b;return{q:`${a} × ${b} = ?（分步计算）`,a:[c,c+b,c-b,a+b],e:`多位数乘一位数：用${b}分别乘个位、十位、百位，注意进位。${a}×${b}：${a%10}×${b}=${(a%10)*b}（个位），${Math.floor(a/10)%10}×${b}=${(Math.floor(a/10)%10)*b}（十位），${Math.floor(a/100)}×${b}=${Math.floor(a/100)*b}（百位），合起来${c}。`}}},
+            {topic:'分数初步', diff:3, fn:(s)=>{const a=(s*19)%3+1,b=(s*23)%3+2,total=a+b;return{q:`蛋糕平均分成${total}份，吃${a}份，吃了几分之几？还剩几分之几？`,a:[`${a}/${total}，剩${b}/${total}`,`${b}/${total}，剩${a}/${total}`,`${a}/${a*b}，剩${b}/${a*b}`,`1/${total}，剩${total-1}/${total}`],e:`分数意义：把整体平均分成${total}份，每份是1/${total}，${a}份就是${a}/${total}。剩下${total}-${a}=${b}份，即${b}/${total}。同分母分数相加减，分母不变，分子相加减。`}}},
+            {topic:'时间计算', diff:2, fn:(s)=>{const startH=(s*29)%12+1,startM=(s*31)%4*15;const durM=(s*37)%60+30;const endM=(startM+durM)%60;const endH=startH+Math.floor((startM+durM)/60);return{q:`${startH}:${startM.toString().padStart(2,'0')}开始上课，经过${durM}分钟，什么时候结束？`,a:[`${endH}:${endM.toString().padStart(2,'0')}`,`${startH}:${(startM+durM).toString().padStart(2,'0')}`,`${endH+1}:${endM}`,`${startH+1}:${startM}`],e:`时间计算：开始时间+经过时间=结束时间。${startM}+${durM}=${startM+durM}分钟=${Math.floor((startM+durM)/60)}小时${endM}分钟，所以结束时间是${endH}:${endM.toString().padStart(2,'0')}。满60分钟进1小时。`}}},
+            {topic:'周长', diff:2, fn:(s)=>{const a=(s*41)%20+5,b=(s*43)%15+5;return{q:`长方形长${a}cm，宽${b}cm，周长是多少？`,a:[(a+b)*2+'cm',a*b+'cm²',a+b+'cm',(a+b)*2+'cm²'],e:`长方形周长公式：C=(长+宽)×2=(${a}+${b})×2=${(a+b)*2}cm。注意周长用长度单位（cm），面积用面积单位（cm²），不要混淆。`}}},
+            {topic:'估算', diff:2, fn:(s)=>{const a=(s*47)%300+200,b=(s*53)%300+200;const ra=Math.round(a/100)*100,rb=Math.round(b/100)*100;return{q:`估算：${a}+${b}≈？`,a:[ra+rb,a+b,ra+rb+100,ra+rb-100],e:`估算方法：把数看成接近的整百数。${a}≈${ra}，${b}≈${rb}，${ra}+${rb}=${ra+rb}。估算用"≈"（约等号），不要写"="。`}}},
+            {topic:'多位数乘一位数', diff:2, fn:(s)=>{const n=(s*59)%500+100;return{q:`${n}×0=？ ${n}×1=？`,a:[`0，${n}`,`${n}，0`,`${n}，${n}`,`0，0`],e:`乘法规律：任何数×0=0，任何数×1=它本身。所以${n}×0=0，${n}×1=${n}。记住这两个特殊规律。`}}},
+            {topic:'分数初步', diff:3, fn:(s)=>{const a=(s*61)%4+2,b=(s*67)%4+2;return{q:`${a}/${a+b} + ${b}/${a+b} = ?`,a:['1',`${a+b}/${a+b}`,`${a+b}/${a*b}`,`${a}/${a+b}`],e:`同分母分数加法：分母不变，分子相加。${a}+${b}=${a+b}，所以${a}/${a+b}+${b}/${a+b}=${a+b}/${a+b}=1。分子分母相同时等于1。`}}},
+            {topic:'万以内加减', diff:2, fn:(s)=>{const a=(s*71)%8000+1000,b=(s*73)%8000+1000;const c=Math.abs(a-b);return{q:`${Math.max(a,b)} - ${Math.min(a,b)} = ?`,a:[c,c+1000,c-1000,c+100],e:`万以内减法：相同数位对齐，从个位减起，哪一位不够减向前一位借1当10。验算：差+减数=被减数，${c}+${Math.min(a,b)}=${Math.max(a,b)}。`}}},
+            {topic:'周长', diff:2, fn:(s)=>{const side=(s*79)%10+3;return{q:`正方形边长${side}cm，周长是多少？`,a:[side*4+'cm',side*side+'cm²',side*2+'cm',side*4+'cm²'],e:`正方形周长公式：C=边长×4=${side}×4=${side*4}cm。正方形四条边相等，周长是边长的4倍。注意单位是cm（长度单位）。`}}}
+        ],
+        '3_2': [
+            {topic:'除数是一位数', diff:3, fn:(s)=>{const a=((s*13)%90+10)*3,b=3,c=a/b;return{q:`${a} ÷ ${b} = ?（从高位除起）`,a:[c,c+1,c-1,c+10],e:`除法竖式：从被除数最高位除起。${a}÷${b}：百位${Math.floor(a/100)}÷${b}=${Math.floor(Math.floor(a/100)/b)}，十位……，个位……，商${c}。每次除后的余数必须比除数小。`}}},
+            {topic:'两位数乘两位数', diff:3, fn:(s)=>{const a=(s*17)%30+10,b=(s*11)%20+10,c=a*b;return{q:`${a} × ${b} = ?（分两步：先乘个位，再乘十位，最后相加）`,a:[c,c+10,c-10,a+b],e:`两位数乘两位数：${a}×${b}=(${a}×${b%10})+(${a}×${Math.floor(b/10)}×10)=${a*b%10}+${a*Math.floor(b/10)*10}=${c}。或者用竖式：先用第二个因数个位乘第一个因数，再用十位乘，最后相加。`}}},
+            {topic:'小数初步', diff:3, fn:(s)=>{const n=(s*19)%10+1;return{q:`${n}元5角写成小数是？元`,a:[n+0.5+'元',n+5+'元',n+0.05+'元',n+'.5元'],e:`小数与人民币：1元=10角，1角=0.1元，5角=0.5元。${n}元5角=${n}+0.5=${n+0.5}元。小数点左边是元，右边第一位是角，第二位是分。`}}},
+            {topic:'面积', diff:3, fn:(s)=>{const a=(s*23)%10+2,b=(s*29)%10+2,c=a*b;return{q:`长方形长${a}米，宽${b}米，面积是多少？`,a:[c+'平方米',(a+b)*2+'米',a+b+'平方米',c+'米'],e:`长方形面积公式：S=长×宽=${a}×${b}=${c}平方米。注意：面积用平方单位（平方米），周长用长度单位（米），不要混淆。`}}},
+            {topic:'年月日', diff:2, fn:(s)=>{const year=(s*31)%10+2015;const isLeap=(year%4===0&&year%100!==0)||(year%400===0);return{q:`${year}年是平年还是闰年？2月有多少天？`,a:[`${isLeap?'闰年':'平年'}，${isLeap?29:28}天`,'平年，30天','闰年，30天','平年，29天'],e:`闰年判断：普通年份÷4能整除是闰年（如2020），整百年份÷400能整除是闰年（如2000）。${year}${isLeap?'÷4='+year/4+'，能整除，是闰年':'÷4='+Math.floor(year/4)+'余'+year%4+'，不能整除，是平年'}。闰年2月29天，平年2月28天。`}}},
+            {topic:'平均数', diff:3, fn:(s)=>{const nums=[(s*37)%20+80,(s*41)%20+80,(s*43)%20+80];const avg=Math.round(nums.reduce((a,b)=>a+b,0)/3);return{q:`三次测验成绩分别是${nums[0]}、${nums[1]}、${nums[2]}分，平均分是多少？`,a:[avg,nums[0],Math.max(...nums),Math.min(...nums)],e:`平均数计算：总数÷份数=平均数。(${nums[0]}+${nums[1]}+${nums[2]})÷3=${nums.reduce((a,b)=>a+b,0)}÷3=${avg}分。平均数能代表一组数据的总体水平。`}}},
+            {topic:'除数是一位数', diff:3, fn:(s)=>{const total=(s*47)%100+50,per=(s*53)%5+3;return{q:`${total}个苹果，每${per}个装一袋，可装几袋？剩几个？`,a:[`${Math.floor(total/per)}袋剩${total%per}个`,`${total/per}袋`,`${total%per}袋`,`${per}袋`],e:`有余数除法应用：${total}÷${per}=${Math.floor(total/per)}（袋）……${total%per}（个）。商表示袋数，余数表示剩下的个数。余数必须比除数小（${total%per}<${per}）。`}}},
+            {topic:'两位数乘两位数', diff:3, fn:(s)=>{const a=(s*59)%20+10,b=(s*61)%20+10;return{q:`${a}×${b}的积是几位数？估算一下。`,a:[a*b>=100?'三位数':'两位数','两位数','三位数','四位数'],e:`估算判断位数：${a}≈${Math.round(a/10)*10}，${b}≈${Math.round(b/10)*10}，${Math.round(a/10)*10}×${Math.round(b/10)*10}=${Math.round(a/10)*10*Math.round(b/10)*10}，是${a*b>=100?'三':'两'}位数。实际${a}×${b}=${a*b}。`}}},
+            {topic:'小数初步', diff:3, fn:(s)=>{const a=(s*67)%10+1,b=(s*71)%10+1;return{q:`${a}.${b}读作？`,a:[a+'点'+b,a+'元'+b+'角',a+'分之'+b,a+'十'+b],e:`小数读法：整数部分按整数读，小数点读"点"，小数部分依次读数字。${a}.${b}读作"${a}点${b}"。不要读成"${a}点${b}十"或"十分之${b}"。`}}},
+            {topic:'面积', diff:3, fn:(s)=>{const side=(s*79)%10+2;return{q:`正方形边长${side}分米，面积是多少？周长是多少？`,a:[side*side+'平方分米，'+side*4+'分米',side*4+'分米，'+side*side+'平方分米',side*side+'分米',side*4+'平方分米'],e:`正方形公式：面积=边长×边长=${side}×${side}=${side*side}平方分米；周长=边长×4=${side}×4=${side*4}分米。注意面积单位和长度单位的区别。`}}}
+        ],
+        '4_1': [
+            {topic:'大数认识', diff:2, fn:(s)=>{const n=((s*13)%9+1)*10000;return{q:`${n}=___万`,a:[n/10000,n/1000,n/100,n],e:`大数改写：去掉末尾4个0，加"万"字。${n}=${n/10000}万。1万=10000，10万=100000，100万=1000000。`}}},
+            {topic:'公顷平方千米', diff:3, fn:(s)=>{const n=(s*7)%5+1;return{q:`${n}公顷=___平方米，${n}平方千米=___公顷`,a:[n*10000+'，'+n*100,n*1000+'，'+n*10,n*100+'，'+n*1000,n*10000+'，'+n*10000],e:`面积单位换算：1公顷=10000平方米，1平方千米=100公顷。${n}公顷=${n}×10000=${n*10000}平方米；${n}平方千米=${n}×100=${n*100}公顷。`}}},
+            {topic:'三位数乘两位数', diff:3, fn:(s)=>{const a=(s*17)%90+100,b=(s*11)%90+10,c=a*b;return{q:`${a}×${b}=？（列竖式计算）`,a:[c,c+100,c-100,a+b],e:`三位数乘两位数：先用个位乘，再用十位乘，最后相加。${a}×${b%10}=${a*(b%10)}，${a}×${Math.floor(b/10)}0=${a*Math.floor(b/10)*10}，相加=${c}。注意积的数位对齐。`}}},
+            {topic:'除数是两位数', diff:3, fn:(s)=>{const a=(s*19)%20+10,b=(s*23)%5+2,c=a*b;return{q:`${c}÷${b}=？（想乘法算除法）`,a:[a,a+1,a-1,c],e:`除法试商：想${b}×？=${c}，因为${b}×${a}=${c}，所以商是${a}。除数是两位数时，先看被除数前两位，不够除看前三位。`}}},
+            {topic:'角与平行垂直', diff:3, fn:(s)=>{const angle=(s*29)%90+10;return{q:`${angle}°的角是___角`,a:[angle<90?'锐角':angle===90?'直角':'钝角','锐角','直角','钝角'],e:`角的分类：${angle}°${angle<90?'小于90°，是锐角':angle===90?'等于90°，是直角':'大于90°小于180°，是钝角'}。锐角<直角<钝角<平角<周角。`}}},
+            {topic:'条形统计图', diff:2, fn:(s)=>{const data=[(s*31)%20+10,(s*37)%20+10,(s*41)%20+10];const total=data.reduce((a,b)=>a+b,0);return{q:`条形图显示：A${data[0]}人，B${data[1]}人，C${data[2]}人，一共多少人？A比B多几人？`,a:[`${total}人，${data[0]-data[1]}人`,`${total}人，${data[1]-data[0]}人`,`${data[0]}人，${data[1]}人`,`${data[2]}人，${total}人`],e:`条形统计图分析：总数=${data[0]}+${data[1]}+${data[2]}=${total}人。A比B多=${data[0]}-${data[1]}=${data[0]-data[1]}人。读条形图要看清横轴、纵轴表示什么，每格代表多少。`}}},
+            {topic:'三位数乘两位数', diff:3, fn:(s)=>{const a=(s*43)%400+100,b=(s*47)%90+10;return{q:`${a}×${b}，积末尾有几个0？`,a:[String(a*b).match(/0+$/)?String(a*b).match(/0+$/)[0].length:0,1,2,3],e:`积末尾0的个数：看因数中共有几个2和5（因为2×5=10）。${a}×${b}=${a*b}，末尾${String(a*b).match(/0+$/)?String(a*b).match(/0+$/)[0].length:0}个0。`}}},
+            {topic:'除数是两位数', diff:3, fn:(s)=>{const a=(s*53)%100+10,b=(s*59)%90+10;return{q:`${a*b}÷${a}=？ ${a*b}÷${b}=？`,a:[`${b}，${a}`,`${a}，${b}`,`${a*b}，1`,`1，${a*b}`],e:`除法性质：被除数÷一个因数=另一个因数。${a}×${b}=${a*b}，所以${a*b}÷${a}=${b}，${a*b}÷${b}=${a}。乘除法互为逆运算。`}}},
+            {topic:'大数认识', diff:2, fn:(s)=>{const n=(s*61)%900000+100000;return{q:`${n}四舍五入到万位约是？`,a:[Math.round(n/10000)+'万',n+'万',Math.floor(n/10000)+'万',Math.ceil(n/10000)+'万'],e:`四舍五入到万位：看千位数字${Math.floor(n/1000)%10}，${Math.floor(n/1000)%10>=5?'≥5向万位进1':'<5舍去'}，后面写"万"。${n}≈${Math.round(n/10000)}万。`}}},
+            {topic:'公顷平方千米', diff:3, fn:(s)=>{const m=(s*67)%1000+100;return{q:`长方形土地长${m}米，宽100米，面积是多少平方米？合多少公顷？`,a:[m*100+'平方米，'+m*100/10000+'公顷',m*100+'公顷',m+100+'平方米',m*100+'平方米，'+m*100+'公顷'],e:`面积计算+单位换算：面积=长×宽=${m}×100=${m*100}平方米。1公顷=10000平方米，${m*100}平方米=${m*100/10000}公顷。`}}}
+        ],
+        '4_2': [
+            {topic:'四则运算', diff:3, fn:(s)=>{const a=(s*13)%20+1,b=(s*7)%20+1,c=(s*11)%10+1,d=a+b*c;return{q:`${a}+${b}×${c}=？（先算什么？）`,a:[d,a+b+c,(a+b)*c,a*b+c],e:`运算顺序：先乘除后加减。先算${b}×${c}=${b*c}，再算${a}+${b*c}=${d}。不能先算${a}+${b}，必须遵守运算顺序规则。`}}},
+            {topic:'运算定律', diff:3, fn:(s)=>{const a=(s*17)%50+10,b=(s*19)%50+10;return{q:`${a}+${b}=${b}+${a}，运用了什么定律？`,a:['加法交换律','加法结合律','乘法交换律','分配律'],e:`加法交换律：两个加数交换位置，和不变。a+b=b+a。注意区分：结合律是(a+b)+c=a+(b+c)，交换律是a+b=b+a。`}}},
+            {topic:'小数意义', diff:3, fn:(s)=>{const n=(s*23)%10+1;return{q:`0.${n}表示什么意思？`,a:[`十分之${n}`,`百分之${n}`,`千分之${n}`,'十分之1'],e:`小数意义：一位小数表示十分之几，0.${n}=${n}/10（十分之${n}）。两位小数表示百分之几，三位表示千分之几。`}}},
+            {topic:'三角形', diff:3, fn:(s)=>{const angles=[30,45,60,90,120][s%5];return{q:`三角形有一个${angles}°角，这是什么三角形？`,a:[angles>=90?'钝角或直角三角形（需另两角也<90°才确定锐角）':'锐角三角形','等边三角形','等腰三角形','直角三角形'],e:`三角形按角分类：有一个角≥90°是钝角/直角三角形，三个角都<90°是锐角三角形。${angles}°${angles>=90?'≥90°，所以这个三角形是钝角或直角三角形':'<90°，但需知道另两个角才能确定是否是锐角三角形'}。`}}},
+            {topic:'运算定律', diff:3, fn:(s)=>{const a=(s*29)%10+2,b=(s*31)%10+2,c=(s*37)%10+2;return{q:`${a}+${b}+${c}，先算${a}+${c}，运用了什么定律？`,a:['交换律和结合律','交换律','结合律','分配律'],e:`简便运算：${a}+${c}=${a+c}能凑整，运用了交换律（交换${b}和${c}位置）和结合律（先算${a}+${c}）。两个定律同时运用。`}}},
+            {topic:'小数加减', diff:3, fn:(s)=>{const a=((s*41)%50+10)/10,b=((s*43)%50+10)/10,c=(a+b).toFixed(1);return{q:`${a}+${b}=？（小数点对齐）`,a:[c,(a+b+0.1).toFixed(1),(a+b-0.1).toFixed(1),(a*b).toFixed(1)],e:`小数加法：小数点对齐（相同数位对齐），从末位加起。${a}+${b}=${c}。注意：小数点对齐，不是末位对齐！`}}},
+            {topic:'数学广角', diff:4, fn:(s)=>{const n=(s*47)%10+2;return{q:`${n}条直线相交，最多有几个交点？`,a:[n*(n-1)/2,n,n*n,2*n],e:`组合问题：每两条直线最多交1点。${n}条直线选2条相交，有C(${n},2)=${n}×${n-1}÷2=${n*(n-1)/2}个交点。公式：n(n-1)/2。`}}},
+            {topic:'三角形', diff:3, fn:(s)=>{const a=(s*53)%15+5,b=(s*59)%15+5,c=(s*61)%15+5;const canForm=a+b>c&&a+c>b&&b+c>a;return{q:`三条边长${a}cm、${b}cm、${c}cm，能组成三角形吗？`,a:[canForm?'能':'不能','能','不能','不一定'],e:`三角形三边关系：任意两边之和大于第三边。${a}+${b}=${a+b}${a+b>c?'>':'<='}${c}，${canForm?'所以能组成三角形':'所以不能组成三角形'}。`}}},
+            {topic:'小数意义', diff:3, fn:(s)=>{const n=(s*67)%100+1;return{q:`${n}去掉末尾2个0，这个数缩小到原来的？`,a:['1/100','1/10','10倍','100倍'],e:`小数点移动：去掉2个0相当于小数点向左移动2位，缩小到原来的1/100。${n}→${n/100}。向右移是扩大，向左移是缩小。`}}},
+            {topic:'四则运算', diff:3, fn:(s)=>{const a=(s*71)%10+2,b=(s*73)%10+2,c=(s*79)%10+2;return{q:`${a}×${b}+${a}×${c}=${a}×(___+___)`,a:[`${b}，${c}`,`${a}，${b}`,`${b}，${a}`,`${a}，${c}`],e:`乘法分配律逆用：a×b+a×c=a×(b+c)。${a}×${b}+${a}×${c}=${a}×(${b}+${c})。提取公因数${a}，剩下${b}和${c}相加。`}}}
+        ],
+        '5_1': [
+            {topic:'小数乘法', diff:3, fn:(s)=>{const a=((s*13)%10+1)/10,b=((s*7)%10+1)/10,c=(a*b).toFixed(2);return{q:`${a}×${b}=？（先按整数算，再点小数点）`,a:[c,(a+b).toFixed(2),(a*b+0.01).toFixed(2),(a-b).toFixed(2)],e:`小数乘法：先按整数乘法算${(a*10)}×${(b*10)}=${a*b*100}，因数共有2位小数，从积右边数2位点小数点，得${c}。注意：积的小数位数=因数小数位数之和。`}}},
+            {topic:'位置数对', diff:2, fn:(s)=>{const x=(s*17)%5+1,y=(s*11)%5+1;return{q:`数对(${x},${y})表示第几列第几行？`,a:[`${x}列${y}行`,`${y}列${x}行`,`${x}行${y}列`,`${x+y}列`],e:`数对表示法：数对(a,b)中，第一个数a表示列，第二个数b表示行。(${x},${y})是第${x}列第${y}行。记住：先列后行。`}}},
+            {topic:'小数除法', diff:3, fn:(s)=>{const a=((s*19)%10+1)*0.5,b=0.5,c=a/b;return{q:`${a}÷${b}=？（除数是小数，先转化成整数）`,a:[c,a+b,a-b,a*b],e:`小数除法：除数${b}有一位小数，被除数和除数同时×10，变成${a*10}÷${b*10}=${c}。商不变性质：被除数和除数同时乘或除以相同数（0除外），商不变。`}}},
+            {topic:'多边形面积', diff:4, fn:(s)=>{const shapes=['平行四边形','三角形','梯形'];const f=['底×高','底×高÷2','(上底+下底)×高÷2'];const idx=s%3;return{q:`${shapes[idx]}的面积公式是？`,a:[f[idx],'边长×4','长×宽','底×高÷3'],e:`面积公式：${shapes[idx]}面积=${f[idx]}。${idx===0?'平行四边形可以剪拼成长方形，面积=底×高':idx===1?'两个完全一样的三角形拼成平行四边形，所以面积=底×高÷2':'两个完全一样的梯形拼成平行四边形，所以面积=(上底+下底)×高÷2'}。`}}},
+            {topic:'简易方程', diff:4, fn:(s)=>{const a=(s*23)%5+2,x=(s*29)%5+1;return{q:`解方程：${a}x=${a*x}`,a:[`x=${x}`,`x=${a}`,`x=${a*x}`,`x=1`],e:`解方程：${a}x=${a*x}，两边同时÷${a}，x=${a*x}÷${a}=${x}。解方程的依据是等式性质：等式两边同时乘或除以相同数（0除外），等式仍成立。`}}},
+            {topic:'小数乘法', diff:3, fn:(s)=>{const n=(s*31)%10+1;return{q:`${n}×0.2=？（0.2=1/5）`,a:[n*0.2,n*2,n/2,n*5],e:`小数乘法：${n}×0.2=${n}×1/5=${n/5}=${n*0.2}。也可以先算${n}×2=${n*2}，再÷10=${n*0.2}。`}}},
+            {topic:'可能性', diff:3, fn:(s)=>{const colors=['红','黄','蓝'];const counts=[2,3,4];return{q:`袋里有${counts[0]}个红球、${counts[1]}个黄球、${counts[2]}个蓝球，摸到___球可能性最大`,a:['蓝','红','黄','一样大'],e:`可能性大小：数量越多，摸到的可能性越大。${counts[2]}>${counts[1]}>${counts[0]}，蓝球最多，所以摸到蓝球可能性最大。可能性=该颜色数量÷总数量。`}}},
+            {topic:'多边形面积', diff:4, fn:(s)=>{const base=(s*37)%10+2,height=(s*41)%10+2;return{q:`三角形底${base}cm，高${height}cm，面积是多少？`,a:[base*height/2+'cm²',base*height+'cm²',(base+height)*2+'cm',base*height*2+'cm²'],e:`三角形面积=底×高÷2=${base}×${height}÷2=${base*height/2}cm²。注意：÷2不能忘！三角形面积是等底等高平行四边形面积的一半。`}}},
+            {topic:'简易方程', diff:4, fn:(s)=>{const a=(s*43)%5+2,b=(s*47)%5+3;return{q:`${a}x+${b}=${a*3+b}，x=？`,a:['3',String(a),String(b),String(a+b)],e:`解方程步骤：${a}x+${b}=${a*3+b} → ${a}x=${a*3+b}-${b}=${a*3} → x=${a*3}÷${a}=3。移项要变号，+${b}移到右边变成-${b}。`}}},
+            {topic:'位置数对', diff:2, fn:(s)=>{const a=(s*53)%5+1,b=(s*59)%5+1;return{q:`点A(${a},${b})向右平移2格，新位置是？`,a:[`${a+2},${b}`,`${a},${b+2}`,`${a-2},${b}`,`${a},${b-2}`],e:`平移规律：左右平移改变列数（第一个数），上下平移改变行数（第二个数）。向右平移2格，列+2，行不变，新位置(${a+2},${b})。`}}}
+        ],
+        '5_2': [
+            {topic:'因数倍数', diff:3, fn:(s)=>{const n=(s*13)%20+2;return{q:`${n}的最小因数是？最大因数是？`,a:['1和'+n,'1和1',n+'和'+n,n+'和1'],e:`因数性质：一个数的最小因数是1，最大因数是它本身${n}。因数个数有限，最小是1，最大是本身。`}}},
+            {topic:'长方体正方体', diff:4, fn:(s)=>{const a=(s*17)%5+2,b=(s*11)%5+3,c=(s*19)%5+2;return{q:`长方体长${a}cm、宽${b}cm、高${c}cm，体积是多少？表面积是多少？`,a:[a*b*c+'cm³，'+2*(a*b+b*c+a*c)+'cm²',a*b*c+'cm²',2*(a*b+b*c+a*c)+'cm³',(a+b+c)*2+'cm²'],e:`长方体公式：体积=长×宽×高=${a}×${b}×${c}=${a*b*c}cm³；表面积=2×(长×宽+宽×高+长×高)=2×(${a*b}+${b*c}+${a*c})=${2*(a*b+b*c+a*c)}cm²。`}}},
+            {topic:'分数意义', diff:3, fn:(s)=>{const a=(s*23)%3+1,b=(s*29)%3+2,total=a+b;return{q:`${total}个苹果，吃${a}个，吃了几分之几？还剩几分之几？`,a:[`${a}/${total}，剩${b}/${total}`,`${b}/${total}，剩${a}/${total}`,`${a}/${a*b}，剩${b}/${a*b}`,`1/${total}，剩${total-1}/${total}`],e:`分数意义：把${total}个苹果看作整体"1"，吃${a}个就是${a}/${total}，剩${b}个就是${b}/${total}。${a}/${total}+${b}/${total}=${total}/${total}=1。`}}},
+            {topic:'分数加减', diff:3, fn:(s)=>{const a=(s*31)%3+1,b=(s*37)%3+2,c=(s*41)%3+1;return{q:`${a}/${b}+${c}/${b}=？（同分母分数相加）`,a:[(a+c)+'/'+b,(a+c)+'/'+(b+b),(a*c)+'/'+b,a+'/'+(b+c)],e:`同分母分数加法：分母不变，分子相加。${a}/${b}+${c}/${b}=${a+c}/${b}${a+c>b?'='+Math.floor((a+c)/b)+'又'+((a+c)%b)+'/'+b:''}。结果能约分要约成最简分数。`}}},
+            {topic:'折线统计图', diff:3, fn:(s)=>{const data=[80,85,82,88,90];const rise=data[4]>data[0];return{q:`折线图显示成绩：${data.join('→')}分，成绩总体呈什么趋势？`,a:[rise?'上升趋势':'下降趋势','下降趋势','不变','无法判断'],e:`折线统计图分析：观察折线走向，从${data[0]}分到${data[4]}分${rise?'上升':'下降'}了${Math.abs(data[4]-data[0])}分，总体呈${rise?'上升':'下降'}趋势。折线图能看出数量的增减变化。`}}},
+            {topic:'找次品', diff:4, fn:(s)=>{const n=(s*47)%5+3;return{q:`${n}个零件中有1个次品（较轻），用天平至少称几次能保证找到？`,a:[Math.ceil(Math.log2(n)),n,2,1],e:`找次品策略：把物品尽量平均分成3份。${n}个零件${n<=3?'分成1,1,1或1,1,'+(n-2)+'，称1次':n<=9?'分成3份，称2次':'分成3份，称3次'}。规律：3ⁿ≥物品数，至少称n次。`}}},
+            {topic:'因数倍数', diff:3, fn:(s)=>{const a=(s*53)%10+2,b=(s*59)%10+2;return{q:`${a}和${b}的最大公因数是？最小公倍数是？`,a:[gcd(a,b)+'，'+lcm(a,b),a*b+'，'+gcd(a,b),gcd(a,b)+'，'+a*b,a+'，'+b],e:`最大公因数（GCD）和最小公倍数（LCM）：${a}和${b}的最大公因数是${gcd(a,b)}，最小公倍数是${lcm(a,b)}。关系：GCD×LCM=${a}×${b}=${a*b}。`}}},
+            {topic:'长方体正方体', diff:4, fn:(s)=>{const edge=(s*61)%5+2;return{q:`正方体棱长${edge}cm，棱长总和是多少？`,a:[edge*12+'cm',edge*6+'cm',edge*8+'cm',edge*4+'cm'],e:`正方体棱长总和：正方体有12条棱，且长度相等。棱长总和=棱长×12=${edge}×12=${edge*12}cm。长方体棱长总和=(长+宽+高)×4。`}}},
+            {topic:'分数意义', diff:3, fn:(s)=>{const n=(s*67)%10+2;return{q:`${n}个相同正方体拼成长方体，有几种拼法？`,a:[n%2===0?2:1,1,3,n],e:`因数分解：${n}=${n}×1×1${n%2===0?'='+Math.floor(n/2)+'×2×1':n%3===0?'='+Math.floor(n/3)+'×3×1':''}。拼法数等于${n}的因数分解方式数（考虑长宽高顺序）。`}}},
+            {topic:'分数加减', diff:3, fn:(s)=>{const a=(s*71)%5+2,b=(s*73)%5+3;return{q:`${a}/${b}的分子加${a}，分母应加多少才能保持分数大小不变？`,a:[b,2*b,a,2*a],e:`分数基本性质：分子分母同时乘或除以相同数（0除外），分数大小不变。分子${a}→${a+a}=${2*a}（×2），分母${b}也应×2=${2*b}，应加${2*b}-${b}=${b}。`}}}
+        ],
+        '6_1': [
+            {topic:'分数乘法', diff:4, fn:(s)=>{const a=(s*13)%5+2,b=(s*7)%5+2;return{q:`${a}/${b}×${b}/${a}=？（分数乘法，先约分）`,a:['1',(a*a)+'/'+b,b+'/'+(a*a),'0'],e:`分数乘法：分子乘分子，分母乘分母，能约分先约分。${a}/${b}×${b}/${a}=${a*b}/${b*a}=1。互为倒数的两个数相乘得1。`}}},
+            {topic:'位置方向', diff:2, fn:(s)=>{const dirs=['东','南','西','北','东北','东南','西北','西南'];const d=dirs[s%8];return{q:`地图通常是按上北下南，左___右___绘制。${d}的反方向是？`,a:[`西，东；${dirs[(s+4)%8]}`,'东，西；'+dirs[(s+4)%8],'南，北；'+dirs[(s+4)%8],'西，东；'+d],e:`方向知识：地图按"上北下南，左西右东"绘制。方向具有相对性，${d}的反方向是${dirs[(s+4)%8]}。八个方向要记牢。`}}},
+            {topic:'分数除法', diff:4, fn:(s)=>{const a=(s*19)%5+2,b=(s*23)%5+3;return{q:`${a}/${b}÷${a}/${b}=？（除以一个分数等于乘它的倒数）`,a:['1',(a*a)+'/'+(b*b),'0',a+'/'+b],e:`分数除法：除以一个数等于乘它的倒数。${a}/${b}÷${a}/${b}=${a}/${b}×${b}/${a}=1。相同的数（0除外）相除得1。`}}},
+            {topic:'比', diff:4, fn:(s)=>{const a=(s*29)%10+2,b=(s*31)%10+2;return{q:`${a}:${b}化简比是？比值是？`,a:[`${a/gcd(a,b)}:${b/gcd(a,b)}，${(a/b).toFixed(2)}`,`${a}:${b}，${a+b}`,`${a*b}:1，${a*b}`,`1:${b/a}，${b/a}`],e:`化简比：前后项同时除以最大公因数${gcd(a,b)}。${a}:${b}=(${a}÷${gcd(a,b)}):(${b}÷${gcd(a,b)})=${a/gcd(a,b)}:${b/gcd(a,b)}。比值=前项÷后项=${a}÷${b}=${(a/b).toFixed(2)}。`}}},
+            {topic:'圆', diff:4, fn:(s)=>{const r=(s*37)%5+1;return{q:`半径${r}cm的圆，直径=？cm，周长=？cm（π取3.14）`,a:[2*r+'，'+(6.28*r).toFixed(2),r+'，'+(3.14*r),2*r+'，'+(3.14*r),r+'，'+(6.28*r)],e:`圆的基本公式：直径d=2r=${2*r}cm，周长C=πd=2πr=2×3.14×${r}=${(6.28*r).toFixed(2)}cm。π≈3.14，要熟记。`}}},
+            {topic:'百分数', diff:4, fn:(s)=>{const n=(s*43)%100+1;return{q:`${n}的20%是多少？${n}增加20%后是多少？`,a:[n*0.2+'，'+n*1.2,n*0.2+'，'+n*0.8,n*20+'，'+n*1.2,n/20+'，'+n+20],e:`百分数计算：求一个数的百分之几用乘法。${n}×20%=${n}×0.2=${n*0.2}。增加20%：${n}×(1+20%)=${n}×1.2=${n*1.2}。"增加"用1+百分数，"减少"用1-百分数。`}}},
+            {topic:'分数乘法', diff:4, fn:(s)=>{const a=(s*47)%10+2,b=(s*53)%10+3;return{q:`${a}米的${b}/${a+b}是多少米？`,a:[(a*b/(a+b)).toFixed(2)+'米',b+'米',a+'米',(a+b)+'米'],e:`分数乘法应用：求一个数的几分之几是多少，用乘法。${a}×${b}/${a+b}=${a*b}/${a+b}${Number.isInteger(a*b/(a+b))?'':'≈'+(a*b/(a+b)).toFixed(2)}米。`}}},
+            {topic:'圆', diff:4, fn:(s)=>{const r=(s*59)%5+1;return{q:`半径${r}cm的圆，面积=？cm²（π取3.14）`,a:[(3.14*r*r).toFixed(2),(6.28*r).toFixed(2),(3.14*2*r).toFixed(2),(3.14*r).toFixed(2)],e:`圆面积公式：S=πr²=3.14×${r}²=3.14×${r*r}=${(3.14*r*r).toFixed(2)}cm²。注意：面积用平方单位，周长用长度单位，不要混淆。`}}},
+            {topic:'比', diff:4, fn:(s)=>{const a=(s*61)%5+2,b=(s*67)%5+3;return{q:`如果${a}:${b}=3:4，那么${a}是${b}的几分之几？`,a:[(a/b).toFixed(2),(b/a).toFixed(2),'3/4','4/3'],e:`比与分数关系：a:b=a/b。${a}:${b}=${a}/${b}=${(a/b).toFixed(2)}。比的前项相当于分子，后项相当于分母，比值就是分数值。`}}},
+            {topic:'百分数', diff:4, fn:(s)=>{const n=(s*71)%100+10;return{q:`${n}减少15%后是多少？`,a:[n*0.85,n*0.15,n*1.15,n*0.5],e:`百分数应用：减少15%就是原数的85%。${n}×(1-15%)=${n}×0.85=${n*0.85}。"减少"用1-百分数，"增加"用1+百分数。`}}}
+        ],
+        '6_2': [
+            {topic:'负数', diff:3, fn:(s)=>{const a=(s*13)%20+1,b=(s*7)%20+1;return{q:`零下${a}℃记作？比0℃低${b}度记作？`,a:[`-${a}℃，-${b}℃`,`+${a}℃，-${b}℃`,`-${a}℃，+${b}℃`,`${a}℃，${b}℃`],e:`负数表示：零上和零下是一对相反意义的量，零上为正，零下为负。零下${a}℃记作-${a}℃，比0℃低${b}度记作-${b}℃。注意负号不能省略。`}}},
+            {topic:'百分数二', diff:4, fn:(s)=>{const p=(s*17)%30+10;return{q:`商品打${p}折，现价是原价的百分之几？`,a:[p+'%',(100-p)+'%',p/10+'%',p*10+'%'],e:`折扣问题：几折就是百分之几十。${p}折=${p}%。打${p}折表示现价=原价×${p}%。如原价100元，打${p}折后${p}元。`}}},
+            {topic:'圆柱圆锥', diff:4, fn:(s)=>{const r=(s*19)%5+1,h=(s*23)%5+2;const v=(3.14*r*r*h).toFixed(2);return{q:`圆柱底面半径${r}cm，高${h}cm，体积是多少？（π取3.14）`,a:[v,(3.14*2*r*h).toFixed(2),(3.14*r*h).toFixed(2),(2*3.14*r*r).toFixed(2)],e:`圆柱体积公式：V=底面积×高=πr²h=3.14×${r}²×${h}=3.14×${r*r}×${h}=${v}cm³。注意：体积用立方单位，和面积单位不同。`}}},
+            {topic:'比例', diff:4, fn:(s)=>{const a=(s*29)%5+3;return{q:`${a+1}个苹果放${a}个抽屉，至少有一个抽屉放几个？（鸽巢原理）`,a:['2个','1个','3个','无法确定'],e:`鸽巢原理：物体数÷抽屉数=商……余数，至少数=商+1（有余数时）。${a+1}÷${a}=1……1，至少1+1=2个。这是数学中重要的存在性原理。`}}},
+            {topic:'百分数二', diff:4, fn:(s)=>{const principal=(s*31)%1000+1000,rate=0.03,years=(s%3)+1;const interest=(principal*rate*years).toFixed(0);return{q:`存入${principal}元，年利率${rate*100}%，${years}年后利息是多少？`,a:[interest+'元',(principal*(1+rate*years)).toFixed(0)+'元',(principal*rate).toFixed(0)+'元',(principal*years).toFixed(0)+'元'],e:`利息公式：利息=本金×利率×时间=${principal}×${rate}×${years}=${interest}元。本息和=本金+利息=${principal*1+Number(interest)}元。注意区分利息和本息。`}}},
+            {topic:'比例', diff:4, fn:(s)=>{const a=(s*37)%10+2,b=(s*41)%10+2;return{q:`${a}和${b}成反比例，${a}扩大2倍，${b}怎么变？`,a:['缩小2倍','扩大2倍','不变','扩大4倍'],e:`反比例性质：xy=k（一定），一个量扩大几倍，另一个量缩小相同倍数。${a}×${b}=k，${a}×2×${b}/2=k，所以${b}缩小2倍。`}}},
+            {topic:'百分数二', diff:4, fn:(s)=>{const n=(s*43)%100+1;return{q:`${n}增加10%后再减少10%，结果是多少？比原来多还是少？`,a:[n*0.99+'，比原来少',n+'，和原来一样',n*1.01+'，比原来多',n*0.9+'，比原来少'],e:`连续变化：${n}×(1+10%)×(1-10%)=${n}×1.1×0.9=${n*0.99}。注意：增加和减少的百分比虽然相同，但基数不同（增加时基数小，减少时基数大），所以结果比原来少。`}}},
+            {topic:'圆柱圆锥', diff:4, fn:(s)=>{const r=(s*47)%5+1,h=(s*53)%5+1;const v=(3.14*r*r*h/3).toFixed(2);return{q:`圆锥底面半径${r}cm，高${h}cm，体积是多少？（π取3.14）`,a:[v,(3.14*r*r*h).toFixed(2),(3.14*r*h).toFixed(2),(3.14*r*r).toFixed(2)],e:`圆锥体积公式：V=1/3×底面积×高=1/3×πr²h=1/3×3.14×${r}²×${h}=${v}cm³。等底等高的圆锥体积是圆柱的1/3，这个关系很重要。`}}},
+            {topic:'比例', diff:4, fn:(s)=>{const a=(s*59)%10+2,b=(s*61)%10+2;return{q:`${a}和${b}成正比例，${a}扩大3倍，${b}怎么变？`,a:['扩大3倍','缩小3倍','不变','扩大9倍'],e:`正比例性质：y/x=k（一定），两个量同扩大同缩小相同倍数。${b}/${a}=k，${b}×3/${a}×3=k，所以${b}也扩大3倍。`}}},
+            {topic:'负数', diff:3, fn:(s)=>{const a=(s*67)%10+1,b=(s*71)%10+1;return{q:`在数轴上，-${a}和-${b}哪个更靠左？（假设${a}>${b}）`,a:[`-${a}更靠左`,`-${b}更靠左`,`一样`,`无法判断`],e:`数轴比较：数轴上越往左数越小。${a}>${b}，所以-${a}<-${b}，-${a}更靠左。负数比较：绝对值大的反而小。`}}}
+        ]
+    },
+
+    generate(grade, term, count, version='A') {
+        const key = `${grade}_${term}`;
+        const templates = this.templates[key];
+        if(!templates) return [];
+        
+        const versionOffset = version === 'B' ? 10000 : 0;
+        const usedFingerprints = new Set();
+        const results = [];
+        const allCandidates = [];
+        
+        for(let seed=0; seed<templates.length*5; seed++) {
+            const tmpl = templates[seed % templates.length];
+            const raw = tmpl.fn(seed + grade*100 + term*10 + versionOffset);
+            const q = {
+                id: `M${grade}${term}_${version}_${seed}`,
+                type: 'math',
+                grade, term,
+                topic: tmpl.topic,
+                difficulty: tmpl.diff,
+                question: raw.q,
+                options: raw.a,
+                explanation: raw.e,
+                correctIndex: 0
+            };
+            allCandidates.push(q);
+        }
+        
+        const shuffled = shuffleArray(allCandidates);
+        
+        for(const q of shuffled) {
+            if(results.length >= count) break;
+            const fp = questionFingerprint(q);
+            if(!usedFingerprints.has(fp)) {
+                usedFingerprints.add(fp);
+                const uniqueOpts = [...new Set(q.options)];
+                while(uniqueOpts.length < 4) {
+                    const fb = (uniqueOpts.length + 1) * (grade + term);
+                    if(!uniqueOpts.includes(String(fb))) uniqueOpts.push(String(fb));
+                }
+                const shuffledOpts = shuffleOptions(uniqueOpts.slice(0,4), 0);
+                q.options = shuffledOpts.options;
+                q.correctIndex = shuffledOpts.correctIndex;
+                results.push(q);
+            }
+        }
+        
+        return results;
+    }
+};
+
+/* ==================== 第三卷：语文引擎 ==================== */
+const ChineseEngine = {
+    data: {
+        '1_1': {
+            units: ['识字一','汉语拼音','课文一','识字二','课文二'],
+            items: [
+                {unit:'识字一',q:'"天地人"中"人"指什么？',a:'人类',opts:['人类','大人','好人','别人'],e:'"人"是象形字，像侧面站立的人形，泛指我们人类。识字要从理解字义开始。'},
+                {unit:'识字一',q:'"金木水火土"中"金"指什么？',a:'金属',opts:['金属','黄金','钱','颜色'],e:'五行中的"金"泛指金属，包括金、银、铜、铁等，不是单指黄金。'},
+                {unit:'汉语拼音',q:'"a"的发音口型是？',a:'张大嘴巴',opts:['张大嘴巴','嘴巴扁扁','嘴巴圆圆','嘴巴尖尖'],e:'单韵母a的发音要领：张大嘴巴aaa，声音响亮。'},
+                {unit:'课文一',q:'"站如松"的下一句是？',a:'坐如钟',opts:['坐如钟','行如风','卧如弓','立如松'],e:'站如松，坐如钟，行如风，卧如弓。这是古人对身体姿态的要求，站要挺拔如松树，坐要端正如大钟。'},
+                {unit:'课文一',q:'"鹅鹅鹅"的作者是谁？',a:'骆宾王',opts:['骆宾王','李白','杜甫','白居易'],e:'《咏鹅》是骆宾王7岁时写的诗，"鹅鹅鹅，曲项向天歌"流传千古。'},
+                {unit:'课文一',q:'"白毛浮绿水"下一句？',a:'红掌拨清波',opts:['红掌拨清波','黄喙啄青苔','黑爪踏污泥','青羽映碧波'],e:'骆宾王《咏鹅》：白毛浮绿水，红掌拨清波。诗人用色彩对比（白-绿-红）描绘鹅的美丽。'},
+                {unit:'识字二',q:'"日月明"中"明"由什么组成？',a:'日和月',opts:['日和月','日和火','月和星','日和星'],e:'"明"是会意字，日+月=明，表示光明。会意字是把两个或多个字的意思合起来表达新意思。'},
+                {unit:'识字二',q:'"日月明"中"男"由什么组成？',a:'田和力',opts:['田和力','日和月','木和林','人和云'],e:'田+力=男，会意字。古代男子在田里出力干活，所以"田下出力"为男。'},
+                {unit:'课文二',q:'"乌鸦喝水"中乌鸦用什么办法？',a:'衔石子放进瓶子',opts:['衔石子放进瓶子','把瓶子推倒','用吸管','找别的水源'],e:'乌鸦把小石子一颗一颗放进瓶子里，水面升高就喝到了。这个故事告诉我们：遇到困难要动脑筋想办法。'},
+                {unit:'课文二',q:'"雪地里的小画家"中，小鸡画什么？',a:'竹叶',opts:['竹叶','梅花','枫叶','月牙'],e:'小鸡的脚印像竹叶，小狗像梅花，小鸭像枫叶，小马像月牙。课文用比喻手法，把脚印比作画。'}
+            ]
+        },
+        '1_2': {
+            units: ['识字一','课文一','课文二','课文三','课文四'],
+            items: [
+                {unit:'识字一',q:'"春夏秋冬"中，"春"的部首是？',a:'日',opts:['日','月','禾','木'],e:'"春"字部首是"日"，上面是"艹"（草字头），下面是"日"。春天阳光明媚，草木生长。'},
+                {unit:'识字一',q:'"姓氏歌"中，"木子李"指什么字？',a:'李',opts:['李','木','子','林'],e:'"木子李"：木+子=李。这是拆字法识字，把"李"拆成"木"和"子"两部分。'},
+                {unit:'课文一',q:'"吃水不忘挖井人"中，挖井人是谁？',a:'毛主席',opts:['毛主席','周总理','朱德','刘少奇'],e:'江西沙洲坝的井是毛主席带领战士和乡亲们挖的。"吃水不忘挖井人"比喻不忘本，感恩。'},
+                {unit:'课文一',q:'"我多想去看看"中，"我"想去看什么？',a:'天安门',opts:['天安门','长城','故宫','西湖'],e:'课文表达了一个孩子对北京天安门的向往。"遥远"的北京，"壮观"的升旗仪式，体现了孩子对祖国首都的热爱。'},
+                {unit:'课文二',q:'"小公鸡和小鸭子"中，小鸭子会什么？',a:'游泳',opts:['游泳','捉虫','跑步','飞'],e:'小鸭子会游泳，小公鸡会捉虫。故事告诉我们：每个人都有自己的长处和短处，要互相帮助。'},
+                {unit:'课文二',q:'"树和喜鹊"中，树很快乐，喜鹊呢？',a:'也很快乐',opts:['也很快乐','很伤心','很孤单','很害怕'],e:'课文通过"树"和"喜鹊"的变化，告诉我们：有朋友才快乐。"孤单"的反义词是"快乐"。'},
+                {unit:'课文三',q:'"静夜思"的作者是谁？',a:'李白',opts:['李白','杜甫','王维','白居易'],e:'李白《静夜思》：床前明月光，疑是地上霜。举头望明月，低头思故乡。表达了游子的思乡之情。'},
+                {unit:'课文三',q:'"夜色"中，"我"原来怕什么？',a:'黑',opts:['黑','白','红','绿'],e:'课文写了一个孩子从怕黑到不怕黑的过程。爸爸晚上拉"我"去散步，"我"发现夜晚也很美好。'},
+                {unit:'课文四',q:'"端午粽"中，粽子用什么包的？',a:'箬竹叶',opts:['箬竹叶','荷叶','芭蕉叶','梧桐叶'],e:'粽子用青青的箬竹叶包的，里面裹着白白的糯米，中间有一颗红红的枣。课文从色、香、味描写粽子。'},
+                {unit:'课文四',q:'"彩虹"中，"我"想把彩虹当什么？',a:'桥',opts:['桥','路','船','伞'],e:'雨停了，天上有一座美丽的桥，那就是彩虹。"我"想把彩虹当桥，帮爸爸妈妈做事，体现了孩子的天真和孝顺。'}
+            ]
+        },
+        '2_1': {
+            units: ['课文一','课文二','课文三','课文四','课文五'],
+            items: [
+                {unit:'课文一',q:'"小蝌蚪找妈妈"中，小蝌蚪的妈妈是？',a:'青蛙',opts:['青蛙','鲤鱼','乌龟','鸭子'],e:'小蝌蚪先长出后腿，再长出前腿，尾巴变短，最后变成青蛙。这是青蛙的生长过程（变态发育）。'},
+                {unit:'课文一',q:'"我是什么"中，"我"是什么？',a:'水',opts:['水','火','风','云'],e:'课文用第一人称写水的变化：云、雨、雪、冰雹。水在自然界循环，形态多变。'},
+                {unit:'课文二',q:'"曹冲称象"中，曹冲用什么代替大象？',a:'石头',opts:['石头','沙子','水','粮食'],e:'曹冲用石头代替大象的重量，利用船的吃水深度相同，这是"等量代换"的思想，体现了曹冲的聪明。'},
+                {unit:'课文二',q:'"玲玲的画"中，玲玲把脏的地方画成了什么？',a:'小花狗',opts:['小花狗','小鸟','小猫','小兔'],e:'爸爸启发玲玲：好多事情并不像我们想象的那么糟，只要肯动脑筋，坏事往往能变成好事。'},
+                {unit:'课文三',q:'"登鹳雀楼"的作者是谁？',a:'王之涣',opts:['王之涣','李白','杜甫','王维'],e:'王之涣《登鹳雀楼》：白日依山尽，黄河入海流。欲穷千里目，更上一层楼。后两句是千古名句，比喻要站得高看得远。'},
+                {unit:'课文三',q:'"望庐山瀑布"的作者是谁？',a:'李白',opts:['李白','杜甫','白居易','苏轼'],e:'李白《望庐山瀑布》：日照香炉生紫烟，遥看瀑布挂前川。飞流直下三千尺，疑是银河落九天。"三千尺"是夸张手法。'},
+                {unit:'课文四',q:'"黄山奇石"中，"仙人指路"像什么？',a:'一位仙人站在山峰上',opts:['一位仙人站在山峰上','一只猴子','一只公鸡','一块巨石'],e:'课文用比喻和想象描写黄山奇石。"仙人指路"像一位仙人站在高高的山峰上，伸着手臂指向前方。'},
+                {unit:'课文四',q:'"日月潭"是我国哪个省的？',a:'台湾',opts:['台湾','福建','浙江','广东'],e:'日月潭是我国台湾省最大的一个湖，景色优美。"日月潭"名字来源于湖中小岛把湖分成日潭和月潭。'},
+                {unit:'课文五',q:'"坐井观天"告诉我们什么道理？',a:'眼界要开阔',opts:['眼界要开阔','天很小','井很深','青蛙很傻'],e:'寓言告诉我们：看问题、认识事物，站得要高，看得要全面。不能局限于自己的小圈子。'},
+                {unit:'课文五',q:'"寒号鸟"中，寒号鸟为什么冻死？',a:'懒惰不做窝',opts:['懒惰不做窝','没有食物','天气太冷','被人打死'],e:'寒号鸟得过且过，"明天再做窝"，结果冬天冻死了。故事告诉我们：不能懒惰，要勤劳，要未雨绸缪。'}
+            ]
+        },
+        '2_2': {
+            units: ['课文一','课文二','课文三','课文四','课文五'],
+            items: [
+                {unit:'课文一',q:'"村居"的作者是谁？',a:'高鼎',opts:['高鼎','李白','杜甫','王维'],e:'高鼎《村居》：草长莺飞二月天，拂堤杨柳醉春烟。儿童散学归来早，忙趁东风放纸鸢。描绘了春天乡村的美好景象。'},
+                {unit:'课文一',q:'"咏柳"的作者是谁？',a:'贺知章',opts:['贺知章','李白','杜甫','白居易'],e:'贺知章《咏柳》：碧玉妆成一树高，万条垂下绿丝绦。不知细叶谁裁出，二月春风似剪刀。把春风比作剪刀，非常形象。'},
+                {unit:'课文二',q:'"雷锋叔叔，你在哪里"中，雷锋帮助了谁？',a:'迷路的孩子',opts:['迷路的孩子','老人','病人','学生'],e:'雷锋抱着迷路的孩子，冒着蒙蒙的细雨。雷锋是解放军战士，乐于助人，是学习的榜样。'},
+                {unit:'课文二',q:'"千人糕"中，"千人糕"是什么？',a:'米糕',opts:['米糕','年糕','蛋糕','雪糕'],e:'千人糕就是平常吃的米糕，经过很多很多人的劳动才做成。告诉我们：要珍惜劳动成果，尊重劳动者。'},
+                {unit:'课文三',q:'"神州谣"中，"黄河奔"，"长江"怎样？',a:'涌',opts:['涌','流','奔','跑'],e:'课文：黄河奔，长江涌，长城长，珠峰耸。用动词表现祖国山河的壮美。"涌"写出长江波涛汹涌的气势。'},
+                {unit:'课文三',q:'"传统节日"中，元宵节要做什么？',a:'看花灯',opts:['看花灯','吃月饼','赛龙舟','登高'],e:'课文：元宵节，看花灯，大街小巷人如潮。春节贴窗花放鞭炮，端午赛龙舟吃粽子，中秋吃月饼赏月。'},
+                {unit:'课文四',q:'"彩色的梦"中，"我"的彩色铅笔是什么？',a:'大森林的精灵',opts:['大森林的精灵','小精灵','魔法师','画家'],e:'课文用拟人手法，把彩色铅笔比作大森林的精灵。"脚尖滑过的地方"指铅笔画画。'},
+                {unit:'课文四',q:'"枫树上的喜鹊"中，"我"学会了什么？',a:'喜鹊的语言',opts:['喜鹊的语言','唱歌','跳舞','画画'],e:'"我"懂得喜鹊的语言，像听懂了似的。课文表现了孩子对大自然的热爱和丰富的想象力。'},
+                {unit:'课文五',q:'"亡羊补牢"告诉我们什么？',a:'及时补救',opts:['及时补救','不用补','已经晚了','放弃'],e:'亡羊补牢，为时不晚。出了问题后及时补救，可以防止继续受损失。与"揠苗助长"形成对比。'},
+                {unit:'课文五',q:'"画杨桃"中，老师教育大家什么？',a:'从不同角度看问题',opts:['从不同角度看问题','要认真画画','要听老师话','不要画杨桃'],e:'老师的话：当我们看见别人把杨桃画成五角星的时候，不要忙着发笑，要看看人家是从什么角度看的。'}
+            ]
+        },
+        '3_1': {
+            units: ['课文一','课文二','课文三','课文四','课文五'],
+            items: [
+                {unit:'课文一',q:'"大青树下的小学"中，学校有什么不同？',a:'不同民族',opts:['不同民族','不同年级','不同性别','不同年龄'],e:'课文描写了一所边疆小学，有汉族、傣族、景颇族、阿昌族、德昂族等不同民族的学生，体现了民族团结。'},
+                {unit:'课文一',q:'"花的学校"作者是谁？',a:'泰戈尔',opts:['泰戈尔','鲁迅','老舍','冰心'],e:'《花的学校》选自泰戈尔的《新月集》。泰戈尔是印度诗人，曾获诺贝尔文学奖。"雷云拍着大手"是拟人手法。'},
+                {unit:'课文二',q:'"铺满金色巴掌的水泥道"中，"金色巴掌"是什么？',a:'梧桐叶',opts:['梧桐叶','银杏叶','枫叶','荷叶'],e:'法国梧桐树的落叶像金色的小巴掌。"金色"写出了秋叶的颜色，"巴掌"写出了叶子的形状，比喻生动形象。'},
+                {unit:'课文二',q:'"秋天的雨"中，秋天的雨有什么？',a:'一盒五彩缤纷的颜料',opts:['一盒五彩缤纷的颜料','一把钥匙','一封信','一首歌'],e:'课文把秋天的雨比作颜料盒、钥匙、喇叭等，用比喻和拟人手法写秋雨带来的变化。"五彩缤纷"写出了秋天的色彩丰富。'},
+                {unit:'课文三',q:'"去年的树"中，树被怎么了？',a:'砍了',opts:['砍了','烧了','卖了','移植了'],e:'树被砍了做成火柴，鸟儿找了好久。这是一个感人的故事，歌颂了鸟儿对树的真挚友情，也呼吁保护环境。'},
+                {unit:'课文三',q:'"在牛肚子里旅行"中，青头和红头是什么？',a:'蟋蟀',opts:['蟋蟀','蚂蚁','蚂蚱','蝗虫'],e:'青头和红头是一对非常要好的蟋蟀朋友。课文科普了牛反刍的知识：牛有四个胃，会反刍。'},
+                {unit:'课文四',q:'"望天门山"的作者是谁？',a:'李白',opts:['李白','杜甫','王维','苏轼'],e:'李白《望天门山》：天门中断楚江开，碧水东流至此回。两岸青山相对出，孤帆一片日边来。写出了长江冲破天门山的壮阔气势。'},
+                {unit:'课文四',q:'"富饶的西沙群岛"中，西沙群岛有什么特点？',a:'风景优美，物产丰富',opts:['风景优美，物产丰富','只有沙子','只有海水','只有鱼'],e:'课文从海水、海底、海滩、海岛四方面写西沙群岛，展现了"风景优美、物产丰富"的特点，表达了对祖国海疆的热爱。'},
+                {unit:'课文五',q:'"司马光"中，司马光用什么砸缸？',a:'石头',opts:['石头','手','脚','棍子'],e:'司马光拿起一块石头，使劲砸那口缸。司马光遇事冷静、机智勇敢，和其他孩子的慌乱形成对比。'},
+                {unit:'课文五',q:'"掌声"中，掌声给了英子什么？',a:'鼓励',opts:['鼓励','嘲笑','同情','冷漠'],e:'英子以前很自卑，同学们的掌声给了她鼓励和信心，让她勇敢地面对生活。掌声代表着尊重、鼓励和关爱。'}
+            ]
+        },
+        '3_2': {
+            units: ['课文一','课文二','课文三','课文四','课文五'],
+            items: [
+                {unit:'课文一',q:'"元日"的作者是谁？',a:'王安石',opts:['王安石','李白','杜甫','苏轼'],e:'王安石《元日》：爆竹声中一岁除，春风送暖入屠苏。千门万户曈曈日，总把新桃换旧符。描写了春节除旧迎新的景象。'},
+                {unit:'课文一',q:'"清明"的作者是谁？',a:'杜牧',opts:['杜牧','李白','杜甫','王维'],e:'杜牧《清明》：清明时节雨纷纷，路上行人欲断魂。借问酒家何处有？牧童遥指杏花村。写出了清明时节的凄迷氛围。'},
+                {unit:'课文二',q:'"纸的发明"中，谁改进了造纸术？',a:'蔡伦',opts:['蔡伦','毕昇','张衡','李时珍'],e:'东汉蔡伦改进了造纸术，用树皮、麻头、破布、旧渔网等原料，造出了便宜好用的纸。造纸术是中国四大发明之一。'},
+                {unit:'课文二',q:'"赵州桥"的设计者是谁？',a:'李春',opts:['李春','鲁班','张衡','李时珍'],e:'赵州桥由隋朝工匠李春设计建造，距今1400多年，是世界上现存最古老的石拱桥。体现了古代劳动人民的智慧。'},
+                {unit:'课文三',q:'"花钟"中，不同的花有什么不同？',a:'开放时间不同',opts:['开放时间不同','颜色不同','形状不同','香味不同'],e:'课文说明不同的植物开花时间不同，与温度、湿度、光照和昆虫活动时间有关。这是科学小品文，兼具科学性和文学性。'},
+                {unit:'课文三',q:'"蜜蜂"的作者法布尔是什么学家？',a:'法国昆虫学家',opts:['法国昆虫学家','英国生物学家','德国物理学家','美国化学家'],e:'法布尔是法国著名昆虫学家，著有《昆虫记》。课文写了他做实验验证蜜蜂有辨认方向的能力，体现了严谨的科学态度。'},
+                {unit:'课文四',q:'"宇宙的另一边"中，"我"想象宇宙另一边有什么？',a:'有个一样的我',opts:['有个一样的我','有外星人','有神仙','有怪兽'],e:'课文充满想象力：在宇宙的另一边，有个一样的我，正在做着相反的事情。乘法是这样的……体现了儿童丰富的想象力。'},
+                {unit:'课文四',q:'"我变成了一棵树"中，"我"变成了什么？',a:'一棵树',opts:['一棵树','一只鸟','一朵花','一片云'],e:'"我"变成了一棵长满各种形状鸟窝的树，妈妈带着好吃的来了。课文表现了母子情深和儿童的天真想象。'},
+                {unit:'课文五',q:'"慢性子裁缝和急性子顾客"中，裁缝有什么特点？',a:'很慢',opts:['很慢','很快','一般','不急'],e:'裁缝是个慢性子，顾客是个急性子。故事通过性格对比，产生了幽默效果，告诉我们：做事不能急躁，也不能太慢。'},
+                {unit:'课文五',q:'"漏"中，"漏"到底是什么？',a:'屋顶漏雨',opts:['屋顶漏雨','怪物','小偷','老虎'],e:'老虎和贼都以为"漏"是厉害的怪物，其实"漏"是屋顶漏雨。故事充满民间故事的幽默和巧合，告诉我们：做贼心虚。'}
+            ]
+        },
+        '4_1': {
+            units: ['课文一','课文二','课文三','课文四','课文五'],
+            items: [
+                {unit:'课文一',q:'"观潮"中，钱塘江大潮什么时候最壮观？',a:'农历八月十八',opts:['农历八月十八','正月十五','五月初五','九月初九'],e:'农历八月十八是一年一度的观潮日。钱塘江大潮是世界奇观，由天体引力和地球自转离心力造成，加上杭州湾喇叭口地形，形成壮观潮涌。'},
+                {unit:'课文一',q:'"走月亮"是什么意思？',a:'在月光下散步',opts:['在月光下散步','看月亮','追月亮','画月亮'],e:'"走月亮"是吴地传统民俗，指在月光下散步。课文描写了"我"和阿妈在月光下散步的温馨情景，充满诗情画意。'},
+                {unit:'课文二',q:'"一个豆荚里的五粒豆"作者是谁？',a:'安徒生',opts:['安徒生','格林','伊索','克雷洛夫'],e:'安徒生童话。最后一粒豆落在窗台上，发芽开花，给生病的小女孩带来了希望。故事告诉我们：生命的价值在于给别人带来希望和快乐。'},
+                {unit:'课文二',q:'"蝙蝠和雷达"中，雷达模仿了什么？',a:'蝙蝠',opts:['蝙蝠','鸟儿','鱼儿','青蛙'],e:'科学家模仿蝙蝠探路的方法（超声波），给飞机装上了雷达。这是仿生学的例子，从生物身上得到启示发明创造。'},
+                {unit:'课文三',q:'"暮江吟"的作者是谁？',a:'白居易',opts:['白居易','李白','杜甫','王维'],e:'白居易《暮江吟》：一道残阳铺水中，半江瑟瑟半江红。可怜九月初三夜，露似真珠月似弓。描绘了秋江傍晚到夜晚的美景。'},
+                {unit:'课文三',q:'"题西林壁"的作者是谁？',a:'苏轼',opts:['苏轼','李白','杜甫','王维'],e:'苏轼《题西林壁》：不识庐山真面目，只缘身在此山中。告诉我们"当局者迷，旁观者清"的道理，也说明了观察角度的重要性。'},
+                {unit:'课文四',q:'"爬山虎的脚"中，爬山虎的脚是什么？',a:'茎上的细丝',opts:['茎上的细丝','叶子','根','花'],e:'爬山虎茎上长叶柄的地方，反面伸出枝状的六七根细丝，这些细丝就是爬山虎的脚。课文观察细致，描写准确，是状物散文的典范。'},
+                {unit:'课文四',q:'"蟋蟀的住宅"中，蟋蟀的住宅是谁挖掘的？',a:'蟋蟀自己',opts:['蟋蟀自己','天生的','别的昆虫','人类'],e:'蟋蟀不肯随遇而安，自己慎重选择住址，挖掘住宅。法布尔把蟋蟀的洞穴比作"住宅"，用拟人手法表达了对小生命的尊重。'},
+                {unit:'课文五',q:'"普罗米修斯"中，普罗米修斯做了什么？',a:'盗火给人类',opts:['盗火给人类','创造了人类','毁灭了人类','统治了人类'],e:'普罗米修斯为人类盗取天火，遭受宙斯的惩罚。这是古希腊神话，歌颂了普罗米修斯为民造福、不惜牺牲的精神。'},
+                {unit:'课文五',q:'"女娲补天"中，女娲用什么补天？',a:'五彩石',opts:['五彩石','泥土','石头','金子'],e:'女娲炼五色石补苍天，斩龟足撑四极。这是中国上古神话，表现了女娲勇敢善良、不怕危险、甘于奉献的精神。'}
+            ]
+        },
+        '4_2': {
+            units: ['课文一','课文二','课文三','课文四','课文五'],
+            items: [
+                {unit:'课文一',q:'"四时田园杂兴"的作者是谁？',a:'范成大',opts:['范成大','杨万里','陆游','辛弃疾'],e:'范成大《四时田园杂兴》：昼出耘田夜绩麻，村庄儿女各当家。描写了农村夏日紧张劳动的气氛，表现了农民的勤劳。'},
+                {unit:'课文一',q:'"宿新市徐公店"的作者是谁？',a:'杨万里',opts:['杨万里','范成大','陆游','辛弃疾'],e:'杨万里《宿新市徐公店》：篱落疏疏一径深，树头新绿未成阴。儿童急走追黄蝶，飞入菜花无处寻。写出了乡村春日的生机和童趣。'},
+                {unit:'课文二',q:'"琥珀"是什么？',a:'松脂化石',opts:['松脂化石','石头','宝石','金属'],e:'琥珀是远古时代的松脂化石，里面可能包着昆虫。科学家通过琥珀可以推测远古时代生物和环境的情况。'},
+                {unit:'课文二',q:'"飞向蓝天的恐龙"中，恐龙变成了什么？',a:'鸟类',opts:['鸟类','灭绝了','鱼','哺乳动物'],e:'恐龙的一支经过漫长的演化，最终变成了凌空翱翔的鸟儿。这是科学发现，体现了科学探索的过程。'},
+                {unit:'课文三',q:'"短诗三首"中"繁星"的作者是谁？',a:'冰心',opts:['冰心','巴金','老舍','鲁迅'],e:'冰心《繁星》：这些事——是永不漫灭的回忆：月明的园中，藤萝的叶下，母亲的膝上。表达了对母亲的依恋和母爱的温馨。'},
+                {unit:'课文三',q:'"绿"的作者是谁？',a:'艾青',opts:['艾青','冰心','巴金','老舍'],e:'艾青《绿》：好像绿色的墨水瓶倒翻了，到处是绿的……用夸张和想象描写了春天到处是绿色的景象。'},
+                {unit:'课文四',q:'"猫"的作者是谁？',a:'老舍',opts:['老舍','鲁迅','巴金','冰心'],e:'老舍《猫》：猫的性格实在有些古怪。老舍用平实而风趣的语言，写出了猫的古怪性格和淘气可爱，表达了对猫的喜爱。'},
+                {unit:'课文四',q:'"母鸡"的作者是谁？',a:'老舍',opts:['老舍','鲁迅','巴金','冰心'],e:'老舍《母鸡》：我一向讨厌母鸡。后来不敢再讨厌了，因为母鸡负责、慈爱、勇敢、辛苦。这是欲扬先抑的写法。'},
+                {unit:'课文五',q:'"海上日出"的作者是谁？',a:'巴金',opts:['巴金','老舍','鲁迅','冰心'],e:'巴金《海上日出》：为了看日出，我常常早起。按日出前、日出时、日出后的顺序，描写了海上日出的壮观景象。'},
+                {unit:'课文五',q:'"记金华的双龙洞"的作者是谁？',a:'叶圣陶',opts:['叶圣陶','巴金','老舍','鲁迅'],e:'叶圣陶《记金华的双龙洞》：4月14日，我在浙江金华，游北山的双龙洞。按游览顺序（路上-洞口-外洞-孔隙-内洞-出洞）记叙。'}
+            ]
+        },
+        '5_1': {
+            units: ['课文一','课文二','课文三','课文四','课文五'],
+            items: [
+                {unit:'课文一',q:'"白鹭"的作者是谁？',a:'郭沫若',opts:['郭沫若','老舍','巴金','鲁迅'],e:'郭沫若《白鹭》：白鹭是一首精巧的诗。用诗一样的语言，赞美了白鹭的平凡而美好。'},
+                {unit:'课文一',q:'"落花生"的作者是谁？',a:'许地山',opts:['许地山','老舍','巴金','鲁迅'],e:'许地山《落花生》：人要做有用的人，不要做只讲体面而对别人没有好处的人。借物喻人，由花生的特点说明做人的道理。'},
+                {unit:'课文二',q:'"将相和"中，"将"指谁？',a:'廉颇',opts:['廉颇','蔺相如','王翦','白起'],e:'"将"指大将军廉颇，"相"指上卿蔺相如。"将相和"讲了完璧归赵、渑池之会、负荆请罪三个故事，表现了两人以国家利益为重的品质。'},
+                {unit:'课文二',q:'"什么比猎豹的速度更快"中，速度最快的是什么？',a:'光',opts:['光','猎豹','火箭','流星体'],e:'课文从人、鸵鸟、猎豹、游隼、飞机、火箭、流星体到光，光速最快（约30万千米/秒）。这是科普说明文，用比较和列数字的方法说明。'},
+                {unit:'课文三',q:'"示儿"的作者是谁？',a:'陆游',opts:['陆游','李白','杜甫','苏轼'],e:'陆游《示儿》：死去元知万事空，但悲不见九州同。王师北定中原日，家祭无忘告乃翁。陆游临终前仍心系国家统一，感人至深。'},
+                {unit:'课文三',q:'"少年中国说"的作者是谁？',a:'梁启超',opts:['梁启超','康有为','孙中山','鲁迅'],e:'梁启超《少年中国说》：少年智则国智，少年富则国富，少年强则国强。把少年和国家命运联系在一起，激励少年奋发图强。'},
+                {unit:'课文四',q:'"太阳"中，太阳离我们多远？',a:'约一亿五千万千米',opts:['约一亿五千万千米','约一千万千米','约十亿千米','约一百万千米'],e:'课文用列数字、举例子、作比较等说明方法，介绍了太阳远、大、热的特点，以及太阳与人类的密切关系。'},
+                {unit:'课文四',q:'"松鼠"有什么特点？',a:'乖巧驯良',opts:['乖巧驯良','凶猛','懒惰','笨拙'],e:'布封《松鼠》：松鼠是一种漂亮的小动物，乖巧，驯良，很讨人喜欢。课文从外形、活动、搭窝、生育等方面介绍了松鼠。'},
+                {unit:'课文五',q:'"慈母情深"中，母亲在哪里工作？',a:'低矮的厂房',opts:['低矮的厂房','写字楼','学校','医院'],e:'母亲在低矮、潮湿、闷热的厂房里辛苦工作，挣钱供"我"读书。课文表现了母爱的伟大和"我"对母亲的感激。'},
+                {unit:'课文五',q:'"精彩极了和糟糕透了"中，两种评价代表什么？',a:'鼓励和严格要求',opts:['鼓励和严格要求','表扬和批评','爱和恨','对和错'],e:'母亲说"精彩极了"是鼓励，父亲说"糟糕透了"是严格要求。两种评价缺一不可，都是爱的表现。'}
+            ]
+        },
+        '5_2': {
+            units: ['课文一','课文二','课文三','课文四','课文五'],
+            items: [
+                {unit:'课文一',q:'"四时田园杂兴"的作者是谁？',a:'范成大',opts:['范成大','杨万里','陆游','辛弃疾'],e:'范成大《四时田园杂兴》：昼出耘田夜绩麻，村庄儿女各当家。童孙未解供耕织，也傍桑阴学种瓜。写出了农村儿童的天真情趣。'},
+                {unit:'课文一',q:'"稚子弄冰"的作者是谁？',a:'杨万里',opts:['杨万里','范成大','陆游','辛弃疾'],e:'杨万里《稚子弄冰》：稚子金盆脱晓冰，彩丝穿取当银钲。敲成玉磬穿林响，忽作玻璃碎地声。写出了儿童玩冰的乐趣。'},
+                {unit:'课文二',q:'"草船借箭"中，诸葛亮有什么特点？',a:'神机妙算',opts:['神机妙算','鲁莽','愚蠢','胆小'],e:'诸葛亮神机妙算，利用大雾和曹操多疑的性格，借得十万支箭。表现了诸葛亮的智慧和胆识。'},
+                {unit:'课文二',q:'"景阳冈"中，武松有什么特点？',a:'勇猛',opts:['勇猛','懦弱','狡猾','懒惰'],e:'武松勇猛过人，赤手空拳打死老虎。"武松打虎"是《水浒传》中的经典情节，表现了武松的英雄气概。'},
+                {unit:'课文三',q:'"从军行"的作者是谁？',a:'王昌龄',opts:['王昌龄','李白','杜甫','王维'],e:'王昌龄《从军行》：青海长云暗雪山，孤城遥望玉门关。黄沙百战穿金甲，不破楼兰终不还。表现了将士们保卫祖国的决心。'},
+                {unit:'课文三',q:'"青山处处埋忠骨"中，"忠骨"指谁？',a:'毛岸英',opts:['毛岸英','岳飞','关羽','文天祥'],e:'毛岸英在抗美援朝中牺牲，毛主席忍痛同意葬在朝鲜。"青山处处埋忠骨，何须马革裹尸还"表现了伟人的胸怀。'},
+                {unit:'课文四',q:'"人物描写一组"中，"摔跤"写的是谁？',a:'小嘎子',opts:['小嘎子','祥子','严监生','刷子李'],e:'《摔跤》描写了小嘎子和胖墩儿比赛摔跤的情景，通过动作描写表现了小嘎子机灵、争强好胜的性格。'},
+                {unit:'课文四',q:'"刷子李"有什么规矩？',a:'身上没白点',opts:['身上没白点','一天只刷一家','只刷外墙','不收钱'],e:'刷子李有个规矩：刷墙时穿一身黑，只要身上有白点，白刷不要钱。表现了他技艺高超和自信。'},
+                {unit:'课文五',q:'"自相矛盾"中，"矛盾"现在比喻什么？',a:'言行不一致',opts:['言行不一致','武器','工具','食物'],e:'"矛盾"现在比喻言行不一致或相互抵触。这个成语出自《韩非子》，告诉我们说话做事要前后一致。'},
+                {unit:'课文五',q:'"田忌赛马"中，孙膑用什么方法取胜？',a:'调换马出场顺序',opts:['调换马出场顺序','换了好马','贿赂对手','作弊'],e:'孙膑帮田忌调换马的出场顺序（下对上，中对下，上对中），反败为胜。这是策略问题，体现了智慧。'}
+            ]
+        },
+        '6_1': {
+            units: ['课文一','课文二','课文三','课文四','课文五'],
+            items: [
+                {unit:'课文一',q:'"草原"的作者是谁？',a:'老舍',opts:['老舍','巴金','鲁迅','冰心'],e:'老舍《草原》：这次，我看到了草原。按事情发展顺序，写了草原美景、迎客、联欢、话别，表现了蒙汉两族人民的深情厚谊。'},
+                {unit:'课文一',q:'"丁香结"的作者是谁？',a:'宗璞',opts:['宗璞','冰心','巴金','老舍'],e:'宗璞《丁香结》：丁香空结雨中愁。由丁香花联想到"丁香结"，进而想到人生中的"结"（困难和不顺心），表达了豁达的人生态度。'},
+                {unit:'课文二',q:'"七律·长征"的作者是谁？',a:'毛泽东',opts:['毛泽东','朱德','周恩来','陈毅'],e:'毛泽东《七律·长征》：红军不怕远征难，万水千山只等闲。概括了红军长征的艰难历程，歌颂了红军不怕困难的精神。'},
+                {unit:'课文二',q:'"狼牙山五壮士"中，五壮士最后怎样？',a:'跳崖',opts:['跳崖','投降','逃跑','隐藏'],e:'五壮士把敌人引上绝路，打完最后一颗子弹，英勇跳崖。表现了革命战士宁死不屈的英雄气概。'},
+                {unit:'课文三',q:'"竹节人"中，竹节人是什么？',a:'玩具',opts:['玩具','食物','工具','武器'],e:'竹节人是用竹子做的玩具。课文回忆了童年做竹节人、玩竹节人的乐趣，表达了对童年生活的怀念。'},
+                {unit:'课文三',q:'"宇宙生命之谜"中，目前发现外星生命了吗？',a:'未发现',opts:['未发现','发现了','确定有','确定没有'],e:'课文是科普说明文，介绍了科学家探索地球之外是否有生命的过程。至今，地球之外是否有生命存在，仍然是一个谜。'},
+                {unit:'课文四',q:'"桥"中，老支书有什么品质？',a:'舍己为人',opts:['舍己为人','自私','胆小','贪婪'],e:'老支书在洪水中舍己为人，牺牲了自己和儿子。课文以"桥"为题，既指实际的桥，也指老支书这座"生命桥"。'},
+                {unit:'课文四',q:'"穷人"中，桑娜和渔夫有什么品质？',a:'善良',opts:['善良','懒惰','富有','冷漠'],e:'桑娜和渔夫虽然贫穷，但善良，主动收养了邻居西蒙的两个孤儿。表现了穷人宁可自己受苦也要帮助别人的高尚品质。'},
+                {unit:'课文五',q:'"伯牙鼓琴"中，钟子期有什么特点？',a:'善听',opts:['善听','善鼓琴','善画','善写'],e:'伯牙善鼓琴，钟子期善听。"善听"指能听懂琴声中的意境。钟子期死后，伯牙破琴绝弦，终身不复鼓琴。表现了知音难觅。'},
+                {unit:'课文五',q:'"月光曲"中，贝多芬为什么弹琴？',a:'被盲姑娘感动',opts:['被盲姑娘感动','为自己','为国王','为贵族'],e:'贝多芬被盲姑娘对音乐的热爱感动，为她弹奏并创作了《月光曲》。表现了贝多芬对穷苦人民的同情和对音乐的热爱。'}
+            ]
+        },
+        '6_2': {
+            units: ['课文一','课文二','课文三','课文四','课文五'],
+            items: [
+                {unit:'课文一',q:'"北京的春节"的作者是谁？',a:'老舍',opts:['老舍','巴金','鲁迅','冰心'],e:'老舍《北京的春节》：按照北京的老规矩，过农历的新年（春节），差不多在腊月的初旬就开头了。按时间顺序写了春节的习俗。'},
+                {unit:'课文一',q:'"腊八粥"的作者是谁？',a:'沈从文',opts:['沈从文','老舍','巴金','鲁迅'],e:'沈从文《腊八粥》：初学喊爸爸的小孩子……提到腊八粥，谁不是嘴里就立时生一种甜甜的腻腻的感觉呢。用排比和反问写出了人们对腊八粥的喜爱。'},
+                {unit:'课文二',q:'"藏戏"中，藏戏有什么特点？',a:'戴着面具演出',opts:['戴着面具演出','不戴面具','只唱歌','只跳舞'],e:'藏戏的特点是戴着面具演出，演出时没有舞台，一部戏可以演出三五天。这是藏族文化的瑰宝。'},
+                {unit:'课文二',q:'"汤姆·索亚历险记"作者是谁？',a:'马克·吐温',opts:['马克·吐温','海明威','狄更斯','雨果'],e:'马克·吐温是美国作家，《汤姆·索亚历险记》描写了美国南方小镇孩子的生活，表现了儿童的冒险精神和正义感。'},
+                {unit:'课文三',q:'"匆匆"的作者是谁？',a:'朱自清',opts:['朱自清','老舍','巴金','鲁迅'],e:'朱自清《匆匆》：燕子去了，有再来的时候……但是，聪明的，你告诉我，我们的日子为什么一去不复返呢？表达了对时光流逝的感慨和珍惜时间的呼吁。'},
+                {unit:'课文三',q:'"那个星期天"的作者是谁？',a:'史铁生',opts:['史铁生','朱自清','老舍','巴金'],e:'史铁生《那个星期天》：写了一个孩子盼望母亲带自己出去玩，结果母亲忙了一天。通过细节描写表现了孩子的期待、焦急和失望。'},
+                {unit:'课文四',q:'"十六年前的回忆"回忆的是谁？',a:'李大钊',opts:['李大钊','鲁迅','陈独秀','胡适'],e:'李星华回忆父亲李大钊同志。李大钊是共产党创始人之一，1927年被反动派杀害。课文表现了李大钊忠于革命、坚贞不屈的精神。'},
+                {unit:'课文四',q:'"为人民服务"中，张思德怎么牺牲的？',a:'烧炭牺牲',opts:['烧炭牺牲','打仗牺牲','救人牺牲','病死'],e:'张思德在陕北烧炭时，因炭窑崩塌而牺牲。毛泽东在追悼会上作《为人民服务》演讲，提出了为人民服务的思想。'},
+                {unit:'课文五',q:'"真理诞生于一百个问号之后"中，真理怎么来？',a:'不断发问',opts:['不断发问','来自书本','来自老师','来自权威'],e:'课文用三个科学发现的事例（酸碱指示剂、大陆漂移学说、睡眠中眼珠转动与做梦有关），说明真理诞生于一百个问号之后。'},
+                {unit:'课文五',q:'"表里的生物"中，"我"认为表里有什么？',a:'小蝎子',opts:['小蝎子','小蛇','小鸟','蜘蛛'],e:'小时候的"我"认为能发出声音的都是活的生物，所以猜测表里有小蝎子。表现了儿童的好奇心和求知欲。'}
+            ]
+        }
+    },
+
+    generate(grade, term, count, version='A') {
+        const key = `${grade}_${term}`;
+        const data = this.data[key];
+        if(!data) return [];
+        
+        const usedFingerprints = new Set();
+        const results = [];
+        const byUnit = {};
+        data.items.forEach(item => {
+            if(!byUnit[item.unit]) byUnit[item.unit] = [];
+            byUnit[item.unit].push(item);
+        });
+        
+        const units = Object.keys(byUnit);
+        let unitIdx = 0;
+        const versionOffset = version === 'B' ? 5 : 0;
+        
+        while(results.length < count) {
+            const unit = units[(unitIdx + versionOffset) % units.length];
+            const pool = byUnit[unit];
+            const item = pool[Math.floor(Math.random() * pool.length)];
+            
+            const q = {
+                id: `C${grade}${term}_${version}_${results.length}`,
+                type: 'chinese',
+                grade, term,
+                unit: item.unit,
+                question: item.q,
+                options: item.opts,
+                explanation: item.e,
+                correctIndex: 0
+            };
+            
+            const fp = questionFingerprint(q);
+            if(!usedFingerprints.has(fp)) {
+                usedFingerprints.add(fp);
+                const shuffled = shuffleOptions(q.options, 0);
+                q.options = shuffled.options;
+                q.correctIndex = shuffled.correctIndex;
+                results.push(q);
+            }
+            
+            unitIdx++;
+            if(unitIdx > count * 3) break;
+        }
+        
+        while(results.length < count) {
+            const fallback = data.items[(results.length + versionOffset) % data.items.length];
+            const shuffled = shuffleOptions(fallback.opts, 0);
+            results.push({
+                id: `C${grade}${term}_${version}_${results.length}`,
+                type: 'chinese',
+                grade, term,
+                unit: fallback.unit,
+                question: fallback.q,
+                options: shuffled.options,
+                correctIndex: shuffled.correctIndex,
+                explanation: fallback.e
+            });
+        }
+        
+        return results.slice(0, count);
+    }
+};
+
+/* ==================== 第四卷：英语引擎 ==================== */
+const EnglishEngine = {
+    vocabulary: {
+        '1_1': {words:['apple','book','cat','dog','egg','fish','girl','hand','ice','juice','kite','lion','monkey','nose','orange','panda','queen','ruler','sun','tiger'], trans:{apple:'苹果',book:'书',cat:'猫',dog:'狗',egg:'蛋',fish:'鱼',girl:'女孩',hand:'手',ice:'冰',juice:'果汁',kite:'风筝',lion:'狮子',monkey:'猴子',nose:'鼻子',orange:'橙子',panda:'熊猫',queen:'女王',ruler:'尺子',sun:'太阳',tiger:'老虎'}},
+        '1_2': {words:['pen','pencil','bag','eraser','crayon','school','head','face','mouth','eye','ear','arm','finger','leg','foot','red','yellow','green','blue','black'], trans:{pen:'钢笔',pencil:'铅笔',bag:'包',eraser:'橡皮',crayon:'蜡笔',school:'学校',head:'头',face:'脸',mouth:'嘴',eye:'眼睛',ear:'耳朵',arm:'胳膊',finger:'手指',leg:'腿',foot:'脚',red:'红色',yellow:'黄色',green:'绿色',blue:'蓝色',black:'黑色'}},
+        '2_1': {words:['one','two','three','four','five','six','seven','eight','nine','ten','cake','bread','hamburger','chicken','milk','water','doll','ball','car','plane'], trans:{one:'一',two:'二',three:'三',four:'四',five:'五',six:'六',seven:'七',eight:'八',nine:'九',ten:'十',cake:'蛋糕',bread:'面包',hamburger:'汉堡包',chicken:'鸡肉',milk:'牛奶',water:'水',doll:'玩具娃娃',ball:'球',car:'小汽车',plane:'飞机'}},
+        '2_2': {words:['morning','afternoon','evening','night','spring','summer','autumn','winter','sunny','rainy','cloudy','hot','cold','warm','cool','big','small','long','short','tall'], trans:{morning:'早上',afternoon:'下午',evening:'晚上',night:'夜晚',spring:'春天',summer:'夏天',autumn:'秋天',winter:'冬天',sunny:'晴朗的',rainy:'下雨的',cloudy:'多云的',hot:'热的',cold:'冷的',warm:'温暖的',cool:'凉爽的',big:'大的',small:'小的',long:'长的',short:'短的',tall:'高的'}},
+        '3_1': {words:['tall','short','fat','thin','strong','old','young','happy','sad','angry','beautiful','clean','easy','fast','slow','near','far','left','right','math'], trans:{tall:'高的',short:'矮的',fat:'胖的',thin:'瘦的',strong:'强壮的',old:'老的',young:'年轻的',happy:'高兴的',sad:'难过的',angry:'生气的',beautiful:'美丽的',clean:'干净的',easy:'容易的',fast:'快的',slow:'慢的',near:'近的',far:'远的',left:'左边',right:'右边',math:'数学'}},
+        '3_2': {words:['Chinese','English','science','music','art','PE','history','classroom','desk','chair','hospital','park','library','doctor','teacher','worker','farmer','nurse','driver','cook'], trans:{Chinese:'语文',English:'英语',science:'科学',music:'音乐',art:'美术',PE:'体育',history:'历史',classroom:'教室',desk:'课桌',chair:'椅子',hospital:'医院',park:'公园',library:'图书馆',doctor:'医生',teacher:'教师',worker:'工人',farmer:'农民',nurse:'护士',driver:'司机',cook:'厨师'}},
+        '4_1': {words:['run','jump','swim','fly','walk','sit','stand','sleep','eat','drink','read','write','draw','sing','dance','play','open','close','turn','put'], trans:{run:'跑',jump:'跳',swim:'游泳',fly:'飞',walk:'走',sit:'坐',stand:'站',sleep:'睡觉',eat:'吃',drink:'喝',read:'读',write:'写',draw:'画',sing:'唱',dance:'跳舞',play:'玩',open:'打开',close:'关闭',turn:'转',put:'放'}},
+        '4_2': {words:['father','mother','brother','sister','son','daughter','grandpa','grandma','uncle','aunt','home','house','room','door','window','kitchen','bedroom','garden','street','city'], trans:{father:'父亲',mother:'母亲',brother:'兄弟',sister:'姐妹',son:'儿子',daughter:'女儿',grandpa:'爷爷',grandma:'奶奶',uncle:'叔叔',aunt:'阿姨',home:'家',house:'房子',room:'房间',door:'门',window:'窗户',kitchen:'厨房',bedroom:'卧室',garden:'花园',street:'街道',city:'城市'}},
+        '5_1': {words:['subject','science','geography','computer','week','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday','today','tomorrow','yesterday','always','usually','often','sometimes','never'], trans:{subject:'科目',science:'科学',geography:'地理',computer:'电脑',week:'星期',Monday:'星期一',Tuesday:'星期二',Wednesday:'星期三',Thursday:'星期四',Friday:'星期五',Saturday:'星期六',Sunday:'星期日',today:'今天',tomorrow:'明天',yesterday:'昨天',always:'总是',usually:'通常',often:'经常',sometimes:'有时',never:'从不'}},
+        '5_2': {words:['country','China','America','England','Australia','Canada','Japan','capital','language','English','Chinese','map','flag','east','west','south','north','mountain','river','lake'], trans:{country:'国家',China:'中国',America:'美国',England:'英国',Australia:'澳大利亚',Canada:'加拿大',Japan:'日本',capital:'首都',language:'语言',English:'英语',Chinese:'汉语',map:'地图',flag:'国旗',east:'东',west:'西',south:'南',north:'北',mountain:'山',river:'河',lake:'湖'}},
+        '6_1': {words:['hobby','swimming','dancing','singing','drawing','reading','traveling','cooking','running','shopping','plan','goal','dream','future','career','scientist','artist','pilot','engineer','police'], trans:{hobby:'爱好',swimming:'游泳',dancing:'跳舞',singing:'唱歌',drawing:'画画',reading:'阅读',traveling:'旅行',cooking:'烹饪',running:'跑步',shopping:'购物',plan:'计划',goal:'目标',dream:'梦想',future:'未来',career:'职业',scientist:'科学家',artist:'艺术家',pilot:'飞行员',engineer:'工程师',police:'警察'}},
+        '6_2': {words:['environment','pollution','protect','recycle','waste','energy','solar','nuclear','technology','invention','internet','website','email','message','information','knowledge','wisdom','culture','custom','tradition'], trans:{environment:'环境',pollution:'污染',protect:'保护',recycle:'回收',waste:'浪费',energy:'能源',solar:'太阳能的',nuclear:'核能的',technology:'技术',invention:'发明',internet:'互联网',website:'网站',email:'电子邮件',message:'信息',information:'信息',knowledge:'知识',wisdom:'智慧',culture:'文化',custom:'习俗',tradition:'传统'}}
+    },
+    
+    grammarTemplates: {
+        '3_1': [
+            {q:'I ___ a student.', opts:['am','is','are','be'], ans:0, e:'I后面用am，he/she/it后面用is，you/we/they后面用are。'},
+            {q:'He ___ tall.', opts:['is','am','are','be'], ans:0, e:'He是第三人称单数，后面用is。'},
+            {q:'They ___ happy.', opts:['are','is','am','be'], ans:0, e:'They是复数，后面用are。'},
+            {q:'What ___ your name?', opts:['is','are','am','be'], ans:0, e:'your name是单数，用is。'}
+        ],
+        '3_2': [
+            {q:'___ you like apples?', opts:['Do','Does','Are','Is'], ans:0, e:'实义动词like的疑问句用助动词Do/Does。you是第二人称，用Do。'},
+            {q:'She ___ to school by bus.', opts:['goes','go','going','gone'], ans:0, e:'She是第三人称单数，一般现在时动词加-es。go→goes。'},
+            {q:'I can ___ English.', opts:['speak','speaks','speaking','spoke'], ans:0, e:'can是情态动词，后面接动词原形。'},
+            {q:'___ is that girl?', opts:['Who','What','Where','How'], ans:0, e:'对人提问用Who，对物提问用What，对地点提问用Where。'}
+        ],
+        '4_1': [
+            {q:'There ___ a book on the desk.', opts:['is','are','am','be'], ans:0, e:'There be句型中，be动词与后面的名词保持一致。a book是单数，用is。'},
+            {q:'There ___ two pens in the box.', opts:['are','is','am','be'], ans:0, e:'two pens是复数，用are。'},
+            {q:'I have ___ orange.', opts:['an','a','the','/'], ans:0, e:'orange以元音音素开头，用an。'},
+            {q:'___ do you go to school?', opts:['How','What','Who','Which'], ans:0, e:'How询问方式，What询问事物，Who询问人。'}
+        ],
+        '4_2': [
+            {q:'He is ___ than me.', opts:['taller','tall','tallest','the tall'], ans:0, e:'than是比较级的标志词，tall的比较级是taller。'},
+            {q:'This is ___ book I have ever read.', opts:['the best','best','better','good'], ans:0, e:'最高级前加the，good的最高级是best。'},
+            {q:'I ___ to the park yesterday.', opts:['went','go','goes','going'], ans:0, e:'yesterday是过去时的标志，go的过去式是went。'},
+            {q:'She is ___ TV now.', opts:['watching','watch','watches','watched'], ans:0, e:'now是现在进行时的标志，be+动词-ing形式。'}
+        ],
+        '5_1': [
+            {q:'If it ___ tomorrow, we will stay at home.', opts:['rains','rain','will rain','rained'], ans:0, e:'if引导的条件状语从句，主句将来时，从句一般现在时。it是第三人称单数，rain加-s。'},
+            {q:'I have lived here ___ 2010.', opts:['since','for','in','at'], ans:0, e:'since+时间点，for+时间段。2010是时间点，用since。'},
+            {q:'The book ___ by Lu Xun.', opts:['was written','wrote','is writing','writes'], ans:0, e:'书是被写的，用被动语态。鲁迅是过去的人，用一般过去时的被动语态was written。'},
+            {q:'He asked me ___ I liked English.', opts:['if','that','what','which'], ans:0, e:'宾语从句中，if表示"是否"，that无意义，what/which在从句中充当成分。'}
+        ],
+        '5_2': [
+            {q:'By the time I arrived, the train ___ already.', opts:['had left','left','has left','leaves'], ans:0, e:'by the time+过去时，主句用过去完成时had done。'},
+            {q:'Hardly ___ when the bus came.', opts:['had I arrived','I had arrived','I arrived','have I arrived'], ans:0, e:'Hardly...when...结构中，hardly位于句首时句子部分倒装，且用过去完成时。'},
+            {q:'Not only he but also I ___ wrong.', opts:['am','is','are','were'], ans:0, e:'not only...but also...遵循就近原则，靠近的I决定用am。'},
+            {q:'It is no use ___ over spilt milk.', opts:['crying','cry','to cry','cried'], ans:0, e:'It is no use doing sth.是固定句型，表示"做某事没有用"。'}
+        ],
+        '6_1': [
+            {q:'___ the sun rises in the east is known to all.', opts:['That','What','Which','When'], ans:0, e:'That引导主语从句，在从句中不充当成分，只起连接作用。'},
+            {q:'I wish I ___ wings.', opts:['had','have','will have','had had'], ans:0, e:'wish后的宾语从句用虚拟语气，与现在事实相反用过去时。'},
+            {q:'It was in the park ___ I met him.', opts:['that','where','when','which'], ans:0, e:'强调句型：It is/was+被强调部分+that+其他。'},
+            {q:'___ for your help, I would have failed.', opts:['But','Except','Without','Unless'], ans:0, e:'But for/Without+名词，表示"如果没有"，引导含蓄虚拟条件。'}
+        ],
+        '6_2': [
+            {q:'The reason ___ he was late is ___ he missed the bus.', opts:['why; that','that; why','why; because','because; that'], ans:0, e:'reason作先行词，定语从句用why引导；表语从句用that引导（不用because）。'},
+            {q:'Only in this way ___ solve the problem.', opts:['can we','we can','we should','should we'], ans:0, e:'only+状语位于句首时，句子部分倒装。'},
+            {q:'The house ___ window is broken belongs to Tom.', opts:['whose','which','that','of which'], ans:0, e:'whose在定语从句中作定语，修饰window，表示"房子的窗户"。'},
+            {q:'___ hard you try, you cannot finish it in one day.', opts:['However','Whatever','Whenever','Wherever'], ans:0, e:'However+形容词/副词，表示"无论多么"。'}
+        ]
+    },
+
+    generate(grade, term, count, version='A') {
+        const key = `${grade}_${term}`;
+        const vocab = this.vocabulary[key];
+        const grammar = this.grammarTemplates[key];
+        const results = [];
+        const used = new Set();
+        const versionOffset = version === 'B' ? 7 : 0;
+        
+        let vocabList = [], trans = {};
+        if(vocab) {
+            vocabList = vocab.words;
+            trans = vocab.trans;
+        } else {
+            for(let g=grade; g>=1; g--) {
+                const k = `${g}_${term}`;
+                if(this.vocabulary[k]) {
+                    vocabList = this.vocabulary[k].words;
+                    trans = this.vocabulary[k].trans;
+                    break;
+                }
+            }
+        }
+        
+        const vocabCount = Math.ceil(count * 0.7);
+        let attempts = 0;
+        while(results.length < vocabCount && attempts < 200) {
+            attempts++;
+            if(vocabList.length === 0) break;
+            const type = Math.floor(Math.random()*2);
+            const idx = (Math.floor(Math.random()*vocabList.length) + versionOffset) % vocabList.length;
+            const word = vocabList[idx];
+            if(!word) continue;
+            
+            let q, opts, ans, exp;
+            if(type === 0) {
+                q = `"${word}"的中文意思是？`;
+                ans = trans[word];
+                if(!ans) continue;
+                const allTrans = Object.values(trans);
+                const wrong = shuffleArray(allTrans.filter(t => t !== ans)).slice(0,3);
+                opts = [ans, ...wrong];
+                exp = `${word}的意思是"${ans}"，请熟记课本单词表。`;
+            } else {
+                ans = word;
+                const cn = trans[word];
+                if(!cn) continue;
+                q = `"${cn}"的英文单词是？`;
+                const wrong = shuffleArray(vocabList.filter(w => w !== word)).slice(0,3);
+                opts = [ans, ...wrong];
+                exp = `"${cn}"对应的英文是"${word}"，注意拼写。`;
+            }
+            
+            const uniqueOpts = [...new Set(opts)];
+            if(uniqueOpts.length >= 4) {
+                const fp = `eng_${word}_${type}_${version}`;
+                if(!used.has(fp)) {
+                    used.add(fp);
+                    const shuffled = shuffleOptions(uniqueOpts.slice(0,4), 0);
+                    results.push({
+                        id: `E${grade}${term}_${version}_${results.length}`,
+                        type: 'english',
+                        grade, term,
+                        question: q,
+                        options: shuffled.options,
+                        correctIndex: shuffled.correctIndex,
+                        explanation: exp,
+                        difficulty: grade <= 2 ? 1 : grade <= 4 ? 2 : 3
+                    });
+                }
+            }
+        }
+        
+        if(grammar && grade >= 3) {
+            const gramCount = count - results.length;
+            attempts = 0;
+            while(results.length < count && attempts < 200) {
+                attempts++;
+                const gIdx = (Math.floor(Math.random()*grammar.length) + versionOffset) % grammar.length;
+                const tmpl = grammar[gIdx];
+                const fp = `gram_${tmpl.q.substring(0,15)}_${version}`;
+                if(!used.has(fp)) {
+                    used.add(fp);
+                    const shuffled = shuffleOptions(tmpl.opts, tmpl.ans);
+                    results.push({
+                        id: `E${grade}${term}_${version}_${results.length}`,
+                        type: 'english',
+                        grade, term,
+                        question: tmpl.q,
+                        options: shuffled.options,
+                        correctIndex: shuffled.correctIndex,
+                        explanation: tmpl.e,
+                        difficulty: grade <= 4 ? 2 : 3
+                    });
+                }
+            }
+        }
+        
+        while(results.length < count) {
+            const fallbackWord = vocabList[(results.length + versionOffset) % vocabList.length] || 'apple';
+            const fallbackAns = trans[fallbackWord] || '苹果';
+            const allTrans = Object.values(trans);
+            const wrong = shuffleArray(allTrans.filter(t => t !== fallbackAns)).slice(0,3);
+            const opts = [fallbackAns, ...wrong];
+            const shuffled = shuffleOptions([...new Set(opts)].slice(0,4), 0);
+            results.push({
+                id: `E${grade}${term}_${version}_${results.length}`,
+                type: 'english',
+                grade, term,
+                question: `"${fallbackWord}"的中文意思是？`,
+                options: shuffled.options,
+                correctIndex: shuffled.correctIndex,
+                explanation: `${fallbackWord}的意思是"${fallbackAns}"。`,
+                difficulty: 1
+            });
+        }
+        
+        return results.slice(0, count);
+    }
+};
+
+/* ==================== 第五卷：常识引擎 ==================== */
+const CommonEngine = {
+    data: {
+        '1_1': [
+            {q:'过马路时看到红灯应该？',a:'停下来等待',opts:['停下来等待','快速跑过去','慢慢走过去','看看没车就过'],e:'红灯停，绿灯行，黄灯亮了等一等。过马路要走斑马线，遵守交通规则。'},
+            {q:'发生火灾时，正确的逃生方法是？',a:'用湿毛巾捂住口鼻弯腰逃生',opts:['用湿毛巾捂住口鼻弯腰逃生','坐电梯快速下楼','从窗户跳下去','躲在床底下'],e:'火灾逃生要点：用湿毛巾捂住口鼻防烟，弯腰低姿前行，走楼梯不坐电梯，不跳楼，不贪恋财物。'},
+            {q:'下列哪个是水果？',a:'苹果',opts:['苹果','白菜','土豆','黄瓜'],e:'苹果是水果，白菜、土豆、黄瓜是蔬菜。水果通常含糖分较高，生吃为主；蔬菜多做菜吃。'},
+            {q:'一年有几个季节？',a:'4个',opts:['4个','3个','5个','6个'],e:'一年有春夏秋冬四季。春季温暖花开，夏季炎热多雨，秋季凉爽落叶，冬季寒冷下雪。'},
+            {q:'我们应该怎样保护牙齿？',a:'早晚刷牙',opts:['早晚刷牙','多吃糖果','不刷牙','用牙咬硬物'],e:'保护牙齿要早晚刷牙、饭后漱口、少吃甜食、定期检查。牙齿健康才能吃嘛嘛香。'}
+        ],
+        '1_2': [
+            {q:'看到有人溺水，小学生应该？',a:'大声呼救找大人帮忙',opts:['大声呼救找大人帮忙','自己跳下去救','赶紧跑开不管','用手去拉'],e:'小学生不能盲目下水救人，应该大声呼救，找大人或警察帮忙，可以扔救生圈、木板等漂浮物。'},
+            {q:'我国的国旗是什么？',a:'五星红旗',opts:['五星红旗','青天白日旗','星条旗','米字旗'],e:'中华人民共和国国旗是五星红旗，红色象征革命，五颗黄色五角星象征共产党领导下的革命人民大团结。'},
+            {q:'人体最大的器官是？',a:'皮肤',opts:['皮肤','肝脏','心脏','肺'],e:'皮肤是人体最大的器官，覆盖全身，保护身体，调节体温，感受外界刺激。'},
+            {q:'下列哪种行为节约用水？',a:'随手关水龙头',opts:['随手关水龙头','长时间开水龙头玩','洗澡用很多水','不关紧水龙头'],e:'节约用水要随手关水龙头、一水多用、使用节水器具。水是生命之源，要珍惜水资源。'},
+            {q:'彩虹一般出现在什么时候？',a:'雨后天晴',opts:['雨后天晴','下雨天','晚上','阴天'],e:'彩虹是阳光照射到空气中的水滴发生折射和反射形成的，通常出现在雨后天晴时，颜色有红橙黄绿蓝靛紫七种。'}
+        ],
+        '2_1': [
+            {q:'我国的首都是？',a:'北京',opts:['北京','上海','广州','深圳'],e:'北京是中华人民共和国的首都，有天安门、故宫、长城等著名景点。'},
+            {q:'下列哪种动物是哺乳动物？',a:'猫',opts:['猫','鸡','蛇','青蛙'],e:'猫是哺乳动物，胎生，用乳汁哺育幼崽，体表有毛。鸡是鸟类，蛇是爬行动物，青蛙是两栖动物。'},
+            {q:'电器着火时，首先应该？',a:'切断电源',opts:['切断电源','用水浇','用灭火器直接喷','用手拍打'],e:'电器着火先切断电源，再用干粉灭火器或二氧化碳灭火器灭火，千万不能用水，以防触电。'},
+            {q:'太阳系中最大的行星是？',a:'木星',opts:['木星','地球','火星','土星'],e:'木星是太阳系中体积和质量最大的行星，它有79颗卫星，表面有大红斑。'},
+            {q:'正确的读书姿势是？',a:'眼睛离书一尺',opts:['眼睛离书一尺','趴着看','躺着看','走路时看'],e:'读书姿势"三个一"：眼睛离书一尺，胸口离桌一拳，手指离笔尖一寸。保护视力，预防近视。'}
+        ],
+        '2_2': [
+            {q:'我国最长的河流是？',a:'长江',opts:['长江','黄河','珠江','黑龙江'],e:'长江是我国第一长河，世界第三长河，全长约6300千米，发源于青藏高原，注入东海。'},
+            {q:'下列哪种能源是不可再生能源？',a:'煤炭',opts:['煤炭','太阳能','风能','水能'],e:'煤炭、石油、天然气是不可再生能源，用一点少一点。太阳能、风能、水能是可再生能源，可以循环利用。'},
+            {q:'遇到陌生人给零食，应该？',a:'婉言谢绝',opts:['婉言谢绝','马上吃掉','带回家吃','谢谢后接受'],e:'陌生人给的食物不能要，可能是坏人设下的陷阱。要学会自我保护，婉言谢绝，迅速离开。'},
+            {q:'人体有多少块骨头？',a:'206块',opts:['206块','306块','106块','406块'],e:'成年人有206块骨头，婴儿约有270块，其中一些会随着成长融合。骨头支撑身体，保护内脏。'},
+            {q:'下列哪种垃圾是可回收物？',a:'废纸',opts:['废纸','剩饭','电池','果皮'],e:'可回收物包括废纸、塑料瓶、玻璃瓶、金属等。剩饭果皮是厨余垃圾，电池是有害垃圾。垃圾分类，从我做起。'}
+        ],
+        '3_1': [
+            {q:'地球自转一周大约是？',a:'24小时',opts:['24小时','365天','30天','12小时'],e:'地球自转一周约24小时，产生昼夜交替；公转一周约365天，产生四季变化。'},
+            {q:'下列哪种植物是先开花后长叶？',a:'玉兰',opts:['玉兰','桃树','柳树','杨树'],e:'玉兰是先开花后长叶的植物，桃花、柳树叶花同时或先叶后花。植物开花长叶顺序与温度、光照有关。'},
+            {q:'声音在哪种介质中传播最快？',a:'固体',opts:['固体','液体','气体','真空'],e:'声音传播需要介质，在固体中最快，液体次之，气体最慢，真空中不能传播。声音是振动产生的波。'},
+            {q:'我国四大发明不包括？',a:'地动仪',opts:['地动仪','造纸术','火药','指南针'],e:'四大发明是造纸术、印刷术、火药、指南针。地动仪是张衡发明的检测地震的仪器，不属于四大发明。'},
+            {q:'食物在人体消化的第一站是？',a:'口腔',opts:['口腔','胃','小肠','大肠'],e:'消化从口腔开始，牙齿咀嚼、舌头搅拌、唾液淀粉酶分解淀粉。然后经食道到胃、小肠、大肠。'}
+        ],
+        '3_2': [
+            {q:'水的三种状态不包括？',a:'泥',opts:['泥','冰','水蒸气','液态水'],e:'水有固（冰）、液（水）、气（水蒸气）三态。温度变化会引起三态转化，如熔化、凝固、汽化、液化。'},
+            {q:'下列哪种动物属于昆虫？',a:'蝴蝶',opts:['蝴蝶','蜘蛛','蜈蚣','蚯蚓'],e:'昆虫特征：身体分头胸腹三部分，有六条腿，一般有两对翅。蝴蝶是昆虫，蜘蛛是蛛形纲，蜈蚣是多足纲。'},
+            {q:'电路中控制电流通断的元件是？',a:'开关',opts:['开关','电池','灯泡','导线'],e:'开关控制电路的通断。完整电路包括电源（电池）、用电器（灯泡）、导线、开关四部分。'},
+            {q:'我国面积最大的省级行政区是？',a:'新疆',opts:['新疆','西藏','内蒙古','青海'],e:'新疆维吾尔自治区面积约166万平方千米，是我国面积最大的省级行政区，位于西北边疆。'},
+            {q:'下列哪种现象是化学变化？',a:'铁生锈',opts:['铁生锈','冰融化','玻璃破碎','水蒸发'],e:'铁生锈生成了新物质（氧化铁），是化学变化。冰融化、玻璃破碎、水蒸发只是形态改变，没有新物质生成，是物理变化。'}
+        ],
+        '4_1': [
+            {q:'光合作用的主要场所是？',a:'叶绿体',opts:['叶绿体','线粒体','细胞核','液泡'],e:'叶绿体含有叶绿素，是植物进行光合作用的场所，把二氧化碳和水转化为有机物和氧气。'},
+            {q:'世界上使用人数最多的语言是？',a:'汉语',opts:['汉语','英语','西班牙语','阿拉伯语'],e:'汉语（中文）是世界上使用人数最多的语言，英语是使用范围最广的语言。'},
+            {q:'下列哪种力不是基本力？',a:'摩擦力',opts:['摩擦力','引力','电磁力','强力'],e:'四种基本力：引力、电磁力、强相互作用力、弱相互作用力。摩擦力是电磁力在宏观的表现。'},
+            {q:'第一次工业革命的标志是？',a:'蒸汽机的发明',opts:['蒸汽机的发明','电的发现','计算机的发明','互联网'],e:'18世纪60年代，瓦特改良蒸汽机，人类进入蒸汽时代。第二次工业革命标志是电力，第三次是信息技术。'},
+            {q:'人体血液循环的动力器官是？',a:'心脏',opts:['心脏','肺','肝脏','肾脏'],e:'心脏是血液循环的动力器官，通过收缩和舒张推动血液在血管中流动，输送氧气和营养物质，带走废物。'}
+        ],
+        '4_2': [
+            {q:'DNA的中文名称是？',a:'脱氧核糖核酸',opts:['脱氧核糖核酸','核糖核酸','氨基酸','蛋白质'],e:'DNA是脱氧核糖核酸，是遗传信息的载体；RNA是核糖核酸。基因是有遗传效应的DNA片段。'},
+            {q:'下列哪个不是太阳系行星？',a:'冥王星',opts:['冥王星','火星','金星','水星'],e:'冥王星在2006年被国际天文学联合会重新定义为矮行星。太阳系八大行星：水金地火木土天海。'},
+            {q:'酸雨的形成主要与哪种气体有关？',a:'二氧化硫',opts:['二氧化硫','氧气','氮气','二氧化碳'],e:'酸雨主要由二氧化硫和氮氧化物溶于雨水形成，pH<5.6。酸雨会腐蚀建筑、酸化土壤、危害生物。'},
+            {q:'世界上面积最大的大洋是？',a:'太平洋',opts:['太平洋','大西洋','印度洋','北冰洋'],e:'太平洋面积约1.65亿平方千米，占地球海洋面积的一半，最深处在马里亚纳海沟（约11034米）。'},
+            {q:'下列哪种能源属于清洁能源？',a:'太阳能',opts:['太阳能','煤炭','石油','天然气'],e:'清洁能源不排放污染物，包括太阳能、风能、水能、核能等。煤炭、石油、天然气燃烧会产生二氧化碳和污染物。'}
+        ],
+        '5_1': [
+            {q:'牛顿三大定律主要研究什么？',a:'力与运动',opts:['力与运动','光与色','热与功','电与磁'],e:'牛顿三大定律是经典力学的基础，研究力与运动的关系。第一定律（惯性），第二定律F=ma，第三定律（作用力与反作用力）。'},
+            {q:'下列哪种生物是分解者？',a:'蘑菇',opts:['蘑菇','草','兔子','鹰'],e:'生态系统中，蘑菇是真菌，属于分解者，分解动植物遗体。草是生产者，兔子是初级消费者，鹰是次级消费者。'},
+            {q:'我国地势特点是？',a:'西高东低',opts:['西高东低','东高西低','南高北低','北高南低'],e:'我国地势西高东低，呈三级阶梯分布。第一阶梯青藏高原，第二阶梯高原盆地，第三阶梯平原丘陵。'},
+            {q:'光在真空中的速度约为？',a:'30万千米/秒',opts:['30万千米/秒','3万千米/秒','300万千米/秒','3千米/秒'],e:'光速约3×10⁸m/s（30万千米/秒），是宇宙中最快的速度。光从太阳到地球约需8分钟。'},
+            {q:'下列哪种物质是纯净物？',a:'氧气',opts:['氧气','空气','海水','石灰水'],e:'纯净物由一种物质组成，氧气O₂是纯净物。空气、海水、石灰水都是混合物，含有多种物质。'}
+        ],
+        '5_2': [
+            {q:'元素周期表的创始人是？',a:'门捷列夫',opts:['门捷列夫','居里夫人','爱因斯坦','达尔文'],e:'1869年俄国化学家门捷列夫发现元素周期律，编制了元素周期表，预测了当时尚未发现的元素。'},
+            {q:'下列哪种运动是平移？',a:'电梯上下',opts:['电梯上下','风车转动','钟表指针','拧瓶盖'],e:'平移是物体沿直线移动，形状大小方向不变。旋转是绕定点转动。电梯上下是平移，风车、指针、拧瓶盖是旋转。'},
+            {q:'我国最大的岛屿是？',a:'台湾岛',opts:['台湾岛','海南岛','崇明岛','舟山岛'],e:'台湾岛面积约3.6万平方千米，是我国第一大岛。海南岛是第二大岛。台湾自古以来就是中国领土不可分割的一部分。'},
+            {q:'下列哪个是导体？',a:'铜',opts:['铜','塑料','橡胶','玻璃'],e:'铜是金属，内部有自由电子，是良导体。塑料、橡胶、玻璃内部电荷不能自由移动，是绝缘体。'},
+            {q:'生物进化论的创立者是？',a:'达尔文',opts:['达尔文','牛顿','爱因斯坦','孟德尔'],e:'达尔文《物种起源》提出自然选择学说，解释了生物进化的机制。孟德尔发现遗传定律，牛顿建立经典力学。'}
+        ],
+        '6_1': [
+            {q:'相对论的主要创立者是？',a:'爱因斯坦',opts:['爱因斯坦','牛顿','伽利略','麦克斯韦'],e:'爱因斯坦创立狭义相对论（1905）和广义相对论（1915），提出E=mc²、时空弯曲等革命性理论。'},
+            {q:'下列哪种反应是核聚变？',a:'太阳发光',opts:['太阳发光','核电站发电','原子弹爆炸','X光检查'],e:'太阳内部是氢核聚变成氦核，释放巨大能量。核电站是核裂变，原子弹是裂变，X光是电子跃迁。'},
+            {q:'我国第一艘航空母舰是？',a:'辽宁舰',opts:['辽宁舰','山东舰','福建舰','广东舰'],e:'辽宁舰是我国第一艘航空母舰，2012年服役，由瓦良格号改建。山东舰是第一艘国产航母，福建舰是弹射型航母。'},
+            {q:'下列哪种现象证明地球是球体？',a:'帆船远去船身先消失',opts:['帆船远去船身先消失','太阳东升西落','四季变化','昼夜交替'],e:'帆船远去时船身先消失，桅杆后消失，证明地球表面是曲面。麦哲伦环球航行、卫星照片也证明地球是球体。'},
+            {q:'基因工程中的"剪刀"是？',a:'限制酶',opts:['限制酶','DNA连接酶','运载体','质粒'],e:'限制酶能识别特定DNA序列并切割，是基因工程的"剪刀"。DNA连接酶是"针线"，运载体（如质粒）是运输工具。'}
+        ],
+        '6_2': [
+            {q:'量子力学的奠基人之一是？',a:'普朗克',opts:['普朗克','牛顿','阿基米德','亚里士多德'],e:'1900年普朗克提出量子假说，标志量子力学诞生。玻尔、海森堡、薛定谔、狄拉克等进一步发展。'},
+            {q:'下列哪种物质是化合物？',a:'水',opts:['水','氧气','铁','金刚石'],e:'化合物由不同种元素组成，水H₂O是化合物。氧气O₂、铁Fe、金刚石C都是单质（同种元素组成）。'},
+            {q:'我国最高的山峰是？',a:'珠穆朗玛峰',opts:['珠穆朗玛峰','乔戈里峰','贡嘎山','梅里雪山'],e:'珠穆朗玛峰海拔8848.86米，是世界最高峰，位于中国与尼泊尔边境的喜马拉雅山脉。'},
+            {q:'互联网的前身ARPANET诞生于哪年？',a:'1969年',opts:['1969年','1989年','1999年','2009年'],e:'ARPANET诞生于1969年，是美国国防部高级研究计划局建立的分组交换网，是互联网的雏形。'},
+            {q:'下列哪种能源来自地球内部？',a:'地热能',opts:['地热能','风能','潮汐能','水能'],e:'地热能来自地球内部放射性元素衰变产生的热能。风能来自太阳辐射造成的温差，潮汐能来自月球引力，水能来自太阳蒸发降水。'}
+        ]
+    },
+
+    generate(grade, term, count, version='A') {
+        const key = `${grade}_${term}`;
+        let pool = this.data[key] || [];
+        if(pool.length < count) {
+            const fallback = this.data[`${Math.min(grade+1,6)}_${term}`] || this.data[`${grade}_${term===1?2:1}`] || [];
+            pool = [...pool, ...fallback];
+        }
+        
+        const results = [];
+        const used = new Set();
+        const shuffled = shuffleArray(pool);
+        const versionOffset = version === 'B' ? 3 : 0;
+        
+        for(let i=0; i<shuffled.length; i++) {
+            if(results.length >= count) break;
+            const item = shuffled[(i + versionOffset) % shuffled.length];
+            const fp = `common_${item.q.substring(0,10)}_${version}`;
+            if(!used.has(fp)) {
+                used.add(fp);
+                const correctIdx = item.opts.indexOf(item.a);
+                const shuffledOpts = shuffleOptions(item.opts, correctIdx >= 0 ? correctIdx : 0);
+                results.push({
+                    id: `K${grade}${term}_${version}_${results.length}`,
+                    type: 'common',
+                    grade, term,
+                    question: item.q,
+                    options: shuffledOpts.options,
+                    correctIndex: shuffledOpts.correctIndex,
+                    explanation: item.e,
+                    difficulty: grade <= 2 ? 1 : grade <= 4 ? 2 : 3
+                });
+            }
+        }
+        
+        while(results.length < count) {
+            results.push({
+                id: `K${grade}${term}_${version}_${results.length}`,
+                type: 'common',
+                grade, term,
+                question: '这是一道常识题，请选择正确答案。',
+                options: ['A','B','C','D'],
+                correctIndex: 0,
+                explanation: '常识题需要平时多积累。',
+                difficulty: 1
+            });
+        }
+        
+        return results.slice(0, count);
+    }
+};
+
+/* ==================== 第六卷：主应用逻辑 ==================== */
+const App = {
+    state: {
+        page: 'home',
+        grade: 3,
+        term: 1,
+        subject: 'mix',
+        paper: 'A',
+        count: 20,
+        questions: [],
+        currentIndex: 0,
+        answers: {},
+        confirmed: {},
+        startTime: 0,
+        endTime: 0,
+        result: null,
+        history: [],
+        wrongBook: []
+    },
+    
+    init() {
+        this.loadStorage();
+        this.render();
+    },
+    
+    loadStorage() {
+        try {
+            this.state.history = JSON.parse(localStorage.getItem(CONFIG.STORAGE_PREFIX+'history')||'[]');
+            this.state.wrongBook = JSON.parse(localStorage.getItem(CONFIG.STORAGE_PREFIX+'wrong')||'[]');
+        } catch(e) { console.error(e); }
+    },
+    
+    saveStorage() {
+        try {
+            localStorage.setItem(CONFIG.STORAGE_PREFIX+'history', JSON.stringify(this.state.history));
+            localStorage.setItem(CONFIG.STORAGE_PREFIX+'wrong', JSON.stringify(this.state.wrongBook));
+        } catch(e) { console.error(e); }
+    },
+    
+    generateQuestions() {
+        const {grade, term, subject, count, paper} = this.state;
+        let questions = [];
+        const counts = {};
+        
+        if(subject === 'mix') {
+            counts.math = Math.round(count * 0.4);
+            counts.chinese = Math.round(count * 0.3);
+            counts.english = Math.round(count * 0.2);
+            counts.common = count - counts.math - counts.chinese - counts.english;
+        } else {
+            counts[subject] = count;
+        }
+        
+        if(counts.math) questions = [...questions, ...MathEngine.generate(grade, term, counts.math, paper)];
+        if(counts.chinese) questions = [...questions, ...ChineseEngine.generate(grade, term, counts.chinese, paper)];
+        if(counts.english) questions = [...questions, ...EnglishEngine.generate(grade, term, counts.english, paper)];
+        if(counts.common) questions = [...questions, ...CommonEngine.generate(grade, term, counts.common, paper)];
+        
+        questions = shuffleArray(questions).slice(0, count);
+        questions.forEach((q, i) => { q._index = i; });
+        
+        this.state.questions = questions;
+        this.state.currentIndex = 0;
+        this.state.answers = {};
+        this.state.confirmed = {};
+        this.state.startTime = Date.now();
+        this.state.endTime = 0;
+        this.state.result = null;
+    },
+    
+    render() {
+        const app = document.getElementById('app');
+        app.innerHTML = '';
+        switch(this.state.page) {
+            case 'home': this.renderHome(app); break;
+            case 'quiz': this.renderQuiz(app); break;
+            case 'result': this.renderResult(app); break;
+            case 'review': this.renderReview(app); break;
+            case 'history': this.renderHistory(app); break;
+            case 'settings': this.renderSettings(app); break;
+        }
+    },
+    
+    renderHome(container) {
+        const {grade, term, subject, count, paper} = this.state;
+        const subjectOpts = CONFIG.SUBJECTS.map(s => 
+            `<button class="btn ${subject===s.id?'btn-primary':''}" onclick="App.setSubject('${s.id}')" style="margin:5px">${s.name}</button>`
+        ).join('');
+        
+        container.innerHTML = `
+            <div class="container">
+                <h1>📚 小学教育测评系统 V${CONFIG.VERSION}</h1>
+                <div class="card">
+                    <h2>🏫 选择年级</h2>
+                    <div class="grid-3">
+                        ${CONFIG.GRADES.map(g => `<button class="btn ${grade===g?'btn-primary':''}" onclick="App.setGrade(${g})">${g}年级</button>`).join('')}
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>📅 选择学期</h2>
+                    <div class="grid-2">
+                        ${CONFIG.TERMS.map(t => `<button class="btn ${term===t?'btn-primary':''}" onclick="App.setTerm(${t})">${t===1?'上学期':'下学期'}</button>`).join('')}
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>📖 选择科目</h2>
+                    <div style="display:flex;flex-wrap:wrap;justify-content:center">
+                        ${subjectOpts}
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>📝 分卷选择 <span class="paper-badge">${paper}卷</span></h2>
+                    <div class="grid-2">
+                        ${CONFIG.PAPERS.map(p => `<button class="btn ${paper===p?'btn-primary':''}" onclick="App.setPaper('${p}')">${p}卷（${p==='A'?'标准卷':'平行卷'}）</button>`).join('')}
+                    </div>
+                    <div class="info-box" style="margin-top:10px">
+                        A卷与B卷知识点相同，题目不同，适合同桌互测或二次练习。
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>🔢 题目数量</h2>
+                    <div class="grid-4">
+                        ${CONFIG.COUNTS.map(c => `<button class="btn ${count===c?'btn-primary':''}" onclick="App.setCount(${c})">${c}题</button>`).join('')}
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="App.startQuiz()" style="margin-top:20px">🚀 开始测评</button>
+                <div class="grid-2" style="margin-top:10px">
+                    <button class="btn btn-info" onclick="App.showHistory()">📜 历史记录</button>
+                    <button class="btn btn-warning" onclick="App.showSettings()">⚙️ 设置</button>
+                </div>
+            </div>
+        `;
+    },
+    
+    renderQuiz(container) {
+        const {questions, currentIndex, answers, confirmed, startTime, paper} = this.state;
+        const q = questions[currentIndex];
+        const total = questions.length;
+        const hasAnswer = answers[currentIndex] !== undefined;
+        const isConfirmed = confirmed[currentIndex];
+        
+        const answeredCount = Object.keys(answers).length;
+        const progress = ((currentIndex + 1) / total * 100).toFixed(0);
+        const elapsed = Math.floor((Date.now() - startTime)/1000);
+        const mins = Math.floor(elapsed/60);
+        const secs = elapsed%60;
+        const timeStr = `${mins}:${secs.toString().padStart(2,'0')}`;
+        
+        let optionsHtml = '';
+        q.options.forEach((opt, idx) => {
+            let cls = 'btn btn-option';
+            let label = String.fromCharCode(65 + idx);
+            
+            if(isConfirmed) {
+                if(idx === q.correctIndex) {
+                    cls += ' correct';
+                    label = '✓';
+                } else if(answers[currentIndex] === idx && idx !== q.correctIndex) {
+                    cls += ' wrong';
+                    label = '✕';
+                } else {
+                    cls += ' disabled';
+                }
+            } else if(answers[currentIndex] === idx) {
+                cls += ' selected';
+            }
+            
+            optionsHtml += `<button class="${cls}" data-label="${label}" onclick="App.selectOption(${idx})" ${isConfirmed?'disabled':''}>${opt}</button>`;
+        });
+        
+        let expHtml = '';
+        if(isConfirmed) {
+            const isCorrect = answers[currentIndex] === q.correctIndex;
+            expHtml = `
+                <div class="explanation show" style="margin-top:16px">
+                    <strong>${isCorrect?'✅ 回答正确！':'❌ 回答错误'}</strong><br>
+                    ${q.explanation || '暂无解析'}
+                </div>
+            `;
+        }
+        
+        const subjTag = CONFIG.SUBJECTS.find(s => s.id === q.type);
+        const tagHtml = subjTag ? `<span class="tag ${subjTag.tag}">${subjTag.name}</span>` : '';
+        const diffHtml = q.difficulty ? `<span class="difficulty-badge diff-${q.difficulty===1?'easy':q.difficulty===2?'medium':'hard'}">${q.difficulty===1?'简单':q.difficulty===2?'中等':'困难'}</span>` : '';
+        
+        container.innerHTML = `
+            <div class="container">
+                <div class="card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                        <span>${tagHtml}${diffHtml}<span class="paper-badge">${paper}卷</span></span>
+                        <span style="color:var(--text-secondary);font-size:14px">${currentIndex+1}/${total} · ⏱️${timeStr}</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+                    <div style="font-size:var(--font-lg);font-weight:600;margin:20px 0;line-height:1.6">${q.question}</div>
+                    <div>${optionsHtml}</div>
+                    ${expHtml}
+                </div>
+                <div class="grid-3" style="margin-top:16px">
+                    <button class="btn" onclick="App.prevQuestion()" ${currentIndex===0?'disabled':''}>⬅️ 上一题</button>
+                    <button class="btn ${hasAnswer&&!isConfirmed?'btn-success':'btn-warning'}" onclick="App.confirmOrNext()" ${!hasAnswer?'disabled':''}>
+                        ${isConfirmed ? (currentIndex === total-1 ? '✅ 提交' : '➡️ 下一题') : '✓ 确认答案'}
+                    </button>
+                    <button class="btn" onclick="App.nextQuestion()" ${currentIndex===total-1?'disabled':''}>➡️ 下一题</button>
+                </div>
+                <div style="text-align:center;margin-top:12px;color:var(--text-secondary);font-size:14px">
+                    已答 ${answeredCount}/${total} 题 · ${paper}卷
+                </div>
+                <button class="btn" onclick="App.submitQuiz()" style="margin-top:20px;background:var(--error);color:white;border-color:var(--error)">🛑 结束并提交</button>
+            </div>
+        `;
+    },
+    
+    renderResult(container) {
+        const {result, questions, paper} = this.state;
+        if(!result) return;
+        
+        const {score, correct, wrong, timeUsed, wrongQuestions} = result;
+        const percentage = Math.round(score);
+        const isPass = percentage >= 60;
+        const circumference = 2 * Math.PI * 70;
+        const offset = circumference - (percentage / 100) * circumference;
+        
+        const achievement = percentage === 100 ? '🏆 满分状元' : 
+                           percentage >= 90 ? '🥇 学霸之星' : 
+                           percentage >= 80 ? '🥈 优秀学员' : 
+                           percentage >= 60 ? '🥉 及格通过' : '💪 继续加油';
+        
+        container.innerHTML = `
+            <div class="container">
+                <h1>🎉 ${paper}卷 测评完成！</h1>
+                <div class="card" style="text-align:center">
+                    <div class="result-ring">
+                        <svg width="160" height="160" style="transform:rotate(-90deg)">
+                            <circle class="ring-bg" cx="80" cy="80" r="70"/>
+                            <circle class="ring-fill" cx="80" cy="80" r="70" 
+                                stroke-dasharray="${circumference}" 
+                                stroke-dashoffset="${offset}"/>
+                        </svg>
+                        <div class="ring-text">
+                            <div class="ring-score">${percentage}</div>
+                            <div style="font-size:14px;color:var(--text-secondary)">分</div>
+                        </div>
+                    </div>
+                    <div style="margin:12px 0">
+                        <span class="achievement">${achievement}</span>
+                        <span class="paper-badge">${paper}卷</span>
+                    </div>
+                    <div class="stat-row">
+                        <div class="stat-item correct"><span class="num">${correct}</span><span>正确</span></div>
+                        <div class="stat-item wrong"><span class="num">${wrong}</span><span>错误</span></div>
+                        <div class="stat-item"><span class="num">${timeUsed}</span><span>用时(秒)</span></div>
+                    </div>
+                    <div style="font-size:18px;margin:16px 0;color:${isPass? 'var(--success)':'var(--error)'};font-weight:700">
+                        ${isPass ? '👍 恭喜通过！' : '别气馁，再试一次！'}
+                    </div>
+                    ${wrongQuestions.length > 0 ? `
+                        <button class="btn btn-warning" onclick="App.showReview()">🔍 查看错题(${wrongQuestions.length})</button>
+                    ` : ''}
+                </div>
+                <button class="btn btn-primary" onclick="App.goHome()">🏠 返回首页</button>
+                <div class="grid-2" style="margin-top:10px">
+                    <button class="btn btn-info" onclick="App.startQuiz()">🔄 再做${paper}卷</button>
+                    <button class="btn btn-success" onclick="App.switchPaper()">📋 换做${paper==='A'?'B':'A'}卷</button>
+                </div>
+            </div>
+        `;
+    },
+    
+    renderReview(container) {
+        const {wrongBook} = this.state;
+        if(wrongBook.length === 0) {
+            container.innerHTML = `
+                <div class="container">
+                    <h1>📖 错题本</h1>
+                    <div class="card" style="text-align:center;padding:40px">
+                        <div style="font-size:48px;margin-bottom:16px">🎊</div>
+                        <div style="font-size:18px;color:var(--text-secondary)">暂无错题，继续保持！</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="App.goHome()">🏠 返回首页</button>
+                </div>
+            `;
+            return;
+        }
+        
+        let itemsHtml = '';
+        wrongBook.slice(-50).reverse().forEach((item) => {
+            itemsHtml += `
+                <div class="wrong-item">
+                    <div style="font-weight:600;margin-bottom:8px">
+                        <span class="topic-tag">${item.subjectName || '综合'}</span>
+                        <span class="paper-badge">${item.paper || 'A'}</span>
+                        ${item.question}
+                    </div>
+                    <div style="color:var(--error);margin-bottom:4px">你的答案：${item.yourAnswer || '未答'}</div>
+                    <div style="color:var(--success);margin-bottom:4px">正确答案：${item.correctAnswer}</div>
+                    <div class="q-exp">${item.explanation || '暂无解析'}</div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = `
+            <div class="container">
+                <h1>📖 错题本 (${wrongBook.length}道)</h1>
+                <div class="wrong-list">${itemsHtml}</div>
+                <button class="btn btn-primary" onclick="App.goHome()">🏠 返回首页</button>
+                <button class="btn btn-warning" onclick="App.clearWrongBook()">🗑️ 清空错题本</button>
+            </div>
+        `;
+    },
+    
+    renderHistory(container) {
+        const {history} = this.state;
+        if(history.length === 0) {
+            container.innerHTML = `
+                <div class="container">
+                    <h1>📜 历史记录</h1>
+                    <div class="card" style="text-align:center;padding:40px">
+                        <div style="font-size:48px;margin-bottom:16px">📝</div>
+                        <div style="font-size:18px;color:var(--text-secondary)">暂无测评记录</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="App.goHome()">🏠 返回首页</button>
+                </div>
+            `;
+            return;
+        }
+        
+        let rows = '';
+        history.slice().reverse().forEach((h) => {
+            const date = new Date(h.time).toLocaleString('zh-CN');
+            rows += `
+                <div class="card" style="margin:8px 0">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div>
+                            <div style="font-weight:700">${h.grade}年级${h.term===1?'上':'下'}学期 · ${h.subjectName} <span class="paper-badge">${h.paper}</span></div>
+                            <div style="font-size:14px;color:var(--text-secondary);margin-top:4px">${date} · ${h.count}题</div>
+                        </div>
+                        <div style="text-align:right">
+                            <div style="font-size:28px;font-weight:800;color:${h.score>=60?'var(--success)':'var(--error)'}">${h.score}分</div>
+                            <div style="font-size:13px;color:var(--text-secondary)">${h.correct}对${h.wrong}错 · ${h.timeUsed}秒</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = `
+            <div class="container">
+                <h1>📜 历史记录</h1>
+                ${rows}
+                <button class="btn btn-primary" onclick="App.goHome()">🏠 返回首页</button>
+                <button class="btn btn-warning" onclick="App.clearHistory()">🗑️ 清空记录</button>
+            </div>
+        `;
+    },
+    
+    renderSettings(container) {
+        container.innerHTML = `
+            <div class="container">
+                <h1>⚙️ 设置</h1>
+                <div class="card">
+                    <h2>数据管理</h2>
+                    <button class="btn btn-warning" onclick="App.clearHistory()">🗑️ 清空历史记录</button>
+                    <button class="btn btn-warning" onclick="App.clearWrongBook()">🗑️ 清空错题本</button>
+                    <button class="btn" onclick="App.clearAll()" style="background:var(--error);color:white;border-color:var(--error);margin-top:10px">⚠️ 清空所有数据</button>
+                </div>
+                <div class="card">
+                    <h2>关于</h2>
+                    <div class="info-box">
+                        <div>小学教育测评系统 V${CONFIG.VERSION} 分卷版</div>
+                        <div style="margin-top:8px">支持年级：1-6年级 · A/B双卷</div>
+                        <div>支持科目：数学、语文、英语、常识、综合</div>
+                        <div style="margin-top:8px">题目根据年级教材知识点智能生成，A/B卷题目不同但难度一致</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="App.goHome()">🏠 返回首页</button>
+            </div>
+        `;
+    },
+    
+    setGrade(g) { this.state.grade = g; this.render(); },
+    setTerm(t) { this.state.term = t; this.render(); },
+    setSubject(s) { this.state.subject = s; this.render(); },
+    setCount(c) { this.state.count = c; this.render(); },
+    setPaper(p) { this.state.paper = p; this.render(); },
+    
+    startQuiz() {
+        this.generateQuestions();
+        this.state.page = 'quiz';
+        this.render();
+        showToast(`${this.state.paper}卷测评开始，加油！`);
+    },
+    
+    switchPaper() {
+        this.state.paper = this.state.paper === 'A' ? 'B' : 'A';
+        this.startQuiz();
+    },
+    
+    selectOption(idx) {
+        if(this.state.confirmed[this.state.currentIndex]) return;
+        this.state.answers[this.state.currentIndex] = idx;
+        this.render();
+    },
+    
+    confirmOrNext() {
+        const {currentIndex, questions, answers, confirmed} = this.state;
+        if(!confirmed[currentIndex]) {
+            this.state.confirmed[currentIndex] = true;
+            this.render();
+        } else {
+            if(currentIndex === questions.length - 1) {
+                this.submitQuiz();
+            } else {
+                this.state.currentIndex++;
+                this.render();
+            }
+        }
+    },
+    
+    prevQuestion() {
+        if(this.state.currentIndex > 0) {
+            this.state.currentIndex--;
+            this.render();
+        }
+    },
+    
+    nextQuestion() {
+        if(this.state.currentIndex < this.state.questions.length - 1) {
+            this.state.currentIndex++;
+            this.render();
+        }
+    },
+    
+    submitQuiz() {
+        const {questions, answers, startTime, count, grade, term, subject, paper} = this.state;
+        this.state.endTime = Date.now();
+        const timeUsed = Math.floor((this.state.endTime - startTime) / 1000);
+        
+        let correct = 0, wrong = 0;
+        const wrongQuestions = [];
+        
+        questions.forEach((q, idx) => {
+            const userAns = answers[idx];
+            const isCorrect = userAns === q.correctIndex;
+            if(isCorrect) {
+                correct++;
+            } else {
+                wrong++;
+                const record = {
+                    id: q.id,
+                    subject: q.type,
+                    subjectName: CONFIG.SUBJECTS.find(s=>s.id===q.type)?.name || '综合',
+                    paper,
+                    grade, term,
+                    question: q.question,
+                    yourAnswer: userAns !== undefined ? q.options[userAns] : '未作答',
+                    correctAnswer: q.options[q.correctIndex],
+                    explanation: q.explanation,
+                    time: Date.now()
+                };
+                wrongQuestions.push(record);
+                if(!this.state.wrongBook.find(w => w.id === q.id && w.question === q.question)) {
+                    this.state.wrongBook.push(record);
+                }
+            }
+        });
+        
+        const score = Math.round((correct / questions.length) * 100);
+        const result = {score, correct, wrong, timeUsed, wrongQuestions, total: questions.length};
+        this.state.result = result;
+        
+        const historyItem = {
+            time: Date.now(),
+            grade, term, count, paper,
+            subject: subject,
+            subjectName: CONFIG.SUBJECTS.find(s=>s.id===subject)?.name || '综合',
+            score, correct, wrong, timeUsed
+        };
+        this.state.history.push(historyItem);
+        if(this.state.history.length > 50) this.state.history.shift();
+        
+        this.saveStorage();
+        this.state.page = 'result';
+        this.render();
+        showToast(`${paper}卷测评完成！得分：${score}分`);
+    },
+    
+    showReview() {
+        this.state.page = 'review';
+        this.render();
+    },
+    
+    showHistory() {
+        this.state.page = 'history';
+        this.render();
+    },
+    
+    showSettings() {
+        this.state.page = 'settings';
+        this.render();
+    },
+    
+    goHome() {
+        this.state.page = 'home';
+        this.state.questions = [];
+        this.state.answers = {};
+        this.state.confirmed = {};
+        this.state.result = null;
+        this.render();
+    },
+    
+    clearWrongBook() {
+        if(confirm('确定要清空错题本吗？')) {
+            this.state.wrongBook = [];
+            this.saveStorage();
+            this.render();
+            showToast('错题本已清空');
+        }
+    },
+    
+    clearHistory() {
+        if(confirm('确定要清空历史记录吗？')) {
+            this.state.history = [];
+            this.saveStorage();
+            this.render();
+            showToast('历史记录已清空');
+        }
+    },
+    
+    clearAll() {
+        if(confirm('确定要清空所有数据吗？此操作不可恢复！')) {
+            this.state.history = [];
+            this.state.wrongBook = [];
+            localStorage.removeItem(CONFIG.STORAGE_PREFIX+'history');
+            localStorage.removeItem(CONFIG.STORAGE_PREFIX+'wrong');
+            this.render();
+            showToast('所有数据已清空');
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    App.init();
+});
+</script>
+<!-- ===== 试用限制模块（每年级10题，每日限1次） ===== -->
+<!-- 必须放在 </body> 之前 -->
+
+<div id="trial-lock-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:99999; justify-content:center; align-items:center; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="background:#fff; width:90%; max-width:380px; border-radius:20px; padding:28px 24px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+    <div style="font-size:56px; margin-bottom:8px;">☕</div>
+    <h2 style="margin:0 0 10px 0; color:#222; font-size:22px;">试用结束</h2>
+    <p style="color:#555; font-size:15px; line-height:1.7; margin-bottom:6px;">
+      今日<strong style="color:#e65100;">10题</strong>试用已完成！
+    </p >
+    <p style="color:#777; font-size:14px; line-height:1.6; margin-bottom:20px;">
+      完整版包含 1-6年级全部题库<br>
+      每日随机20题 · 详细解析 · 薄弱点分析
+    </p >
+    
+    <div style="background:#fff8e1; border-radius:10px; padding:14px; margin-bottom:20px; border:1px solid #ffe082;">
+      <div style="font-size:13px; color:#f57f17; margin-bottom:8px; font-weight:bold;">☕ 解锁仅需一杯奶茶钱</div>
+      <div style="font-size:18px; color:#333; font-weight:bold; letter-spacing:1px;" id="trial-wechat-display">你的微信号</div>
+    </div>
+    
+    <button onclick="trialCopyWx()" style="width:100%; background:#07c160; color:#fff; border:none; padding:14px; border-radius:10px; font-size:16px; cursor:pointer; margin-bottom:10px; font-weight:bold;">
+      📋 复制微信号
+    </button>
+    
+    <button onclick="trialClose()" style="width:100%; background:#f5f5f5; color:#666; border:none; padding:12px; border-radius:10px; font-size:14px; cursor:pointer;">
+      明天再来
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ================== 配置区（只改这里） ==================
+  var CFG = {
+    limit: 10,                          // 每年级免费题数
+    wechat: '18778629849',                  // ← 改成你的微信号！
+    storageKey: 'trial_done_' + new Date().toDateString().replace(/\s/g,'_')
+  };
+  
+  // ================== 状态 ==================
+  var count = 0;           // 已答题数（本次打开）
+  var locked = false;      // 是否已锁定
+  var todayDone = false;   // 今日是否已用完
+  
+  // 检查今日是否已用完
+  try {
+    if (localStorage.getItem(CFG.storageKey) === 'yes') todayDone = true;
+  } catch(e) {}
+  
+  // ================== 核心函数 ==================
+  
+  // 显示锁定层
+  function lock() {
+    locked = true;
+    var el = document.getElementById('trial-lock-screen');
+    if (el) el.style.display = 'flex';
+    try { localStorage.setItem(CFG.storageKey, 'yes'); } catch(e) {}
+  }
+  
+  // 关闭锁定层
+  window.trialClose = function() {
+    var el = document.getElementById('trial-lock-screen');
+    if (el) el.style.display = 'none';
+  };
+  
+  // 复制微信号
+  window.trialCopyWx = function() {
+    var wx = CFG.wechat;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(wx).then(function(){ alert('已复制微信号：' + wx); });
+    } else {
+      var inp = document.createElement('input');
+      inp.value = wx; document.body.appendChild(inp);
+      inp.select(); document.execCommand('copy');
+      document.body.removeChild(inp);
+      alert('已复制微信号：' + wx);
+    }
+  };
+  
+  // 更新顶部提示
+  function updateTip() {
+    var tip = document.getElementById('trial-top-tip');
+    if (!tip) return;
+    var remain = CFG.limit - count;
+    if (remain < 0) remain = 0;
+    tip.innerHTML = '🎁 试用版：每年级限做' + CFG.limit + '题（剩余' + remain + '题） | 完整版+v：' + CFG.wechat;
+  }
+  
+  // ================== 拦截按钮点击 ==================
+  
+  document.addEventListener('click', function(e){
+    var btn = e.target;
+    var text = (btn.innerText || btn.textContent || '').trim();
+    
+    // 匹配"下一题/提交/继续/确认/查看结果/完成"等按钮
+    var isNext = /下一|提交|继续|确认|查看结果|完成/.test(text);
+    if (!isNext) return;
+    
+    // 如果今日已锁，直接拦截并弹窗
+    if (todayDone || locked) {
+      e.stopPropagation();
+      e.preventDefault();
+      lock();
+      return false;
+    }
+    
+    // 计数+1，更新提示
+    count++;
+    updateTip();
+    
+    // 达到10题，延迟弹窗（让原逻辑先记录答案）
+    if (count >= CFG.limit) {
+      setTimeout(lock, 80);
+    }
+  }, true);
+  
+  // 移动端触摸也拦截
+  document.addEventListener('touchend', function(e){
+    if (!locked && !todayDone) return;
+    var text = (e.target.innerText || e.target.textContent || '').trim();
+    if (/下一|提交|继续/.test(text)) {
+      e.preventDefault();
+      lock();
+    }
+  }, {passive:false});
+  
+  // ================== 页面加载初始化 ==================
+  
+  window.addEventListener('load', function(){
+    // 设置弹窗里的微信号
+    var disp = document.getElementById('trial-wechat-display');
+    if (disp) disp.textContent = CFG.wechat;
+    
+    // 如果今日已用完
+    if (todayDone) {
+      var bar = document.createElement('div');
+      bar.style.cssText = 'position:fixed; top:0; left:0; width:100%; background:#ff9800; color:#fff; text-align:center; padding:10px; font-size:14px; z-index:99998; font-family:sans-serif;';
+      bar.innerHTML = '🔒 今日试用已用完 | 解锁完整版+v：' + CFG.wechat + ' <span style="text-decoration:underline; margin-left:8px; cursor:pointer;" onclick="trialCopyWx()">[复制]</span>';
+      document.body.appendChild(bar);
+      
+      // 如果正在答题界面，直接弹窗
+      var quiz = document.querySelector('.quiz, #quiz, .question-box, [class*="question"], [id*="question"], .test-container');
+      if (quiz && quiz.offsetParent !== null) {
+        setTimeout(lock, 600);
+      }
+      return;
+    }
+    
+    // 未用完：顶部显示剩余题数
+    var tip = document.createElement('div');
+    tip.id = 'trial-top-tip';
+    tip.style.cssText = 'position:fixed; top:0; left:0; width:100%; background:#e3f2fd; color:#1565c0; text-align:center; padding:9px; font-size:13px; z-index:99998; font-family:sans-serif; border-bottom:1px solid #bbdefb;';
+    document.body.appendChild(tip);
+    updateTip();
+  });
+  
+})();
+</script>
+</body>
+</html>
