@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>小学教育测评系统 V5.1 · 完整版</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100vh;overflow-x:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:linear-gradient(160deg,#e0f7fa 0%,#e8f5e9 30%,#dcedc8 60%,#c8e6c9 100%);
+  color:#2d3436;
+  line-height:1.5;
+  position:relative;
+}
+
+/* 背景光晕 */
+body::before,body::after{
+  content:"";position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(80px);opacity:.5;
+}
+body::before{
+  width:300px;height:300px;background:radial-gradient(circle,#a8edea 0%,transparent 70%);
+  top:-100px;right:-100px;
+}
+body::after{
+  width:400px;height:400px;background:radial-gradient(circle,#fed6e3 0%,transparent 70%);
+  bottom:-150px;left:-150px;
+}
+
+.container{max-width:420px;margin:0 auto;padding:16px;position:relative;z-index:1}
+
+/* ===== 液态玻璃卡片 ===== */
+.liquid{
+  background:rgba(255,255,255,.25);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.5);
+  box-shadow:
+    0 8px 32px rgba(31,38,135,.1),
+    inset 0 0 0 1px rgba(255,255,255,.4),
+    inset 0 1px 0 rgba(255,255,255,.6);
+  padding:20px;
+  margin-bottom:16px;
+  position:relative;
+  overflow:hidden;
+}
+.liquid::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.4) 0%,transparent 100%);
+  pointer-events:none;border-radius:24px 24px 0 0;
+}
+
+/* ===== 顶部标题区 ===== */
+.header{
+  text-align:center;padding:28px 0 16px;
+}
+.header h1{
+  font-size:22px;font-weight:800;color:#2d3436;
+  letter-spacing:-.5px;
+  text-shadow:0 2px 4px rgba(0,0,0,.05);
+}
+.header p{
+  font-size:13px;color:#636e72;margin-top:4px;
+}
+.badge{
+  display:inline-block;background:rgba(0,184,148,.15);
+  color:#00b894;padding:3px 10px;border-radius:12px;
+  font-size:11px;font-weight:700;margin-left:6px;
+  border:1px solid rgba(0,184,148,.2);
+  backdrop-filter:blur(4px);
+}
+
+/* ===== 液态按钮 ===== */
+.liquid-btn{
+  padding:14px 10px;
+  background:rgba(255,255,255,.35);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.6);
+  border-radius:18px;
+  cursor:pointer;text-align:center;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  font-size:15px;font-weight:700;color:#2d3436;
+  box-shadow:0 4px 12px rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.5);
+  position:relative;overflow:hidden;
+}
+.liquid-btn:active{transform:scale(.96)}
+.liquid-btn.active{
+  background:linear-gradient(135deg,rgba(0,184,148,.7),rgba(0,206,180,.8));
+  color:#fff;border-color:rgba(255,255,255,.3);
+  box-shadow:0 6px 20px rgba(0,184,148,.25),inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+/* 大按钮 */
+.liquid-primary{
+  width:100%;padding:16px;
+  background:linear-gradient(135deg,rgba(0,184,148,.85),rgba(0,206,180,.9));
+  backdrop-filter:blur(12px);
+  color:#fff;border:none;border-radius:20px;
+  font-size:17px;font-weight:800;cursor:pointer;
+  margin-top:4px;transition:all .3s;
+  box-shadow:0 8px 24px rgba(0,184,148,.3),inset 0 1px 0 rgba(255,255,255,.3);
+  border:1px solid rgba(255,255,255,.3);
+  letter-spacing:.5px;
+}
+.liquid-primary:active{transform:scale(.97)}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+
+.section-title{
+  font-size:15px;font-weight:700;color:#2d3436;
+  margin-bottom:12px;display:flex;align-items:center;gap:6px;
+}
+
+/* ===== 答题页 ===== */
+.quiz-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;
+}
+.quiz-tag{
+  font-size:12px;padding:5px 14px;border-radius:20px;
+  font-weight:700;background:rgba(0,184,148,.15);
+  color:#00b894;border:1px solid rgba(0,184,148,.2);
+  backdrop-filter:blur(8px);
+}
+.timer-pill{
+  font-size:13px;color:#636e72;font-weight:600;
+  background:rgba(255,255,255,.4);padding:5px 12px;
+  border-radius:12px;backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.5);
+}
+
+.progress-box{margin-bottom:14px}
+.progress-track{
+  height:8px;background:rgba(0,0,0,.06);
+  border-radius:4px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.3);
+}
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,#00b894,#fd79a8);
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+  border-radius:4px;
+}
+.progress-text{
+  text-align:center;font-size:12px;color:#b2bec3;
+  margin-top:6px;font-weight:600;
+}
+
+/* 题目区 */
+.q-liquid{
+  background:rgba(255,255,255,.3);
+  backdrop-filter:blur(20px) saturate(180%);
+  border-radius:24px;border:1px solid rgba(255,255,255,.5);
+  box-shadow:0 8px 32px rgba(31,38,135,.08),inset 0 0 0 1px rgba(255,255,255,.4);
+  padding:22px 20px;margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.q-liquid::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:40%;
+  background:linear-gradient(180deg,rgba(255,255,255,.35) 0%,transparent 100%);
+  pointer-events:none;border-radius:24px 24px 0 0;
+}
+.q-num{
+  font-size:13px;font-weight:700;color:#00b894;margin-bottom:8px;
+  position:relative;
+}
+.q-text{
+  font-size:18px;font-weight:800;color:#2d3436;
+  line-height:1.6;position:relative;margin-bottom:18px;
+}
+
+/* 选项液态 */
+.opt-liquid{
+  display:flex;align-items:center;padding:14px 16px;
+  background:rgba(255,255,255,.25);
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:16px;margin-bottom:10px;
+  cursor:pointer;transition:all .25s;
+  font-size:15px;position:relative;
+  box-shadow:0 2px 8px rgba(0,0,0,.03);
+}
+.opt-liquid:active{transform:scale(.98)}
+.opt-letter{
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,.6);
+  border:1.5px solid rgba(0,184,148,.25);
+  color:#00b894;display:flex;align-items:center;
+  justify-content:center;font-weight:800;
+  margin-right:12px;flex-shrink:0;font-size:13px;
+  transition:all .25s;
+}
+.opt-liquid.correct{
+  background:rgba(0,184,148,.12);
+  border-color:rgba(0,184,148,.4);
+}
+.opt-liquid.correct .opt-letter{
+  background:linear-gradient(135deg,#00b894,#00cec9);
+  color:#fff;border-color:transparent;
+}
+.opt-liquid.wrong{
+  background:rgba(255,193,7,.1);
+  border-color:rgba(255,193,7,.3);
+}
+.opt-liquid.wrong .opt-letter{
+  background:linear-gradient(135deg,#ffc107,#ff9800);
+  color:#fff;border-color:transparent;
+}
+.opt-liquid.disabled{pointer-events:none;opacity:.65}
+
+/* 解析 */
+.parse-liquid{
+  margin-top:14px;padding:14px;
+  background:rgba(0,184,148,.08);
+  backdrop-filter:blur(8px);
+  border-left:4px solid #00b894;
+  border-radius:14px;display:none;
+  font-size:14px;line-height:1.6;color:#2d3436;
+  animation:fadeIn .3s;
+  border:1px solid rgba(0,184,148,.15);
+}
+.parse-liquid.show{display:block}
+.parse-title{font-weight:800;margin-bottom:4px;font-size:15px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* 底部导航 */
+.nav-liquid{
+  display:flex;gap:10px;margin-top:12px;
+}
+.nav-btn-liquid{
+  flex:1;padding:12px;border-radius:16px;border:none;
+  font-size:14px;font-weight:700;cursor:pointer;
+  transition:all .25s;display:flex;align-items:center;
+  justify-content:center;gap:4px;
+  background:rgba(255,255,255,.35);
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.5);
+  color:#636e72;
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+.nav-btn-liquid:active{transform:scale(.96)}
+.nav-btn-liquid:disabled{
+  background:rgba(200,200,200,.2);color:#b2bec3;
+  cursor:not-allowed;box-shadow:none;
+}
+.nav-btn-liquid.red{
+  background:linear-gradient(135deg,rgba(0,184,148,.8),rgba(0,206,180,.85));
+  color:#fff;border-color:rgba(255,255,255,.3);
+  box-shadow:0 4px 16px rgba(0,184,148,.2);
+}
+
+.status-text{
+  text-align:center;color:#b2bec3;
+  font-size:12px;margin-top:10px;font-weight:600;
+}
+
+/* ===== 结果页 ===== */
+.score-liquid{
+  text-align:center;padding:20px;
+}
+.score-circle{
+  width:120px;height:120px;border-radius:50%;
+  background:linear-gradient(135deg,#00b894,#00cec9);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;margin:0 auto 12px;
+  box-shadow:0 8px 24px rgba(0,184,148,.25);
+  border:3px solid rgba(255,255,255,.4);
+  color:#fff;position:relative;
+}
+.score-num{font-size:42px;font-weight:800;line-height:1}
+.score-label{font-size:12px;opacity:.9;margin-top:2px}
+.score-comment{font-size:17px;font-weight:700;color:#00b894;margin-top:6px}
+
+.detail-row{
+  display:flex;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid rgba(0,0,0,.05);
+  font-size:14px;position:relative;
+}
+.detail-row:last-child{border-bottom:none}
+.detail-label{color:#636e72}
+.detail-value{color:#2d3436;font-weight:700}
+
+/* 弹窗液态 */
+.modal{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(45,52,54,.4);
+  display:none;justify-content:center;align-items:center;
+  z-index:1000;padding:20px;
+  backdrop-filter:blur(8px);
+}
+.modal.show{display:flex}
+.modal-liquid{
+  background:rgba(255,255,255,.7);
+  backdrop-filter:blur(30px) saturate(180%);
+  border-radius:28px;padding:32px 24px;
+  max-width:360px;width:100%;text-align:center;
+  animation:pop .4s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 20px 60px rgba(0,0,0,.12);
+  border:1px solid rgba(255,255,255,.6);
+  position:relative;overflow:hidden;
+}
+.modal-liquid::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.5) 0%,transparent 100%);
+  pointer-events:none;
+}
+@keyframes pop{from{transform:scale(.85) translateY(30px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-icon{font-size:48px;margin-bottom:10px;position:relative}
+.modal h2{margin-bottom:8px;color:#2d3436;font-size:20px;font-weight:800;position:relative}
+.modal p{color:#636e72;margin-bottom:20px;font-size:14px;line-height:1.7;position:relative}
+.modal-btn{
+  display:block;width:100%;padding:13px;border-radius:16px;
+  border:none;font-size:15px;cursor:pointer;margin-bottom:10px;
+  font-weight:700;transition:all .25s;position:relative;
+}
+.modal-btn:active{transform:scale(.97)}
+.modal-btn.green{
+  background:linear-gradient(135deg,#00b894,#00cec9);
+  color:#fff;box-shadow:0 4px 16px rgba(0,184,148,.2);
+}
+.modal-btn.gray{
+  background:rgba(240,240,240,.7);color:#2d3436;
+  backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.5);
+}
+.modal-btn.pink{
+  background:rgba(253,121,168,.15);color:#e84393;
+  border:1.5px dashed rgba(253,121,168,.3);
+  backdrop-filter:blur(8px);
+}
+
+.wx-liquid{
+  background:rgba(253,121,168,.1);
+  backdrop-filter:blur(8px);
+  border-radius:14px;padding:12px;margin-bottom:16px;
+  border:1.5px dashed rgba(253,121,168,.25);
+  position:relative;
+}
+.wx-liquid strong{color:#e84393;font-size:20px;letter-spacing:1px;font-weight:800}
+
+.tip-liquid{
+  text-align:center;padding:14px;
+  background:rgba(255,255,255,.3);
+  backdrop-filter:blur(10px);
+  border:1.5px dashed rgba(253,121,168,.2);
+  border-radius:18px;margin-top:14px;
+  color:#636e72;font-size:13px;line-height:1.7;
+}
+
+.auth-bar{
+  background:rgba(0,184,148,.12);
+  border-bottom:1.5px solid rgba(0,184,148,.25);
+  color:#00b894;
+  padding:10px 20px;
+  text-align:center;
+  font-size:13px;
+  font-weight:700;
+  position:sticky;
+  top:0;
+  z-index:100;
+  backdrop-filter:blur(10px);
+}
+.auth-bar strong{color:#006b54}
+.watermark{
+  position:fixed;bottom:12px;right:12px;
+  background:rgba(0,184,148,.1);
+  color:#00b894;padding:8px 14px;
+  border-radius:10px;font-size:12px;
+  pointer-events:none;z-index:50;
+  border:1px solid rgba(0,184,148,.2);
+  font-weight:700;backdrop-filter:blur(4px);
+}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<div id="authBar" class="auth-bar" style="display:none">
+  ✅ 已授权用户：<strong id="authUser">-</strong> · 完整版功能已解锁 · 无限刷题
+</div>
+<div id="app"></div>
+<div id="watermark" class="watermark" style="display:none"></div>
+
+
+
+<script>
+/* ===== 题库生成器 ===== */
+const QB={
+  math(g){
+    const qs=[],add=(t,o,a,p)=>qs.push({t,o,a,p});
+    const r=(min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+    const sh=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+    if(g<=2){
+      for(let i=0;i<300;i++){
+        const type=r(1,5);
+        if(type===1){const a=r(1,20),b=r(1,20),ans=a+b;add(`${a}+${b}=？`,sh([ans,ans+r(1,5),Math.abs(ans-r(1,5)),ans+10]).slice(0,4),0,`${a}+${b}=${ans}`)}
+        else if(type===2){const a=r(5,20),b=r(1,a),ans=a-b;add(`${a}-${b}=？`,sh([ans,ans+r(1,5),Math.abs(ans-r(1,5)),ans+10]).slice(0,4),0,`${a}-${b}=${ans}`)}
+        else if(type===3){const a=r(2,9),b=r(2,9),ans=a*b;add(`${a}×${b}=？`,sh([ans,ans+a,ans+b,ans+1]).slice(0,4),0,`${a}×${b}=${ans}`)}
+        else if(type===4){const a=r(2,9),b=r(2,9),ans=a*b;add(`${ans}÷${a}=？`,sh([b,b+1,Math.abs(b-1),a]).slice(0,4),0,`${ans}÷${a}=${b}`)}
+        else{const h=r(1,12),m=[0,15,30,45][r(0,3)];add(`${h}:${m.toString().padStart(2,'0')}是几点？`,sh([`${h}:${m.toString().padStart(2,'0')}`,`${h+1}:${m.toString().padStart(2,'0')}`,`${h-1}:${m.toString().padStart(2,'0')}`,`${h}:${(m+15)%60}`]).slice(0,4),0,`正确时间是${h}:${m.toString().padStart(2,'0')}`)}
+      }
+    }else if(g<=4){
+      for(let i=0;i<300;i++){
+        const type=r(1,5);
+        if(type===1){const a=r(100,999),b=r(100,999),ans=a+b;add(`${a}+${b}=？`,sh([ans,ans+r(1,50),Math.abs(ans-r(1,50)),ans+100]).slice(0,4),0,`${a}+${b}=${ans}`)}
+        else if(type===2){const a=r(200,999),b=r(100,a),ans=a-b;add(`${a}-${b}=？`,sh([ans,ans+r(1,50),Math.abs(ans-r(1,50)),ans+100]).slice(0,4),0,`${a}-${b}=${ans}`)}
+        else if(type===3){const a=r(10,99),b=r(2,9),ans=a*b;add(`${a}×${b}=？`,sh([ans,ans+a,ans+b,ans+10]).slice(0,4),0,`${a}×${b}=${ans}`)}
+        else if(type===4){const b=r(2,9),ans=r(10,99),a=ans*b;add(`${a}÷${b}=？`,sh([ans,ans+1,Math.abs(ans-1),ans+b]).slice(0,4),0,`${a}÷${b}=${ans}`)}
+        else{const a=r(1,9),b=r(1,9),c=r(1,9);add(`${a}/${b}+${c}/${b}=？`,sh([`${a+c}/${b}`,`${a+c}/${b+b}`,`${a+c+1}/${b}`,`${a}/${b+c}`]).slice(0,4),0,`同分母相加：${a}+${c}=${a+c}，答案${a+c}/${b}`)}
+      }
+    }else{
+      for(let i=0;i<300;i++){
+        const type=r(1,5);
+        if(type===1){const a=r(10,99),b=r(10,99),ans=a*b;add(`${a}×${b}=？`,sh([ans,ans+r(1,100),Math.abs(ans-r(1,100)),ans+100]).slice(0,4),0,`${a}×${b}=${ans}`)}
+        else if(type===2){const a=r(2,50),b=r(2,50);const gg=this.gcd(a,b);add(`${a}和${b}的最大公约数是？`,sh([gg,gg+1,Math.abs(gg-1),gg+2]).filter((v,j,s)=>s.indexOf(v)===j).slice(0,4),0,`最大公约数是${gg}`)}
+        else if(type===3){const a=r(1,20),b=r(1,20);const p=2*(a+b);add(`长方形长${a}cm，宽${b}cm，周长=？`,sh([p,2*a+b,a+2*b,a*b]).slice(0,4),0,`周长=2×(${a}+${b})=${p}cm`)}
+        else if(type===4){const r0=r(1,10);const s=(3.14*r0*r0).toFixed(2);add(`半径${r0}的圆面积？（π=3.14）`,sh([s,(s*1).toFixed(2),(s*2).toFixed(2),(s/2).toFixed(2)]).slice(0,4),0,`面积=3.14×${r0}²=${s}`)}
+        else{const a=r(1,20),b=r(1,20);add(`${a}/${b}化成小数是？`,sh([(a/b).toFixed(2),(a/b+0.1).toFixed(2),(a/b-0.1).toFixed(2),(a/(b+1)).toFixed(2)]).slice(0,4),0,`${a}/${b}=${(a/b).toFixed(2)}`)}
+      }
+    }
+    return sh(qs);
+  },
+  gcd(a,b){while(b){[a,b]=[b,a%b]}return a},
+
+  chinese(g){
+    const qs=[],add=(t,o,a,p)=>qs.push({t,o,a,p});
+    const p1=[
+      {t:'"春眠不觉晓"下一句？',o:['处处闻啼鸟','夜来风雨声','花落知多少','明月来相照'],a:0,p:'孟浩然《春晓》'},
+      {t:'"床前明月光"作者是？',o:['杜甫','李白','王维','白居易'],a:1,p:'李白《静夜思》'},
+      {t:'"鹅鹅鹅，曲项向天歌"作者是？',o:['骆宾王','李白','杜甫','王维'],a:0,p:'骆宾王《咏鹅》'},
+      {t:'"白日依山尽"下一句？',o:['黄河入海流','欲穷千里目','更上一层楼','春眠不觉晓'],a:0,p:'王之涣《登鹳雀楼》'},
+      {t:'"谁知盘中餐"下一句？',o:['粒粒皆辛苦','汗滴禾下土','春种一粒粟','秋收万颗子'],a:0,p:'李绅《悯农》'},
+      {t:'"小荷才露尖尖角"下一句？',o:['早有蜻蜓立上头','映日荷花别样红','接天莲叶无穷碧','春风又绿江南岸'],a:0,p:'杨万里《小池》'},
+      {t:'"一年之计在于"？',o:['春','夏','秋','冬'],a:0,p:'一年之计在于春'},
+      {t:'"一寸光阴一寸金"下一句？',o:['寸金难买寸光阴','光阴似箭','日月如梭','时不我待'],a:0,p:'寸金难买寸光阴'},
+      {t:'"三人行，必有我师"出自？',o:['《论语》','《孟子》','《大学》','《中庸》'],a:0,p:'《论语·述而》'},
+      {t:'"画蛇添足"是？',o:['寓言','童话','神话','历史'],a:0,p:'寓言故事'},
+      {t:'"守株待兔"是？',o:['寓言','童话','神话','历史'],a:0,p:'寓言故事'},
+      {t:'"卧薪尝胆"说的是？',o:['勾践','夫差','项羽','刘邦'],a:0,p:'越王勾践'},
+      {t:'"桂林山水甲天下""甲"的意思是？',o:['第一','铠甲','士兵','植物'],a:0,p:'天下第一'},
+      {t:'"桃花潭水深千尺"用了什么修辞？',o:['比喻','拟人','夸张','排比'],a:2,p:'夸张手法'},
+      {t:'"飞流直下三千尺"用了什么修辞？',o:['比喻','拟人','夸张','排比'],a:2,p:'夸张手法'},
+      {t:'"的、地、得"动词前用？',o:['的','地','得','都可以'],a:1,p:'动词前用"地"'},
+      {t:'"少壮不努力"下句？',o:['老大徒伤悲','黄河入海流','白毛浮绿水','粒粒皆辛苦'],a:0,p:'《长歌行》'},
+      {t:'"欲穷千里目"下一句？',o:['更上一层楼','黄河入海流','白日依山尽','春眠不觉晓'],a:0,p:'《登鹳雀楼》'},
+      {t:'"锄禾日当午"下一句？',o:['汗滴禾下土','粒粒皆辛苦','谁知盘中餐','春种一粒粟'],a:0,p:'《悯农》'},
+      {t:'"离离原上草"下一句？',o:['一岁一枯荣','野火烧不尽','春风吹又生','远芳侵古道'],a:0,p:'白居易《赋得古原草送别》'}
+    ];
+    const p2=[
+      {t:'"不识庐山真面目"下一句？',o:['只缘身在此山中','横看成岭侧成峰','远近高低各不同','白云生处有人家'],a:0,p:'苏轼《题西林壁》'},
+      {t:'"山重水复疑无路"下一句？',o:['柳暗花明又一村','只缘身在此山中','不识庐山真面目','横看成岭侧成峰'],a:0,p:'陆游《游山西村》'},
+      {t:'"劝君更尽一杯酒"下一句？',o:['西出阳关无故人','莫愁前路无知己','天下谁人不识君','一片冰心在玉壶'],a:0,p:'王维《送元二使安西》'},
+      {t:'"独在异乡为异客"下一句？',o:['每逢佳节倍思亲','遥知兄弟登高处','遍插茱萸少一人','西出阳关无故人'],a:0,p:'王维《九月九日忆山东兄弟》'},
+      {t:'"天门中断楚江开"下一句？',o:['碧水东流至此回','两岸青山相对出','孤帆一片日边来','唯见长江天际流'],a:0,p:'李白《望天门山》'},
+      {t:'"两个黄鹂鸣翠柳"下一句？',o:['一行白鹭上青天','窗含西岭千秋雪','门泊东吴万里船','孤帆一片日边来'],a:0,p:'杜甫《绝句》'},
+      {t:'"窗含西岭千秋雪"下一句？',o:['门泊东吴万里船','一行白鹭上青天','两个黄鹂鸣翠柳','孤帆一片日边来'],a:0,p:'杜甫《绝句》'},
+      {t:'"姑苏城外寒山寺"下一句？',o:['夜半钟声到客船','烟花三月下扬州','唯见长江天际流','门泊东吴万里船'],a:0,p:'张继《枫桥夜泊》'},
+      {t:'"竹外桃花三两枝"下一句？',o:['春江水暖鸭先知','一枝红杏出墙来','二月春风似剪刀','草长莺飞二月天'],a:0,p:'苏轼《惠崇春江晚景》'},
+      {t:'"日出江花红胜火"下一句？',o:['春来江水绿如蓝','二月春风似剪刀','草长莺飞二月天','一枝红杏出墙来'],a:0,p:'白居易《忆江南》'},
+      {t:'"爆竹声中一岁除"下一句？',o:['春风送暖入屠苏','总把新桃换旧符','千门万户曈曈日','一枝红杏出墙来'],a:0,p:'王安石《元日》'},
+      {t:'"借问酒家何处有"下一句？',o:['牧童遥指杏花村','春风送暖入屠苏','总把新桃换旧符','一枝红杏出墙来'],a:0,p:'杜牧《清明》'},
+      {t:'"停车坐爱枫林晚"下一句？',o:['霜叶红于二月花','牧童遥指杏花村','春风送暖入屠苏','一枝红杏出墙来'],a:0,p:'杜牧《山行》'},
+      {t:'"清明时节雨纷纷"下一句？',o:['路上行人欲断魂','牧童遥指杏花村','借问酒家何处有','春风送暖入屠苏'],a:0,p:'杜牧《清明》'},
+      {t:'"千里莺啼绿映红"下一句？',o:['水村山郭酒旗风','南朝四百八十寺','多少楼台烟雨中','霜叶红于二月花'],a:0,p:'杜牧《江南春》'},
+      {t:'"南朝四百八十寺"下一句？',o:['多少楼台烟雨中','水村山郭酒旗风','千里莺啼绿映红','霜叶红于二月花'],a:0,p:'杜牧《江南春》'},
+      {t:'"两岸猿声啼不住"下一句？',o:['轻舟已过万重山','孤帆一片日边来','唯见长江天际流','门泊东吴万里船'],a:0,p:'李白《早发白帝城》'},
+      {t:'"黄鹤一去不复返"下一句？',o:['白云千载空悠悠','晴川历历汉阳树','芳草萋萋鹦鹉洲','日暮乡关何处是'],a:0,p:'崔颢《黄鹤楼》'},
+      {t:'"晴川历历汉阳树"下一句？',o:['芳草萋萋鹦鹉洲','白云千载空悠悠','日暮乡关何处是','烟波江上使人愁'],a:0,p:'崔颢《黄鹤楼》'},
+      {t:'"日暮乡关何处是"下一句？',o:['烟波江上使人愁','芳草萋萋鹦鹉洲','白云千载空悠悠','晴川历历汉阳树'],a:0,p:'崔颢《黄鹤楼》'}
+    ];
+    const p3=[
+      {t:'"人生自古谁无死"下一句？',o:['留取丹心照汗青','化作春泥更护花','要留清白在人间','任尔东西南北风'],a:0,p:'文天祥《过零丁洋》'},
+      {t:'"粉骨碎身浑不怕"下一句？',o:['要留清白在人间','留取丹心照汗青','化作春泥更护花','任尔东西南北风'],a:0,p:'于谦《石灰吟》'},
+      {t:'"千磨万击还坚劲"下一句？',o:['任尔东西南北风','要留清白在人间','留取丹心照汗青','化作春泥更护花'],a:0,p:'郑燮《竹石》'},
+      {t:'"落红不是无情物"下一句？',o:['化作春泥更护花','要留清白在人间','留取丹心照汗青','任尔东西南北风'],a:0,p:'龚自珍《己亥杂诗》'},
+      {t:'"我劝天公重抖擞"下一句？',o:['不拘一格降人才','化作春泥更护花','要留清白在人间','留取丹心照汗青'],a:0,p:'龚自珍《己亥杂诗》'},
+      {t:'"随风潜入夜"下一句？',o:['润物细无声','当春乃发生','花重锦官城','江船火独明'],a:0,p:'杜甫《春夜喜雨》'},
+      {t:'"好雨知时节"下一句？',o:['当春乃发生','润物细无声','花重锦官城','江船火独明'],a:0,p:'杜甫《春夜喜雨》'},
+      {t:'"天街小雨润如酥"下一句？',o:['草色遥看近却无','最是一年春好处','绝胜烟柳满皇都','当春乃发生'],a:0,p:'韩愈《早春呈水部张十八员外》'},
+      {t:'"最是一年春好处"下一句？',o:['绝胜烟柳满皇都','草色遥看近却无','天街小雨润如酥','当春乃发生'],a:0,p:'韩愈《早春呈水部张十八员外》'},
+      {t:'"草长莺飞二月天"下一句？',o:['拂堤杨柳醉春烟','儿童散学归来早','忙趁东风放纸鸢','绝胜烟柳满皇都'],a:0,p:'高鼎《村居》'},
+      {t:'"儿童散学归来早"下一句？',o:['忙趁东风放纸鸢','拂堤杨柳醉春烟','草长莺飞二月天','绝胜烟柳满皇都'],a:0,p:'高鼎《村居》'},
+      {t:'"碧玉妆成一树高"下一句？',o:['万条垂下绿丝绦','不知细叶谁裁出','二月春风似剪刀','草长莺飞二月天'],a:0,p:'贺知章《咏柳》'},
+      {t:'"不知细叶谁裁出"下一句？',o:['二月春风似剪刀','万条垂下绿丝绦','碧玉妆成一树高','草长莺飞二月天'],a:0,p:'贺知章《咏柳》'},
+      {t:'"等闲识得东风面"下一句？',o:['万紫千红总是春','草长莺飞二月天','拂堤杨柳醉春烟','忙趁东风放纸鸢'],a:0,p:'朱熹《春日》'},
+      {t:'"胜日寻芳泗水滨"下一句？',o:['无边光景一时新','万紫千红总是春','等闲识得东风面','草长莺飞二月天'],a:0,p:'朱熹《春日》'},
+      {t:'"黑云翻墨未遮山"下一句？',o:['白雨跳珠乱入船','卷地风来忽吹散','望湖楼下水如天','水光潋滟晴方好'],a:0,p:'苏轼《六月二十七日望湖楼醉书》'},
+      {t:'"卷地风来忽吹散"下一句？',o:['望湖楼下水如天','白雨跳珠乱入船','黑云翻墨未遮山','水光潋滟晴方好'],a:0,p:'苏轼《六月二十七日望湖楼醉书》'},
+      {t:'"水光潋滟晴方好"下一句？',o:['山色空蒙雨亦奇','欲把西湖比西子','淡妆浓抹总相宜','卷地风来忽吹散'],a:0,p:'苏轼《饮湖上初晴后雨》'},
+      {t:'"欲把西湖比西子"下一句？',o:['淡妆浓抹总相宜','山色空蒙雨亦奇','水光潋滟晴方好','卷地风来忽吹散'],a:0,p:'苏轼《饮湖上初晴后雨》'},
+      {t:'"梅子金黄杏子肥"下一句？',o:['麦花雪白菜花稀','日长篱落无人过','惟有蜻蜓蛱蝶飞','儿童急走追黄蝶'],a:0,p:'范成大《四时田园杂兴》'}
+    ];
+    const p4=[
+      {t:'"日长篱落无人过"下一句？',o:['惟有蜻蜓蛱蝶飞','麦花雪白菜花稀','梅子金黄杏子肥','儿童急走追黄蝶'],a:0,p:'范成大《四时田园杂兴》'},
+      {t:'"儿童急走追黄蝶"下一句？',o:['飞入菜花无处寻','惟有蜻蜓蛱蝶飞','日长篱落无人过','麦花雪白菜花稀'],a:0,p:'杨万里《宿新市徐公店》'},
+      {t:'"篱落疏疏一径深"下一句？',o:['树头新绿未成阴','儿童急走追黄蝶','飞入菜花无处寻','惟有蜻蜓蛱蝶飞'],a:0,p:'杨万里《宿新市徐公店》'},
+      {t:'"梅子黄时日日晴"下一句？',o:['小溪泛尽却山行','绿阴不减来时路','添得黄鹂四五声','树头新绿未成阴'],a:0,p:'曾几《三衢道中》'},
+      {t:'"绿阴不减来时路"下一句？',o:['添得黄鹂四五声','梅子黄时日日晴','小溪泛尽却山行','树头新绿未成阴'],a:0,p:'曾几《三衢道中》'},
+      {t:'"不论平地与山尖"下一句？',o:['无限风光尽被占','采得百花成蜜后','为谁辛苦为谁甜','梅子黄时日日晴'],a:0,p:'罗隐《蜂》'},
+      {t:'"采得百花成蜜后"下一句？',o:['为谁辛苦为谁甜','无限风光尽被占','不论平地与山尖','梅子黄时日日晴'],a:0,p:'罗隐《蜂》'},
+      {t:'"大漠沙如雪"下一句？',o:['燕山月似钩','何当金络脑','快走踏清秋','快走踏清秋'],a:0,p:'李贺《马诗》'},
+      {t:'"何当金络脑"下一句？',o:['快走踏清秋','大漠沙如雪','燕山月似钩','快走踏清秋'],a:0,p:'李贺《马诗》'},
+      {t:'"千锤万凿出深山"下一句？',o:['烈火焚烧若等闲','粉骨碎身浑不怕','要留清白在人间','任尔东西南北风'],a:0,p:'于谦《石灰吟》'},
+      {t:'"咬定青山不放松"下一句？',o:['立根原在破岩中','千磨万击还坚劲','任尔东西南北风','要留清白在人间'],a:0,p:'郑燮《竹石》'},
+      {t:'"立根原在破岩中"下一句？',o:['千磨万击还坚劲','咬定青山不放松','任尔东西南北风','要留清白在人间'],a:0,p:'郑燮《竹石》'},
+      {t:'"九州生气恃风雷"下一句？',o:['万马齐喑究可哀','我劝天公重抖擞','不拘一格降人才','化作春泥更护花'],a:0,p:'龚自珍《己亥杂诗》'},
+      {t:'"万马齐喑究可哀"下一句？',o:['我劝天公重抖擞','九州生气恃风雷','不拘一格降人才','化作春泥更护花'],a:0,p:'龚自珍《己亥杂诗》'},
+      {t:'"红军不怕远征难"下一句？',o:['万水千山只等闲','五岭逶迤腾细浪','乌蒙磅礴走泥丸','金沙水拍云崖暖'],a:0,p:'毛泽东《七律·长征》'},
+      {t:'"五岭逶迤腾细浪"下一句？',o:['乌蒙磅礴走泥丸','万水千山只等闲','金沙水拍云崖暖','大渡桥横铁索寒'],a:0,p:'毛泽东《七律·长征》'},
+      {t:'"金沙水拍云崖暖"下一句？',o:['大渡桥横铁索寒','乌蒙磅礴走泥丸','五岭逶迤腾细浪','万水千山只等闲'],a:0,p:'毛泽东《七律·长征》'},
+      {t:'"更喜岷山千里雪"下一句？',o:['三军过后尽开颜','大渡桥横铁索寒','金沙水拍云崖暖','乌蒙磅礴走泥丸'],a:0,p:'毛泽东《七律·长征》'},
+      {t:'"风雨送春归"下一句？',o:['飞雪迎春到','已是悬崖百丈冰','犹有花枝俏','俏也不争春'],a:0,p:'毛泽东《卜算子·咏梅》'},
+      {t:'"已是悬崖百丈冰"下一句？',o:['犹有花枝俏','飞雪迎春到','俏也不争春','待到山花烂漫时'],a:0,p:'毛泽东《卜算子·咏梅》'}
+    ];
+    let pool;
+    if(g<=2) pool=[...p1,...p2];
+    else if(g<=4) pool=[...p2,...p3];
+    else pool=[...p3,...p4];
+    while(qs.length<300){
+      const q=pool[qs.length%pool.length];
+      const opts=[...q.o],correct=opts[q.a];
+      for(let k=opts.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[opts[k],opts[j]]=[opts[j],opts[k]]}
+      add(q.t,opts,opts.indexOf(correct),q.p);
+    }
+    return qs;
+  },
+
+  english(g){
+    const qs=[],add=(t,o,a,p)=>qs.push({t,o,a,p});
+    const p1=[
+      {t:'"Hello"中文是？',o:['你好','再见','谢谢','对不起'],a:0,p:'Hello=你好'},
+      {t:'"Goodbye"中文是？',o:['再见','你好','谢谢','对不起'],a:0,p:'Goodbye=再见'},
+      {t:'"Thank you"中文是？',o:['谢谢','你好','再见','对不起'],a:0,p:'Thank you=谢谢'},
+      {t:'"Cat"是什么？',o:['狗','猫','鸟','鱼'],a:1,p:'Cat=猫'},
+      {t:'"Dog"是什么？',o:['狗','猫','鸟','鱼'],a:0,p:'Dog=狗'},
+      {t:'"Apple"是什么？',o:['苹果','香蕉','橙子','葡萄'],a:0,p:'Apple=苹果'},
+      {t:'"Red"是什么颜色？',o:['红','绿','蓝','黄'],a:0,p:'Red=红'},
+      {t:'"Green"是什么颜色？',o:['红','绿','蓝','黄'],a:1,p:'Green=绿'},
+      {t:'"Blue"是什么颜色？',o:['红','绿','蓝','黄'],a:2,p:'Blue=蓝'},
+      {t:'"Yellow"是什么颜色？',o:['红','绿','蓝','黄'],a:3,p:'Yellow=黄'},
+      {t:'"One"对应数字？',o:['1','2','3','4'],a:0,p:'One=1'},
+      {t:'"Two"对应数字？',o:['1','2','3','4'],a:1,p:'Two=2'},
+      {t:'"Three"对应数字？',o:['1','2','3','4'],a:2,p:'Three=3'},
+      {t:'"I ___ a student."',o:['is','am','are','be'],a:1,p:'I用am'},
+      {t:'"He ___ a teacher."',o:['is','am','are','be'],a:0,p:'He用is'},
+      {t:'"They ___ students."',o:['is','am','are','be'],a:2,p:'They用are'},
+      {t:'"What is your name?"是？',o:['问名字','问年龄','问颜色','问时间'],a:0,p:'问名字'},
+      {t:'"How old are you?"是？',o:['问年龄','问名字','问颜色','问时间'],a:0,p:'问年龄'},
+      {t:'"How are you?"回答？',o:['Fine, thanks.','I am 8.','I am Tom.','Yes.'],a:0,p:'Fine, thanks.'},
+      {t:'"Good morning"什么时候说？',o:['早上','中午','晚上','深夜'],a:0,p:'早上'}
+    ];
+    const p2=[
+      {t:'"Book"中文是？',o:['书','笔','橡皮','尺子'],a:0,p:'Book=书'},
+      {t:'"Pen"中文是？',o:['书','笔','橡皮','尺子'],a:1,p:'Pen=笔'},
+      {t:'"Monday"是星期几？',o:['星期一','星期二','星期三','星期四'],a:0,p:'Monday=星期一'},
+      {t:'"Tuesday"是星期几？',o:['星期一','星期二','星期三','星期四'],a:1,p:'Tuesday=星期二'},
+      {t:'"Wednesday"是星期几？',o:['星期一','星期二','星期三','星期四'],a:2,p:'Wednesday=星期三'},
+      {t:'"Friday"是星期几？',o:['星期五','星期六','星期日','星期一'],a:0,p:'Friday=星期五'},
+      {t:'"January"是几月？',o:['一月','二月','三月','四月'],a:0,p:'January=一月'},
+      {t:'"Big"反义词？',o:['Small','Long','Short','Tall'],a:0,p:'Big-Small'},
+      {t:'"Hot"反义词？',o:['Cold','Warm','Cool','Wet'],a:0,p:'Hot-Cold'},
+      {t:'"Happy"反义词？',o:['Sad','Angry','Tired','Hungry'],a:0,p:'Happy-Sad'},
+      {t:'"Tall"反义词？',o:['Short','Small','Long','Thin'],a:0,p:'Tall-Short'},
+      {t:'"New"反义词？',o:['Old','Young','Small','Big'],a:0,p:'New-Old'},
+      {t:'"Fast"反义词？',o:['Slow','Small','Short','Thin'],a:0,p:'Fast-Slow'},
+      {t:'"Easy"反义词？',o:['Difficult','Hard','Bad','Dirty'],a:0,p:'Easy-Difficult'},
+      {t:'"Right"反义词？',o:['Wrong','Left','Bad','Dirty'],a:0,p:'Right-Wrong'},
+      {t:'"Day"反义词？',o:['Night','Morning','Evening','Afternoon'],a:0,p:'Day-Night'},
+      {t:'"Black"反义词？',o:['White','Red','Blue','Green'],a:0,p:'Black-White'},
+      {t:'"Open"反义词？',o:['Close','Shut','End','Stop'],a:0,p:'Open-Close'},
+      {t:'"Come"反义词？',o:['Go','Leave','Run','Walk'],a:0,p:'Come-Go'},
+      {t:'"Up"反义词？',o:['Down','Left','Right','Back'],a:0,p:'Up-Down'}
+    ];
+    const p3=[
+      {t:'"School"中文是？',o:['学校','医院','公园','商店'],a:0,p:'School=学校'},
+      {t:'"Hospital"中文是？',o:['学校','医院','公园','商店'],a:1,p:'Hospital=医院'},
+      {t:'"Park"中文是？',o:['学校','医院','公园','商店'],a:2,p:'Park=公园'},
+      {t:'"Shop"中文是？',o:['学校','医院','公园','商店'],a:3,p:'Shop=商店'},
+      {t:'"Teacher"中文是？',o:['老师','医生','警察','工人'],a:0,p:'Teacher=老师'},
+      {t:'"Doctor"中文是？',o:['老师','医生','警察','工人'],a:1,p:'Doctor=医生'},
+      {t:'"Policeman"中文是？',o:['老师','医生','警察','工人'],a:2,p:'Policeman=警察'},
+      {t:'"Worker"中文是？',o:['老师','医生','警察','工人'],a:3,p:'Worker=工人'},
+      {t:'"Driver"中文是？',o:['司机','农民','厨师','护士'],a:0,p:'Driver=司机'},
+      {t:'"Farmer"中文是？',o:['司机','农民','厨师','护士'],a:1,p:'Farmer=农民'},
+      {t:'"Cook"中文是？',o:['司机','农民','厨师','护士'],a:2,p:'Cook=厨师'},
+      {t:'"Nurse"中文是？',o:['司机','农民','厨师','护士'],a:3,p:'Nurse=护士'},
+      {t:'"Head"中文是？',o:['头','手','脚','腿'],a:0,p:'Head=头'},
+      {t:'"Hand"中文是？',o:['头','手','脚','腿'],a:1,p:'Hand=手'},
+      {t:'"Foot"中文是？',o:['头','手','脚','腿'],a:2,p:'Foot=脚'},
+      {t:'"Leg"中文是？',o:['头','手','脚','腿'],a:3,p:'Leg=腿'},
+      {t:'"Eye"中文是？',o:['眼睛','耳朵','鼻子','嘴巴'],a:0,p:'Eye=眼睛'},
+      {t:'"Ear"中文是？',o:['眼睛','耳朵','鼻子','嘴巴'],a:1,p:'Ear=耳朵'},
+      {t:'"Nose"中文是？',o:['眼睛','耳朵','鼻子','嘴巴'],a:2,p:'Nose=鼻子'},
+      {t:'"Mouth"中文是？',o:['眼睛','耳朵','鼻子','嘴巴'],a:3,p:'Mouth=嘴巴'}
+    ];
+    let pool;
+    if(g<=2) pool=[...p1,...p2];
+    else if(g<=4) pool=[...p2,...p3];
+    else pool=[...p3,...p1];
+    while(qs.length<300){
+      const q=pool[qs.length%pool.length];
+      const opts=[...q.o],correct=opts[q.a];
+      for(let k=opts.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[opts[k],opts[j]]=[opts[j],opts[k]]}
+      add(q.t,opts,opts.indexOf(correct),q.p);
+    }
+    return qs;
+  },
+
+  common(g){
+    const qs=[],add=(t,o,a,p)=>qs.push({t,o,a,p});
+    const pool=[
+      {t:'一年有几个季节？',o:['2','3','4','5'],a:2,p:'春夏秋冬四季'},
+      {t:'中国首都是？',o:['上海','北京','广州','深圳'],a:1,p:'北京'},
+      {t:'水在多少度结冰？',o:['0℃','10℃','100℃','-10℃'],a:0,p:'0℃'},
+      {t:'人体最大器官是？',o:['心脏','肝脏','皮肤','大脑'],a:2,p:'皮肤'},
+      {t:'彩虹几种颜色？',o:['5','6','7','8'],a:2,p:'红橙黄绿青蓝紫'},
+      {t:'地球围着什么转？',o:['月亮','太阳','火星','木星'],a:1,p:'太阳'},
+      {t:'火警电话？',o:['110','119','120','122'],a:1,p:'119'},
+      {t:'急救电话？',o:['110','119','120','122'],a:2,p:'120'},
+      {t:'报警电话？',o:['110','119','120','122'],a:0,p:'110'},
+      {t:'太阳系几大行星？',o:['7','8','9','10'],a:1,p:'八大行星'},
+      {t:'植物靠什么制造养分？',o:['光合作用','呼吸作用','吸收作用','分解作用'],a:0,p:'光合作用'},
+      {t:'我国最长河流？',o:['黄河','长江','珠江','黑龙江'],a:1,p:'长江'},
+      {t:'我国最高山峰？',o:['泰山','华山','珠穆朗玛峰','黄山'],a:2,p:'珠穆朗玛峰'},
+      {t:'月亮本身发光吗？',o:['会','不会','有时候','不知道'],a:1,p:'不发光，反射太阳光'},
+      {t:'青蛙用什么呼吸？',o:['肺','鳃','肺和皮肤','鼻子'],a:2,p:'肺和皮肤'},
+      {t:'蛇是哺乳动物吗？',o:['是','不是','有些是','不知道'],a:1,p:'不是，是爬行动物'},
+      {t:'蝙蝠是鸟类吗？',o:['是','不是','既是鸟又是兽','不知道'],a:1,p:'不是，是哺乳动物'},
+      {t:'企鹅生活在？',o:['北极','南极','赤道','沙漠'],a:1,p:'南极'},
+      {t:'北极熊生活在？',o:['北极','南极','赤道','沙漠'],a:0,p:'北极'},
+      {t:'蜻蜓几条腿？',o:['4','6','8','10'],a:1,p:'6条'},
+      {t:'蜘蛛几条腿？',o:['4','6','8','10'],a:2,p:'8条'},
+      {t:'打雷时先看到闪电还是先听到雷声？',o:['同时','先看到闪电','先听到雷声','不一定'],a:1,p:'光速快，先看到闪电'},
+      {t:'水的三种状态？',o:['固液气','冷热温','红白蓝','大中小'],a:0,p:'固态、液态、气态'},
+      {t:'空气中最多的气体？',o:['氧气','氮气','二氧化碳','氢气'],a:1,p:'氮气占78%'},
+      {t:'人呼吸需要？',o:['氧气','氮气','二氧化碳','氢气'],a:0,p:'氧气'},
+      {t:'声音在哪种介质传播最快？',o:['固体','液体','气体','真空'],a:0,p:'固体'},
+      {t:'光在哪种介质传播最快？',o:['固体','液体','气体','真空'],a:3,p:'真空'},
+      {t:'凸透镜对光线有？',o:['会聚作用','发散作用','反射作用','折射作用'],a:0,p:'会聚作用'},
+      {t:'凹透镜对光线有？',o:['会聚作用','发散作用','反射作用','折射作用'],a:1,p:'发散作用'},
+      {t:'导体和绝缘体的区别？',o:['颜色不同','导电性不同','硬度不同','重量不同'],a:1,p:'导电性'},
+      {t:'铜是导体还是绝缘体？',o:['导体','绝缘体','半导体','超导体'],a:0,p:'导体'},
+      {t:'橡胶是导体还是绝缘体？',o:['导体','绝缘体','半导体','超导体'],a:1,p:'绝缘体'},
+      {t:'磁铁能吸引？',o:['铜','铝','铁','塑料'],a:2,p:'铁、钴、镍'},
+      {t:'指南针指向南方的一端是？',o:['N极','S极','北极','南极'],a:1,p:'S极'},
+      {t:'人体正常体温约？',o:['35℃','36.5℃','38℃','40℃'],a:1,p:'约36.5℃'},
+      {t:'人体有多少块骨头？',o:['106','206','306','406'],a:1,p:'206块'},
+      {t:'人有多少颗牙齿？',o:['20','28','32','36'],a:2,p:'32颗'},
+      {t:'红细胞主要功能？',o:['止血','运输氧气','免疫','凝血'],a:1,p:'运输氧气'},
+      {t:'白细胞主要功能？',o:['止血','运输氧气','免疫','凝血'],a:2,p:'免疫'},
+      {t:'血小板主要功能？',o:['止血','运输氧气','免疫','凝血'],a:0,p:'止血凝血'},
+      {t:'心脏有几个腔？',o:['2','3','4','5'],a:2,p:'4个腔'},
+      {t:'肺是呼吸系统还是消化系统？',o:['呼吸系统','消化系统','循环系统','泌尿系统'],a:0,p:'呼吸系统'},
+      {t:'胃是消化系统还是呼吸系统？',o:['消化系统','呼吸系统','循环系统','泌尿系统'],a:0,p:'消化系统'},
+      {t:'肾是泌尿系统还是消化系统？',o:['泌尿系统','消化系统','循环系统','呼吸系统'],a:0,p:'泌尿系统'},
+      {t:'大脑是神经系统还是循环系统？',o:['神经系统','循环系统','呼吸系统','消化系统'],a:0,p:'神经系统'},
+      {t:'眼是感觉器官还是运动器官？',o:['感觉器官','运动器官','消化器官','呼吸器官'],a:0,p:'感觉器官'},
+      {t:'维生素A缺乏会导致？',o:['坏血病','夜盲症','佝偻病','贫血'],a:1,p:'夜盲症'},
+      {t:'维生素C缺乏会导致？',o:['坏血病','夜盲症','佝偻病','贫血'],a:0,p:'坏血病'},
+      {t:'维生素D缺乏会导致？',o:['坏血病','夜盲症','佝偻病','贫血'],a:2,p:'佝偻病'},
+      {t:'铁缺乏会导致？',o:['坏血病','夜盲症','佝偻病','贫血'],a:3,p:'贫血'},
+      {t:'蛋白质是构成什么的主要物质？',o:['骨骼','肌肉','细胞','血液'],a:2,p:'细胞'},
+      {t:'糖类是人体主要的？',o:['构成物质','能源物质','调节物质','遗传物质'],a:1,p:'能源物质'},
+      {t:'脂肪是人体重要的？',o:['构成物质','能源物质','储能物质','调节物质'],a:2,p:'储能物质'},
+      {t:'DNA是人体的？',o:['能源物质','储能物质','遗传物质','构成物质'],a:2,p:'遗传物质'},
+      {t:'染色体由什么组成？',o:['DNA和蛋白质','RNA和蛋白质','DNA和RNA','蛋白质和脂肪'],a:0,p:'DNA和蛋白质'},
+      {t:'基因是DNA上的？',o:['片段','全部','一半','三分之一'],a:0,p:'有遗传效应的片段'},
+      {t:'细胞分裂时染色体先？',o:['复制','分裂','消失','融合'],a:0,p:'复制'},
+      {t:'有丝分裂结果？',o:['细胞数目减半','细胞数目加倍','体积减半','体积加倍'],a:1,p:'数目加倍'},
+      {t:'减数分裂结果？',o:['细胞数目减半','细胞数目加倍','体积减半','体积加倍'],a:0,p:'染色体减半'},
+      {t:'条件反射是生来就有还是后天形成？',o:['生来就有','后天形成','都有','都不是'],a:1,p:'后天形成'},
+      {t:'非条件反射是生来就有还是后天形成？',o:['生来就有','后天形成','都有','都不是'],a:0,p:'生来就有'},
+      {t:'膝跳反射是？',o:['条件反射','非条件反射','都不是','都有'],a:1,p:'非条件反射'},
+      {t:'望梅止渴是？',o:['条件反射','非条件反射','都不是','都有'],a:0,p:'条件反射'},
+      {t:'人类特有的神经中枢？',o:['视觉中枢','听觉中枢','语言中枢','运动中枢'],a:2,p:'语言中枢'},
+      {t:'大脑皮层是调节人体生理活动的？',o:['最高级中枢','最低级中枢','中级中枢','初级中枢'],a:0,p:'最高级中枢'},
+      {t:'小脑主要功能？',o:['调节心跳','协调运动','调节呼吸','调节体温'],a:1,p:'协调运动'},
+      {t:'脑干主要功能？',o:['调节心跳呼吸','协调运动','调节体温','调节血糖'],a:0,p:'调节心跳呼吸'},
+      {t:'激素是由什么分泌的？',o:['内分泌腺','外分泌腺','神经','肌肉'],a:0,p:'内分泌腺'},
+      {t:'胰岛素由什么分泌？',o:['胰岛','甲状腺','肾上腺','垂体'],a:0,p:'胰岛'},
+      {t:'生长激素由什么分泌？',o:['胰岛','甲状腺','肾上腺','垂体'],a:3,p:'垂体'},
+      {t:'侏儒症是因为幼年缺乏？',o:['胰岛素','甲状腺激素','生长激素','肾上腺素'],a:2,p:'生长激素'},
+      {t:'甲亢是因为过多？',o:['胰岛素','甲状腺激素','生长激素','肾上腺素'],a:1,p:'甲状腺激素'},
+      {t:'糖尿病是因为缺乏？',o:['胰岛素','甲状腺激素','生长激素','肾上腺素'],a:0,p:'胰岛素'},
+      {t:'近视是因为晶状体？',o:['曲度过大','曲度过小','扁平','正常'],a:0,p:'曲度过大'},
+      {t:'远视是因为晶状体？',o:['曲度过大','曲度过小','扁平','正常'],a:1,p:'曲度过小'},
+      {t:'生态系统由什么组成？',o:['生物部分和非生物部分','生产者消费者分解者','动物植物微生物','阳光空气水'],a:0,p:'生物+非生物'},
+      {t:'生产者主要是？',o:['绿色植物','动物','细菌','真菌'],a:0,p:'绿色植物'},
+      {t:'消费者主要是？',o:['动物','绿色植物','细菌','真菌'],a:0,p:'动物'},
+      {t:'分解者主要是？',o:['细菌和真菌','动物','绿色植物','病毒'],a:0,p:'细菌和真菌'},
+      {t:'食物链从什么开始？',o:['生产者','消费者','分解者','非生物'],a:0,p:'生产者'},
+      {t:'能量流动特点？',o:['单向流动逐级递减','双向流动逐级递增','循环流动不变','随机流动'],a:0,p:'单向流动、逐级递减'},
+      {t:'物质循环特点？',o:['循环往复全球范围','单向流动逐级递减','不循环不变','随机流动'],a:0,p:'循环往复'},
+      {t:'保护生物多样性最有效措施？',o:['建立自然保护区','迁地保护','法制教育','人工繁殖'],a:0,p:'自然保护区'},
+      {t:'我国特有的珍稀动物？',o:['大熊猫','老虎','狮子','大象'],a:0,p:'大熊猫'},
+      {t:'被称为"活化石"的植物？',o:['银杏','松树','柏树','杨树'],a:0,p:'银杏'},
+      {t:'垃圾分类分为？',o:['可回收有害厨余其他','可回收不可回收','干湿','都有'],a:0,p:'四类'},
+      {t:'废旧电池属于？',o:['有害垃圾','可回收','厨余','其他'],a:0,p:'有害垃圾'},
+      {t:'剩饭剩菜属于？',o:['厨余垃圾','有害','可回收','其他'],a:0,p:'厨余垃圾'},
+      {t:'废纸属于？',o:['可回收','有害','厨余','其他'],a:0,p:'可回收'},
+      {t:'太阳能属于？',o:['可再生能源','不可再生','化石能源','核能'],a:0,p:'可再生能源'},
+      {t:'煤炭属于？',o:['不可再生能源','可再生','新能源','清洁能源'],a:0,p:'不可再生'},
+      {t:'石油属于？',o:['不可再生能源','可再生','新能源','清洁能源'],a:0,p:'不可再生'},
+      {t:'天然气属于？',o:['不可再生能源','可再生','新能源','清洁能源'],a:0,p:'不可再生'},
+      {t:'风能属于？',o:['可再生能源','不可再生','化石能源','核能'],a:0,p:'可再生能源'},
+      {t:'水能属于？',o:['可再生能源','不可再生','化石能源','核能'],a:0,p:'可再生能源'},
+      {t:'核能属于？',o:['不可再生能源','可再生','化石能源','清洁能源'],a:0,p:'不可再生'},
+      {t:'温室效应会导致？',o:['全球变暖','全球变冷','海平面下降','冰川增加'],a:0,p:'全球变暖'},
+      {t:'酸雨会导致？',o:['土壤酸化','土壤碱化','促进生长','没有影响'],a:0,p:'土壤酸化'},
+      {t:'臭氧层破坏会导致？',o:['紫外线增强','红外线增强','可见光增强','X射线增强'],a:0,p:'紫外线增强'},
+      {t:'白色污染是指？',o:['塑料污染','纸张污染','金属污染','玻璃污染'],a:0,p:'塑料污染'},
+      {t:'一公里等于多少米？',o:['10','100','1000','10000'],a:2,p:'1000米'},
+      {t:'一米等于多少厘米？',o:['10','100','1000','10000'],a:1,p:'100厘米'},
+      {t:'一吨等于多少千克？',o:['10','100','1000','10000'],a:2,p:'1000千克'},
+      {t:'圆周率π约等于？',o:['3.12','3.14','3.16','3.18'],a:1,p:'3.14'},
+      {t:'水的化学式？',o:['H2O','CO2','O2','N2'],a:0,p:'H2O'},
+      {t:'二氧化碳化学式？',o:['H2O','CO2','O2','N2'],a:1,p:'CO2'},
+      {t:'氧气化学式？',o:['H2O','CO2','O2','N2'],a:2,p:'O2'},
+      {t:'食盐化学名称？',o:['氯化钠','碳酸钠','氢氧化钠','硫酸钠'],a:0,p:'氯化钠'},
+      {t:'干冰是？',o:['固态水','固态二氧化碳','固态氮气','固态氧气'],a:1,p:'固态二氧化碳'},
+      {t:'天然气主要成分？',o:['一氧化碳','甲烷','乙烷','丙烷'],a:1,p:'甲烷'},
+      {t:'煤气中毒是因为？',o:['一氧化碳','二氧化碳','甲烷','氮气'],a:0,p:'一氧化碳'},
+      {t:'酸雨是因为空气中什么过多？',o:['氧气','氮气','二氧化硫','二氧化碳'],a:2,p:'二氧化硫'},
+      {t:'温室效应主要是因为？',o:['氧气','氮气','二氧化碳','氢气'],a:2,p:'二氧化碳'},
+      {t:'声音是由什么产生？',o:['物体振动','物体运动','物体发热','物体发光'],a:0,p:'振动'},
+      {t:'真空能传声吗？',o:['能','不能','有时候','看情况'],a:1,p:'不能'},
+      {t:'人耳能听到的频率范围？',o:['20-20000Hz','10-10000Hz','50-50000Hz','100-100000Hz'],a:0,p:'20-20000Hz'},
+      {t:'超声波频率？',o:['低于20Hz','20-20000Hz','高于20000Hz','高于100000Hz'],a:2,p:'高于20000Hz'},
+      {t:'次声波频率？',o:['低于20Hz','20-20000Hz','高于20000Hz','高于100000Hz'],a:0,p:'低于20Hz'},
+      {t:'闪电和打雷同时发生吗？',o:['是','不是','不一定','看情况'],a:0,p:'是，光速快先看到闪电'},
+      {t:'彩虹是光的什么现象？',o:['反射','折射','散射','衍射'],a:1,p:'折射和反射'},
+      {t:'镜子成像是光的什么现象？',o:['反射','折射','散射','衍射'],a:0,p:'反射'},
+      {t:'放大镜成像是光的什么现象？',o:['反射','折射','散射','衍射'],a:1,p:'折射'},
+      {t:'天空为什么是蓝色？',o:['光的反射','光的折射','光的散射','光的衍射'],a:2,p:'瑞利散射'},
+      {t:'日落时太阳为什么是红色？',o:['光的反射','光的折射','光的散射','光的衍射'],a:2,p:'散射，长波透过'},
+      {t:'发电机将什么能转化为电能？',o:['机械能','热能','光能','化学能'],a:0,p:'机械能'},
+      {t:'电动机将电能转化为什么能？',o:['机械能','热能','光能','化学能'],a:0,p:'机械能'},
+      {t:'电池将什么能转化为电能？',o:['机械能','热能','光能','化学能'],a:3,p:'化学能'},
+      {t:'太阳能板将什么能转化为电能？',o:['机械能','热能','光能','化学能'],a:2,p:'光能'},
+      {t:'核电站利用什么发电？',o:['煤炭','石油','天然气','核裂变'],a:3,p:'核裂变'},
+      {t:'水电站利用什么发电？',o:['煤炭','石油','天然气','水能'],a:3,p:'水能'},
+      {t:'风力发电利用什么？',o:['煤炭','石油','天然气','风能'],a:3,p:'风能'},
+      {t:'一天有多少小时？',o:['12','24','36','48'],a:1,p:'24小时'},
+      {t:'一小时有多少分钟？',o:['30','60','90','100'],a:1,p:'60分钟'},
+      {t:'一周有多少天？',o:['5','6','7','8'],a:2,p:'7天'},
+      {t:'一年有多少个月？',o:['10','11','12','13'],a:2,p:'12个月'},
+      {t:'大月有多少天？',o:['28','29','30','31'],a:3,p:'31天'},
+      {t:'小月有多少天？',o:['28','29','30','31'],a:2,p:'30天'},
+      {t:'平年二月有多少天？',o:['28','29','30','31'],a:0,p:'28天'},
+      {t:'闰年二月有多少天？',o:['28','29','30','31'],a:1,p:'29天'},
+      {t:'闰年有多少天？',o:['365','366','367','368'],a:1,p:'366天'},
+      {t:'平年有多少天？',o:['365','366','367','368'],a:0,p:'365天'},
+      {t:'香港回归时间？',o:['1996年','1997年','1998年','1999年'],a:1,p:'1997年7月1日'},
+      {t:'澳门回归时间？',o:['1998年','1999年','2000年','2001年'],a:1,p:'1999年12月20日'},
+      {t:'中国共产党成立于？',o:['1919年','1920年','1921年','1922年'],a:2,p:'1921年'},
+      {t:'中华人民共和国成立时间？',o:['1948年','1949年','1950年','1951年'],a:1,p:'1949年10月1日'},
+      {t:'春节是农历哪一天？',o:['正月初一','正月十五','腊月三十','五月初五'],a:0,p:'正月初一'},
+      {t:'元宵节是农历哪一天？',o:['正月初一','正月十五','腊月三十','五月初五'],a:1,p:'正月十五'},
+      {t:'端午节是农历哪一天？',o:['正月初一','正月十五','五月初五','八月十五'],a:2,p:'五月初五'},
+      {t:'中秋节是农历哪一天？',o:['正月初一','正月十五','五月初五','八月十五'],a:3,p:'八月十五'},
+      {t:'清明节通常在公历几月？',o:['3月','4月','5月','6月'],a:1,p:'4月'},
+      {t:'劳动节是公历哪一天？',o:['4月1日','5月1日','6月1日','7月1日'],a:1,p:'5月1日'},
+      {t:'儿童节是公历哪一天？',o:['4月1日','5月1日','6月1日','7月1日'],a:2,p:'6月1日'},
+      {t:'建党节是公历哪一天？',o:['6月1日','7月1日','8月1日','9月1日'],a:1,p:'7月1日'},
+      {t:'建军节是公历哪一天？',o:['7月1日','8月1日','9月1日','10月1日'],a:1,p:'8月1日'},
+      {t:'国庆节是公历哪一天？',o:['8月1日','9月1日','10月1日','11月1日'],a:2,p:'10月1日'},
+      {t:'教师节是公历哪一天？',o:['8月10日','9月10日','10月10日','11月10日'],a:1,p:'9月10日'},
+      {t:'妇女节是公历哪一天？',o:['2月8日','3月8日','4月8日','5月8日'],a:1,p:'3月8日'},
+      {t:'青年节是公历哪一天？',o:['3月4日','4月4日','5月4日','6月4日'],a:2,p:'5月4日'},
+      {t:'植树节是公历哪一天？',o:['2月12日','3月12日','4月12日','5月12日'],a:1,p:'3月12日'},
+      {t:'母亲节是公历哪一天？',o:['4月第二个周日','5月第二个周日','6月第二个周日','7月第二个周日'],a:1,p:'5月第二个周日'},
+      {t:'父亲节是公历哪一天？',o:['5月第三个周日','6月第三个周日','7月第三个周日','8月第三个周日'],a:1,p:'6月第三个周日'},
+      {t:'地球自转周期是？',o:['12小时','24小时','365天','30天'],a:1,p:'约24小时'},
+      {t:'地球公转周期是？',o:['12小时','24小时','365天','30天'],a:2,p:'约365天'},
+      {t:'月球绕地球转一圈约？',o:['12小时','24小时','30天','365天'],a:2,p:'约30天'},
+      {t:'中国有多少个民族？',o:['54','55','56','57'],a:2,p:'56个'},
+      {t:'中国人口最多的民族？',o:['汉族','壮族','满族','回族'],a:0,p:'汉族'},
+      {t:'中国有多少个省级行政区？',o:['32','33','34','35'],a:2,p:'34个'},
+      {t:'中国有几个直辖市？',o:['3','4','5','6'],a:1,p:'4个'},
+      {t:'中国有几个特别行政区？',o:['1','2','3','4'],a:1,p:'2个'},
+      {t:'近亲结婚后代患遗传病概率？',o:['降低','升高','不变','不一定'],a:1,p:'升高'},
+      {t:'生物进化最直接证据？',o:['化石','比较解剖学','胚胎学','分子生物学'],a:0,p:'化石'},
+      {t:'生物进化总体趋势？',o:['简单到复杂低等到高等水生到陆生','复杂到简单高等到低等陆生到水生','简单到复杂高等到低等水生到陆生','复杂到简单低等到高等陆生到水生'],a:0,p:'简单→复杂，低等→高等，水生→陆生'},
+      {t:'自然选择学说谁提出？',o:['达尔文','孟德尔','牛顿','爱因斯坦'],a:0,p:'达尔文'},
+      {t:'生物分类基本单位？',o:['种','属','科','目'],a:0,p:'种'},
+      {t:'细菌是单细胞还是多细胞？',o:['单细胞','多细胞','都有','都不是'],a:0,p:'单细胞'},
+      {t:'病毒有细胞结构吗？',o:['有','没有','有时有','不一定'],a:1,p:'没有'},
+      {t:'病毒由什么组成？',o:['蛋白质外壳和内部遗传物质','细胞膜和细胞质','细胞核和细胞质','细胞壁和细胞膜'],a:0,p:'蛋白质外壳+遗传物质'},
+      {t:'细菌通过什么繁殖？',o:['分裂生殖','孢子生殖','出芽生殖','种子生殖'],a:0,p:'分裂生殖'},
+      {t:'真菌通过什么繁殖？',o:['孢子生殖','分裂生殖','出芽生殖','种子生殖'],a:0,p:'孢子生殖'},
+      {t:'蘑菇是真菌还是植物？',o:['真菌','植物','动物','细菌'],a:0,p:'真菌'},
+      {t:'乳酸菌是细菌还是真菌？',o:['细菌','真菌','病毒','原生动物'],a:0,p:'细菌'},
+      {t:'酵母菌是细菌还是真菌？',o:['真菌','细菌','病毒','原生动物'],a:0,p:'真菌'},
+      {t:'青霉素从什么中提取？',o:['青霉菌','酵母菌','乳酸菌','大肠杆菌'],a:0,p:'青霉菌'},
+      {t:'制作酸奶用？',o:['乳酸菌','酵母菌','霉菌','醋酸菌'],a:0,p:'乳酸菌'},
+      {t:'制作馒头面包用？',o:['酵母菌','乳酸菌','霉菌','醋酸菌'],a:0,p:'酵母菌'},
+      {t:'制作醋用？',o:['醋酸菌','酵母菌','乳酸菌','霉菌'],a:0,p:'醋酸菌'},
+      {t:'酿酒用？',o:['酵母菌','乳酸菌','霉菌','醋酸菌'],a:0,p:'酵母菌'},
+      {t:'制作泡菜用？',o:['乳酸菌','酵母菌','霉菌','醋酸菌'],a:0,p:'乳酸菌'},
+      {t:'食品腐败主要原因？',o:['细菌和真菌生长繁殖','温度过高','湿度过大','光照太强'],a:0,p:'微生物繁殖'},
+      {t:'食品保存原理？',o:['杀死或抑制微生物生长','增加微生物','提高温度','增加湿度'],a:0,p:'杀死或抑制微生物'},
+      {t:'冷藏保存原理？',o:['低温抑制微生物生长','低温杀死微生物','高温抑制微生物','高温杀死微生物'],a:0,p:'低温抑制'},
+      {t:'真空包装原理？',o:['隔绝氧气抑制微生物','增加氧气','增加湿度','增加温度'],a:0,p:'隔绝氧气'},
+      {t:'腌制保存原理？',o:['高渗透压抑制微生物','低渗透压','增加氧气','增加温度'],a:0,p:'高渗透压'},
+      {t:'脱水保存原理？',o:['去除水分抑制微生物','增加水分','增加氧气','增加温度'],a:0,p:'去除水分'},
+      {t:'巴斯德消毒法温度？',o:['60-80℃','100℃','121℃','150℃'],a:0,p:'60-80℃'},
+      {t:'高温灭菌温度？',o:['60-80℃','100℃','121℃','150℃'],a:2,p:'121℃'},
+      {t:'生物多样性的内涵？',o:['生物种类基因生态系统多样性','物种数量分布多样性','形态结构功能多样性','都有'],a:0,p:'三种多样性'},
+      {t:'扬子鳄是？',o:['爬行动物','两栖动物','鱼类','哺乳动物'],a:0,p:'爬行动物'},
+      {t:'白鳍豚是？',o:['哺乳动物','鱼类','两栖动物','爬行动物'],a:0,p:'哺乳动物'},
+      {t:'朱鹮是？',o:['鸟类','哺乳动物','爬行动物','两栖动物'],a:0,p:'鸟类'},
+      {t:'金丝猴是？',o:['哺乳动物','鸟类','爬行动物','两栖动物'],a:0,p:'哺乳动物'},
+      {t:'藏羚羊是？',o:['哺乳动物','鸟类','爬行动物','两栖动物'],a:0,p:'哺乳动物'},
+      {t:'丹顶鹤是？',o:['鸟类','哺乳动物','爬行动物','两栖动物'],a:0,p:'鸟类'},
+      {t:'褐马鸡是？',o:['鸟类','哺乳动物','爬行动物','两栖动物'],a:0,p:'鸟类'},
+      {t:'食物链正确写法？',o:['生产者→初级消费者→次级消费者','消费者→生产者→分解者','分解者→消费者→生产者','非生物→生产者→消费者'],a:0,p:'生产者→消费者'},
+      {t:'有毒物质在食物链中会？',o:['富集','稀释','消失','不变'],a:0,p:'富集'},
+      {t:'生态平衡是指？',o:['生物数量和比例相对稳定','生物数量不断增加','生物数量不断减少','生物种类不断增加'],a:0,p:'相对稳定'},
+      {t:'生态系统自动调节能力？',o:['有限的','无限的','不变的','固定的'],a:0,p:'有限'},
+      {t:'破坏生态平衡因素？',o:['自然因素和人为因素','只有自然因素','只有人为因素','没有因素'],a:0,p:'两者都有'},
+      {t:'传染病流行三个环节？',o:['传染源传播途径易感人群','病原体传播途径易感人群','传染源病原体易感人群','病原体传染源传播途径'],a:0,p:'三个环节'},
+      {t:'预防传染病措施？',o:['控制传染源切断传播途径保护易感人群','消灭病原体切断传播途径保护易感人群','控制传染源消灭病原体保护易感人群','控制传染源切断传播途径消灭病原体'],a:0,p:'三项措施'},
+      {t:'隔离病人属于？',o:['控制传染源','切断传播途径','保护易感人群','消灭病原体'],a:0,p:'控制传染源'},
+      {t:'消毒属于？',o:['控制传染源','切断传播途径','保护易感人群','消灭病原体'],a:1,p:'切断传播途径'},
+      {t:'接种疫苗属于？',o:['控制传染源','切断传播途径','保护易感人群','消灭病原体'],a:2,p:'保护易感人群'},
+      {t:'艾滋病由什么引起？',o:['细菌','病毒','真菌','寄生虫'],a:1,p:'HIV病毒'},
+      {t:'HIV主要攻击？',o:['红细胞','白细胞','T淋巴细胞','血小板'],a:2,p:'T淋巴细胞'},
+      {t:'遗传是指亲子间的？',o:['相似性','差异性','变异','进化'],a:0,p:'相似性'},
+      {t:'变异是指亲子间和子代个体间的？',o:['相似性','差异性','遗传','进化'],a:1,p:'差异'},
+      {t:'生物性状由什么控制？',o:['基因','DNA','染色体','细胞核'],a:0,p:'基因'},
+      {t:'男性体细胞染色体组成？',o:['22对+XX','22对+XY','22对+YY','23对+XY'],a:1,p:'22对+XY'},
+      {t:'女性体细胞染色体组成？',o:['22对+XX','22对+XY','22对+YY','23对+XX'],a:0,p:'22对+XX'},
+      {t:'生男生女由什么决定？',o:['母亲','父亲','父母共同','随机'],a:1,p:'父亲精子'},
+      {t:'近亲结婚后代患遗传病概率？',o:['降低','升高','不变','不一定'],a:1,p:'升高'},
+      {t:'我国婚姻法禁止什么结婚？',o:['直系血亲和三代以内旁系血亲','四代以内旁系血亲','五代以内旁系血亲','所有亲戚'],a:0,p:'直系+三代旁系'},
+      {t:'自然选择核心是？',o:['适者生存不适者被淘汰','用进废退','获得性遗传','突变论'],a:0,p:'适者生存'},
+      {t:'我国特有珍稀植物？',o:['银杉','松树','柏树','杨树'],a:0,p:'银杉'},
+      {t:'被称为"活化石"的动物？',o:['大熊猫','老虎','狮子','大象'],a:0,p:'大熊猫'},
+      {t:'运动系统由什么组成？',o:['骨、关节、骨骼肌','骨、关节、肌肉','骨、骨骼肌、神经','关节、肌肉、神经'],a:0,p:'骨+关节+骨骼肌'},
+      {t:'骨由什么组成？',o:['骨膜、骨质、骨髓','骨膜、骨质、骨松质','骨膜、骨髓、骨密质','骨质、骨髓、骨松质'],a:0,p:'骨膜+骨质+骨髓'},
+      {t:'关节基本结构？',o:['关节面、关节囊、关节腔','关节头、关节窝、关节软骨','关节囊、关节腔、韧带','关节面、关节囊、韧带'],a:0,p:'关节面+关节囊+关节腔'},
+      {t:'骨骼肌收缩时牵动什么运动？',o:['骨','关节','肌肉','神经'],a:0,p:'骨'},
+      {t:'屈肘时什么肌肉收缩？',o:['肱二头肌','肱三头肌','三角肌','胸大肌'],a:0,p:'肱二头肌'},
+      {t:'伸肘时什么肌肉收缩？',o:['肱二头肌','肱三头肌','三角肌','胸大肌'],a:1,p:'肱三头肌'},
+      {t:'消化系统由什么组成？',o:['消化道和消化腺','口腔和胃','小肠和大肠','肝脏和胰腺'],a:0,p:'消化道+消化腺'},
+      {t:'消化道包括？',o:['口腔、咽、食道、胃、小肠、大肠、肛门','口腔、胃、小肠、大肠','食道、胃、小肠','胃、小肠、大肠、肛门'],a:0,p:'口腔→肛门'},
+      {t:'淀粉在口腔开始消化是因为？',o:['唾液淀粉酶','胃酸','胰淀粉酶','肠淀粉酶'],a:0,p:'唾液淀粉酶'},
+      {t:'蛋白质在胃开始消化是因为？',o:['唾液淀粉酶','胃蛋白酶','胰蛋白酶','肠肽酶'],a:1,p:'胃蛋白酶'},
+      {t:'脂肪在小肠消化是因为？',o:['唾液淀粉酶','胃蛋白酶','胆汁乳化','胰脂肪酶'],a:2,p:'胆汁乳化'},
+      {t:'小肠是消化和吸收主要场所是因为？',o:['长度长、面积大、消化液多','只有小肠能消化','只有小肠能吸收','小肠最长'],a:0,p:'长+面积大+消化液多'},
+      {t:'大肠主要功能？',o:['消化食物','吸收水分和形成粪便','吸收营养','分泌消化液'],a:1,p:'吸收水分+形成粪便'},
+      {t:'呼吸系统由什么组成？',o:['呼吸道和肺','鼻腔和肺','气管和肺','支气管和肺'],a:0,p:'呼吸道+肺'},
+      {t:'气体交换发生在？',o:['鼻腔','气管','肺泡','支气管'],a:2,p:'肺泡'},
+      {t:'血液循环系统由什么组成？',o:['心脏、血管、血液','心脏和血管','血管和血液','心脏和血液'],a:0,p:'心脏+血管+血液'},
+      {t:'血管分为？',o:['动脉、静脉、毛细血管','动脉和静脉','静脉和毛细血管','动脉和毛细血管'],a:0,p:'三种血管'},
+      {t:'动脉血含氧？',o:['多','少','没有','不一定'],a:0,p:'多'},
+      {t:'静脉血含氧？',o:['多','少','没有','不一定'],a:1,p:'少'},
+      {t:'毛细血管作用？',o:['运输血液','物质交换','止血','调节血压'],a:1,p:'物质交换'},
+      {t:'左心室连通？',o:['主动脉','肺动脉','肺静脉','上腔静脉'],a:0,p:'主动脉'},
+      {t:'右心室连通？',o:['主动脉','肺动脉','肺静脉','上腔静脉'],a:1,p:'肺动脉'},
+      {t:'体循环起点？',o:['左心室','右心室','左心房','右心房'],a:0,p:'左心室'},
+      {t:'肺循环起点？',o:['左心室','右心室','左心房','右心房'],a:1,p:'右心室'},
+      {t:'泌尿系统由什么组成？',o:['肾脏、输尿管、膀胱、尿道','肾脏和膀胱','输尿管和膀胱','膀胱和尿道'],a:0,p:'肾脏→尿道'},
+      {t:'形成尿液器官？',o:['肾脏','输尿管','膀胱','尿道'],a:0,p:'肾脏'},
+      {t:'暂时储存尿液器官？',o:['肾脏','输尿管','膀胱','尿道'],a:2,p:'膀胱'},
+      {t:'肾单位是肾脏的？',o:['基本单位','最大单位','最小单位','辅助单位'],a:0,p:'基本单位'},
+      {t:'肾小球作用？',o:['过滤血液','重吸收','分泌尿液','储存尿液'],a:0,p:'过滤血液'},
+      {t:'肾小管作用？',o:['过滤血液','重吸收','分泌尿液','储存尿液'],a:1,p:'重吸收'},
+      {t:'神经系统由什么组成？',o:['中枢神经系统和周围神经系统','脑和脊髓','脑神经和脊神经','脑和神经'],a:0,p:'中枢+周围'},
+      {t:'中枢神经系统包括？',o:['脑和脊髓','脑神经和脊神经','脑和神经','脊髓和神经'],a:0,p:'脑+脊髓'},
+      {t:'周围神经系统包括？',o:['脑神经和脊神经','脑和脊髓','脑和神经','脊髓和神经'],a:0,p:'脑神经+脊神经'},
+      {t:'脑包括？',o:['大脑、小脑、脑干','大脑和小脑','小脑和脑干','大脑和脑干'],a:0,p:'大脑+小脑+脑干'},
+      {t:'反射分为？',o:['条件反射和非条件反射','简单反射和复杂反射','先天反射和后天反射','都有'],a:0,p:'两种反射'},
+      {t:'简单反射是？',o:['生来就有','后天形成','都有','都不是'],a:0,p:'生来就有'},
+      {t:'复杂反射是？',o:['生来就有','后天形成','都有','都不是'],a:1,p:'后天形成'},
+      {t:'人类高级神经活动基本方式？',o:['反射','反应','应激性','适应性'],a:0,p:'反射'},
+      {t:'激素调节特点？',o:['缓慢、持久、广泛','快速、短暂、局限','快速、持久、广泛','缓慢、短暂、局限'],a:0,p:'缓慢持久广泛'},
+      {t:'神经调节特点？',o:['缓慢、持久、广泛','快速、短暂、局限','快速、持久、广泛','缓慢、短暂、局限'],a:1,p:'快速短暂局限'},
+      {t:'人体生命活动主要受什么调节？',o:['神经调节','激素调节','神经和激素共同','免疫调节'],a:2,p:'神经+激素'},
+      {t:'免疫分为？',o:['非特异性免疫和特异性免疫','先天免疫和后天免疫','细胞免疫和体液免疫','都有'],a:0,p:'两种免疫'},
+      {t:'非特异性免疫是？',o:['生来就有','后天形成','都有','都不是'],a:0,p:'生来就有'},
+      {t:'特异性免疫是？',o:['生来就有','后天形成','都有','都不是'],a:1,p:'后天形成'},
+      {t:'皮肤、黏膜属于？',o:['第一道防线','第二道防线','第三道防线','第四道防线'],a:0,p:'第一道防线'},
+      {t:'体液中杀菌物质和吞噬细胞属于？',o:['第一道防线','第二道防线','第三道防线','第四道防线'],a:1,p:'第二道防线'},
+      {t:'免疫器官和免疫细胞属于？',o:['第一道防线','第二道防线','第三道防线','第四道防线'],a:2,p:'第三道防线'},
+      {t:'抗体由什么产生？',o:['淋巴细胞','吞噬细胞','红细胞','血小板'],a:0,p:'淋巴细胞'},
+      {t:'抗原是引起免疫反应的？',o:['物质','细胞','器官','组织'],a:0,p:'物质'},
+      {t:'疫苗是？',o:['抗原','抗体','淋巴细胞','吞噬细胞'],a:0,p:'抗原'},
+      {t:'注射疫苗属于？',o:['自然免疫','人工免疫','被动免疫','都有'],a:1,p:'人工免疫'},
+      {t:'传染病流行三个环节？',o:['传染源传播途径易感人群','病原体传播途径易感人群','传染源病原体易感人群','病原体传染源传播途径'],a:0,p:'三个环节'},
+      {t:'体细胞中染色体？',o:['成对存在','成单存在','有时成对有时成单','不存在'],a:0,p:'成对'},
+      {t:'生殖细胞中染色体？',o:['成对存在','成单存在','有时成对有时成单','不存在'],a:1,p:'成单'},
+      {t:'男性精子染色体？',o:['22条+X或22条+Y','22条+XY','23条+X','23条+Y'],a:0,p:'22条+X或22条+Y'},
+      {t:'女性卵细胞染色体？',o:['22条+X或22条+Y','22条+XX','22条+X','23条+X'],a:2,p:'22条+X'},
+      {t:'生物分类从大到小？',o:['界门纲目科属种','界门纲科属种','界门纲目属种','界门纲科目属种'],a:0,p:'界→种'},
+      {t:'制作酱油用？',o:['霉菌','酵母菌','乳酸菌','醋酸菌'],a:0,p:'霉菌'},
+      {t:'食品腐败主要原因？',o:['细菌和真菌生长繁殖','温度过高','湿度过大','光照太强'],a:0,p:'微生物繁殖'}
+    ];
+    while(qs.length<300){
+      const q=pool[qs.length%pool.length];
+      const opts=[...q.o],correct=opts[q.a];
+      for(let k=opts.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[opts[k],opts[j]]=[opts[j],opts[k]]}
+      add(q.t,opts,opts.indexOf(correct),q.p);
+    }
+    return qs;
+  },
+
+  generate(grade,subject){
+    let bank;
+    if(subject==='math') bank=this.math(grade);
+    else if(subject==='chinese') bank=this.chinese(grade);
+    else if(subject==='english') bank=this.english(grade);
+    else bank=this.common(grade);
+    const sh=[...bank];
+    for(let i=sh.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[sh[i],sh[j]]=[sh[j],sh[i]]}
+    return sh.slice(0,10).map((q,i)=>({id:i,text:q.t,options:q.o,answer:q.a,parse:q.p}));
+  }
+};
+
+const App={
+  state:{
+    page:'home',grade:null,subject:null,
+    currentQ:0,score:0,answers:[],questions:[],
+    trialCount:0,startTime:0,timer:null,elapsed:0,autoNextTimer:null
+  },
+  subjects:{
+    math:{name:'数学',icon:'🔢'},
+    chinese:{name:'语文',icon:'📖'},
+    english:{name:'英语',icon:'🔤'},
+    common:{name:'常识',icon:'🌍'}
+  },
+  init(){
+    this.checkAuth();
+    this.render();
+  },
+  checkAuth(){
+    const params=new URLSearchParams(location.search);
+    const user=params.get('user');
+    if(user){
+      this.state.authUser=decodeURIComponent(user);
+      const bar=document.getElementById('authBar');
+      const wm=document.getElementById('watermark');
+      const authUserEl=document.getElementById('authUser');
+      if(bar)bar.style.display='block';
+      if(authUserEl)authUserEl.textContent=this.state.authUser;
+      if(wm){wm.style.display='block';wm.textContent='授权用户：'+this.state.authUser;}
+    }
+  },
+  
+  goHome(){
+    const modal=document.getElementById('trialModal');
+    if(modal)modal.classList.remove('show');
+    if(this.state.autoNextTimer)clearTimeout(this.state.autoNextTimer);
+    if(this.state.timer)clearInterval(this.state.timer);
+    this.state.page='home';this.state.grade=null;this.state.subject=null;
+    this.state.currentQ=0;this.state.score=0;this.state.answers=[];this.state.questions=[];
+    this.state.startTime=0;this.state.elapsed=0;this.state.timer=null;this.state.autoNextTimer=null;
+    this.render();
+  },
+  selectGrade(g){this.state.grade=g;this.render();},
+  selectSubject(s){this.state.subject=s;this.render();},
+  startQuiz(){
+    const s=this.state;
+    s.questions=QB.generate(s.grade,s.subject);
+    s.currentQ=0;s.score=0;s.answers=[];s.page='quiz';
+    s.startTime=Date.now();s.elapsed=0;
+    s.timer=setInterval(()=>{
+      s.elapsed=Math.floor((Date.now()-s.startTime)/1000);
+      const el=document.getElementById('timerDisplay');
+      if(el)el.textContent=this.formatTime(s.elapsed);
+    },1000);
+    this.render();
+  },
+  formatTime(sec){
+    const m=Math.floor(sec/60).toString().padStart(2,'0');
+    const s=(sec%60).toString().padStart(2,'0');
+    return m+':'+s;
+  },
+  selectOption(idx){
+    if(this.state.answers[this.state.currentQ]!==undefined)return;
+    if(this.state.autoNextTimer)clearTimeout(this.state.autoNextTimer);
+    const q=this.state.questions[this.state.currentQ];
+    const isCorrect=idx===q.answer;
+    this.state.answers[this.state.currentQ]=idx;
+    if(isCorrect)this.state.score++;
+    this.render();
+    if(this.state.currentQ<this.state.questions.length-1){
+      this.state.autoNextTimer=setTimeout(()=>{this.nextQuestion();},3000);
+    }
+  },
+  prevQuestion(){
+    if(this.state.autoNextTimer)clearTimeout(this.state.autoNextTimer);
+    this.state.autoNextTimer=null;
+    if(this.state.currentQ>0){this.state.currentQ--;this.render();}
+  },
+  nextQuestion(){
+    if(this.state.autoNextTimer)clearTimeout(this.state.autoNextTimer);
+    this.state.autoNextTimer=null;
+    if(this.state.answers[this.state.currentQ]===undefined)return;
+    if(this.state.currentQ<this.state.questions.length-1){this.state.currentQ++;this.render();}
+    else{this.finishQuiz();}
+  },
+  finishQuiz(){
+    if(this.state.autoNextTimer)clearTimeout(this.state.autoNextTimer);
+    if(this.state.timer)clearInterval(this.state.timer);
+    this.state.page='result';this.render();
+  },
+  
+  
+  render(){
+    const app=document.getElementById('app');
+    const s=this.state;
+    if(s.page==='home'){
+      app.innerHTML=`
+        <div class="header">
+          <h1>📚 小学教育测评系统 <span class="badge" style="background:rgba(0,184,148,.15);color:#00b894">完整版</span></h1>
+          <p>智能分卷 · 即时反馈 · 四科覆盖 · 每年级每科300题</p>
+        </div>
+        <div class="container">
+          <div class="liquid">
+            <div class="section-title">🎓 选择年级</div>
+            <div class="grid">
+              ${[1,2,3,4,5,6].map(g=>`<div class="liquid-btn ${s.grade===g?'active':''}" onclick="App.selectGrade(${g})">${g}年级</div>`).join('')}
+            </div>
+          </div>
+          ${s.grade?`
+          <div class="liquid">
+            <div class="section-title">📖 选择科目</div>
+            <div class="grid grid-2">
+              ${Object.entries(this.subjects).map(([k,v])=>`<div class="liquid-btn ${s.subject===k?'active':''}" onclick="App.selectSubject('${k}')">${v.icon} ${v.name}</div>`).join('')}
+            </div>
+          </div>`:''}
+          ${s.subject?`<button class="liquid-primary" onclick="App.startQuiz()">🚀 开始测评</button>`:''}
+          <div class="tip-liquid">
+            🎉 完整版已解锁 · 每年级每科300题不重复 · 无限刷题
+          </div>
+        </div>`;
+    }else if(s.page==='quiz'){
+      const q=s.questions[s.currentQ];
+      const progress=((s.currentQ+1)/s.questions.length)*100;
+      const hasAnswered=s.answers[s.currentQ]!==undefined;
+      const isCorrect=hasAnswered&&s.answers[s.currentQ]===q.answer;
+      const subInfo=this.subjects[s.subject];
+      const canPrev=s.currentQ>0;
+      const canNext=hasAnswered&&s.currentQ<s.questions.length-1;
+      const isLast=s.currentQ===s.questions.length-1;
+      app.innerHTML=`
+        <div class="container" style="padding-top:12px">
+          <div class="quiz-bar">
+            <div style="display:flex;gap:8px">
+              <span class="quiz-tag">${subInfo.name}</span>
+              <span class="quiz-tag" style="background:rgba(0,184,148,.15);color:#00b894">${s.grade}年级</span>
+            </div>
+            <div class="timer-pill">⏱️ <span id="timerDisplay">${this.formatTime(s.elapsed)}</span></div>
+          </div>
+          <div class="progress-box">
+            <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
+            <div class="progress-text">第 ${s.currentQ+1} 题 / 共 ${s.questions.length} 题</div>
+          </div>
+          <div class="q-liquid">
+            <div class="q-num">📌 第 ${s.currentQ+1} 题</div>
+            <div class="q-text">${q.text}</div>
+            <div>
+              ${q.options.map((opt,idx)=>`<div class="opt-liquid ${hasAnswered?(idx===q.answer?'correct':(idx===s.answers[s.currentQ]?'wrong':'')):''} ${hasAnswered?'disabled':''}" onclick="App.selectOption(${idx})"><span class="opt-letter">${['A','B','C','D'][idx]}</span><span>${opt}</span></div>`).join('')}
+            </div>
+            <div class="parse-liquid ${hasAnswered?'show':''}"><div class="parse-title" style="color:${isCorrect?'#00b894':'#e84393'}">${isCorrect?'🎉 回答正确！':'😅 回答错误'}</div>${q.parse}</div>
+          </div>
+          <div class="nav-liquid">
+            <button class="nav-btn-liquid" onclick="App.prevQuestion()" ${!canPrev?'disabled':''}>⬅️ 上一题</button>
+            <button class="nav-btn-liquid" onclick="App.nextQuestion()" ${!canNext?'disabled':''}>➡️ 下一题</button>
+            <button class="nav-btn-liquid red" onclick="App.finishQuiz()">⏹️ ${isLast&&hasAnswered?'查看成绩':'结束并提交'}</button>
+          </div>
+          <div class="status-text">
+            已答 ${s.answers.filter(a=>a!==undefined).length}/10 题
+            ${hasAnswered&&!isLast?'<br><span style="color:#00b894;font-size:11px">💡 3秒后自动进入下一题</span>':''}
+            ${hasAnswered&&isLast?'<br><span style="color:#00b894;font-size:11px">🎉 最后一题！点击查看成绩</span>':''}
+          </div>
+        </div>`;
+    }else if(s.page==='result'){
+      const pct=Math.round((s.score/s.questions.length)*100);
+      let comment=pct>=90?'太棒了！🌟':pct>=60?'继续加油！💪':'多多练习！📚';
+      const wrongQs=s.questions.map((q,i)=>({q,i})).filter(({q,i})=>s.answers[i]!==q.answer);
+      app.innerHTML=`
+        <div class="header" style="padding-bottom:8px"><h2>🎉 测评报告</h2></div>
+        <div class="container">
+          <div class="liquid score-liquid">
+            <div class="score-circle"><div class="score-num">${pct}</div><div class="score-label">分</div></div>
+            <div class="score-comment">${comment}</div>
+          </div>
+          <div class="liquid">
+            <div class="detail-row"><span class="detail-label">科目</span><span class="detail-value">${this.subjects[s.subject].name}</span></div>
+            <div class="detail-row"><span class="detail-label">年级</span><span class="detail-value">${s.grade}年级</span></div>
+            <div class="detail-row"><span class="detail-label">总题数</span><span class="detail-value">${s.questions.length}题</span></div>
+            <div class="detail-row"><span class="detail-label">答对</span><span class="detail-value" style="color:#00b894">${s.score}题</span></div>
+            <div class="detail-row"><span class="detail-label">答错</span><span class="detail-value" style="color:#fd79a8">${s.questions.length-s.score}题</span></div>
+            <div class="detail-row"><span class="detail-label">用时</span><span class="detail-value">${this.formatTime(s.elapsed)}</span></div>
+          </div>
+          ${wrongQs.length>0?`<div class="liquid"><div class="section-title">📝 错题回顾（${wrongQs.length}题）</div><div style="margin-top:8px">${wrongQs.map(({q,i})=>`<div style="padding:12px 0;border-bottom:1px solid rgba(0,0,0,.05);font-size:13px"><div style="color:#2d3436;font-weight:700;margin-bottom:3px">${i+1}. ${q.text}</div><div style="color:#fd79a8">你的答案：${['A','B','C','D'][s.answers[i]]} · 正确答案：${['A','B','C','D'][q.answer]}</div><div style="color:#00b894;margin-top:3px">💡 ${q.parse}</div></div>`).join('')}</div></div>`:''}
+          <button class="liquid-primary" onclick="App.goHome()">🏠 返回首页</button>
+          <div class="tip-liquid">
+            🎉 完整版已解锁 · 无限刷题 · 感谢使用
+          </div>
+        </div>`;
+    }
+  }
+};
+App.init();
+</script>
+</body>
+</html>
