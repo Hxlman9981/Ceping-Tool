@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>小学教育测评系统 V3.0 - 试用版</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#e0f7fa 0%,#e8f5e9 40%,#f1f8e9 70%,#fff8e1 100%);min-height:100vh;color:#2c3e50;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.page{display:none;padding:0 16px 24px;max-width:720px;margin:0 auto;animation:fadeIn .4s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.watermark{position:fixed;bottom:8px;right:8px;font-size:11px;color:rgba(0,0,0,0.12);pointer-events:none;z-index:9999;transform:rotate(-12deg);line-height:1.4}
+.home-header{text-align:center;padding:32px 0 20px}
+.home-logo{font-size:42px;margin-bottom:8px}
+.home-title{font-size:26px;font-weight:800;color:#1b5e20;letter-spacing:1px}
+.home-badge{display:inline-block;margin-top:10px;padding:6px 18px;background:linear-gradient(135deg,#ffa726,#ef6c00);color:#fff;font-size:14px;font-weight:bold;border-radius:20px;box-shadow:0 2px 8px rgba(0,191,165,0.3)}
+.home-desc{font-size:15px;color:#666;margin-top:12px;line-height:1.5}
+.select-card{background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);border-radius:24px;padding:22px 18px;margin-bottom:16px;box-shadow:0 4px 20px rgba(0,0,0,0.06);border:1px solid rgba(255,255,255,0.6)}
+.select-title{font-size:17px;font-weight:700;color:#444;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.select-title .icon{font-size:20px}
+.subject-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.subject-item{background:rgba(255,255,255,0.95);border:2px solid #e0f0e0;border-radius:18px;padding:18px 10px;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.subject-item:active{transform:scale(0.96)}
+.subject-item.selected{border-color:#00bfa5;background:linear-gradient(135deg,#e0f7fa,#e8f5e9);box-shadow:0 4px 12px rgba(0,191,165,0.15)}
+.subject-item.disabled{opacity:0.35;pointer-events:none;filter:grayscale(0.8)}
+.subject-icon{font-size:32px;margin-bottom:6px;display:block}
+.subject-name{font-size:15px;font-weight:700;color:#555}
+.grade-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grade-item{background:rgba(255,255,255,0.95);border:2px solid #e8e8e8;border-radius:16px;padding:16px 8px;text-align:center;font-size:15px;font-weight:700;color:#666;cursor:pointer;transition:all .25s}
+.grade-item:active{transform:scale(0.95)}
+.grade-item.selected{border-color:#66bb6a;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);color:#2e7d32;box-shadow:0 4px 12px rgba(102,187,106,0.2)}
+.start-btn{display:block;width:85%;margin:24px auto 12px;padding:16px;background:linear-gradient(135deg,#42a5f5,#1e88e5);color:#fff;border:none;border-radius:28px;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(30,136,229,0.35);transition:all .3s;letter-spacing:2px}
+.start-btn:active{transform:scale(0.96);box-shadow:0 3px 10px rgba(30,136,229,0.25)}
+.start-btn:disabled{background:#ccc;box-shadow:none;cursor:not-allowed;transform:none}
+.no-eng-tip{font-size:12px;color:#e65100;text-align:center;margin-top:8px;display:none;padding:6px 10px;background:rgba(255,243,224,0.8);border-radius:10px;border:1px dashed #ffcc80}
+.tip-bar{background:rgba(255,243,224,0.9);border:1px dashed #ffcc80;border-radius:14px;padding:12px 16px;text-align:center;font-size:13px;color:#e65100;margin-top:12px;line-height:1.5}
+.quiz-top{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px}
+.quiz-pill{display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(255,255,255,0.9);border-radius:20px;font-size:14px;font-weight:700;color:#00897b;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.quiz-pill.grade{color:#d81b60}
+.quiz-progress{font-size:14px;color:#888;font-weight:600}
+.progress-track{width:100%;height:5px;background:#e0e0e0;border-radius:3px;margin-bottom:18px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#26a69a,#66bb6a);border-radius:3px;transition:width .35s ease}
+.q-card{background:rgba(255,255,255,0.92);border-radius:24px;padding:24px 20px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.07);border:1px solid rgba(255,255,255,0.5)}
+.q-label{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:800;color:#00897b;margin-bottom:12px;background:rgba(0,137,123,0.08);padding:4px 12px;border-radius:10px}
+.q-text{font-size:20px;font-weight:700;color:#263238;line-height:1.6;word-break:break-word}
+.opt-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.opt-item{background:rgba(255,255,255,0.95);border:2px solid #eceff1;border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s;position:relative}
+.opt-item:active{transform:scale(0.98)}
+.opt-tag{width:36px;height:36px;border-radius:50%;background:#eceff1;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#546e7a;flex-shrink:0;transition:all .2s}
+.opt-text{font-size:17px;font-weight:600;color:#37474f;flex:1;line-height:1.4}
+.opt-item.selected{border-color:#29b6f6;background:#e1f5fe}
+.opt-item.selected .opt-tag{background:#29b6f6;color:#fff}
+.opt-item.correct{border-color:#66bb6a;background:#e8f5e9}
+.opt-item.correct .opt-tag{background:#66bb6a;color:#fff}
+.opt-item.wrong{border-color:#ef5350;background:#ffebee}
+.opt-item.wrong .opt-tag{background:#ef5350;color:#fff}
+.opt-item.disabled{pointer-events:none;opacity:.75}
+.parse-box{background:linear-gradient(135deg,#fff8e1,#fff3e0);border-left:4px solid #ffa726;border-radius:0 16px 16px 0;padding:16px;display:none;margin-bottom:16px;animation:slideDown .3s}
+.parse-box.show{display:block}
+.parse-title{font-size:14px;font-weight:800;color:#ef6c00;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.parse-text{font-size:15px;color:#5d4037;line-height:1.7}
+@keyframes slideDown{from{opacity:0;max-height:0;padding-top:0;padding-bottom:0}to{opacity:1;max-height:400px}}
+.bottom-nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:8px 0 20px}
+.nav-btn{border:none;border-radius:16px;padding:14px 8px;font-size:15px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:4px}
+.nav-prev{background:rgba(255,255,255,0.9);color:#546e7a;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.nav-next{background:linear-gradient(135deg,#66bb6a,#43a047);color:#fff;box-shadow:0 4px 12px rgba(67,160,71,0.3)}
+.nav-end{background:linear-gradient(135deg,#ec407a,#d81b60);color:#fff;box-shadow:0 4px 12px rgba(216,27,96,0.3)}
+.nav-btn:active{transform:scale(0.95)}
+.nav-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.result-header{text-align:center;padding:30px 0 20px}
+.score-ring{width:140px;height:140px;border-radius:50%;background:conic-gradient(#66bb6a var(--deg),#e0e0e0 0);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 6px 20px rgba(102,187,106,0.2)}
+.score-ring::before{content:'';position:absolute;width:110px;height:110px;border-radius:50%;background:#fff}
+.score-inner{position:relative;z-index:1;text-align:center}
+.score-num{font-size:40px;font-weight:800;color:#2e7d32;line-height:1}
+.score-total{font-size:14px;color:#888;margin-top:2px}
+.result-title{font-size:22px;font-weight:800;color:#333;margin-bottom:6px}
+.result-sub{font-size:15px;color:#777}
+.review-card{background:rgba(255,255,255,0.92);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05);cursor:pointer;transition:all .2s;border-left:4px solid transparent}
+.review-card:hover{transform:translateX(4px)}
+.review-card.correct{border-left-color:#66bb6a}
+.review-card.wrong{border-left-color:#ef5350}
+.review-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.review-num{width:28px;height:28px;border-radius:50%;background:#eceff1;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#546e7a}
+.review-status{font-size:18px}
+.review-q{font-size:15px;font-weight:700;color:#37474f;line-height:1.5;margin-bottom:6px}
+.review-ans{font-size:13px;color:#78909c}
+.review-parse{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #cfd8dc;font-size:14px;color:#546e7a;line-height:1.6}
+.review-card.expanded .review-parse{display:block}
+.result-btns{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px;padding:0 4px}
+.res-btn{border:none;border-radius:18px;padding:16px;font-size:16px;font-weight:800;cursor:pointer;transition:all .25s;color:#fff}
+.res-home{background:linear-gradient(135deg,#42a5f5,#1e88e5);box-shadow:0 4px 14px rgba(30,136,229,0.3)}
+.res-again{background:linear-gradient(135deg,#ab47bc,#8e24aa);box-shadow:0 4px 14px rgba(142,36,170,0.3)}
+.res-btn:active{transform:scale(0.96)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:center;justify-content:center;z-index:10000;padding:20px;backdrop-filter:blur(4px)}
+.modal.show{display:flex}
+.modal-box{background:#fff;border-radius:24px;padding:28px 24px;max-width:380px;width:100%;text-align:center;animation:popIn .35s;box-shadow:0 12px 40px rgba(0,0,0,0.2)}
+@keyframes popIn{from{transform:scale(0.85);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-icon{font-size:56px;margin-bottom:12px}
+.modal-title{font-size:20px;font-weight:800;color:#263238;margin-bottom:10px}
+.modal-text{font-size:15px;color:#546e7a;line-height:1.6;margin-bottom:20px}
+.modal-btn{width:100%;padding:14px;border-radius:14px;border:none;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:all .2s}
+.modal-btn:last-child{margin-bottom:0}
+.modal-primary{background:linear-gradient(135deg,#66bb6a,#43a047);color:#fff}
+.modal-secondary{background:#f5f5f5;color:#546e7a}
+.modal-btn:active{transform:scale(0.97)}
+</style>
+</head>
+<body>
+<div class="watermark" id="watermark">试用版 V3.0 · 完整版联系 hxlman9981</div>
+
+<div class="page active" id="page-home">
+    <div class="home-header">
+        <div class="home-logo">📚🎓✨</div>
+        <div class="home-title">小学教育测评系统</div>
+        <div class="home-badge">试用版 V3.0</div>
+        <div class="home-desc">名校联合研发 · 课标精准对齐 · 四科覆盖<br>每年级每科300题 · 试用版每次10题</div>
+    </div>
+    <div class="select-card">
+        <div class="select-title"><span class="icon">📂</span>选择科目</div>
+        <div class="subject-grid" id="subjectGrid">
+            <div class="subject-item" data-sub="math" onclick="pickSub('math')"><span class="subject-icon">🔢</span><span class="subject-name">数学</span></div>
+            <div class="subject-item" data-sub="chinese" onclick="pickSub('chinese')"><span class="subject-icon">📖</span><span class="subject-name">语文</span></div>
+            <div class="subject-item" data-sub="english" id="subEng" onclick="pickSub('english')"><span class="subject-icon">🔤</span><span class="subject-name">英语</span></div>
+            <div class="subject-item" data-sub="common" onclick="pickSub('common')"><span class="subject-icon">🌍</span><span class="subject-name">常识</span></div>
+        </div>
+        <div class="no-eng-tip" id="noEngTip">📢 根据教育部课程标准，英语课从三年级开始开设，一、二年级已自动隐藏</div>
+    </div>
+    <div class="select-card">
+        <div class="select-title"><span class="icon">🎓</span>选择年级</div>
+        <div class="grade-grid">
+            <div class="grade-item" data-g="1" onclick="pickGrade(1)">一年级</div>
+            <div class="grade-item" data-g="2" onclick="pickGrade(2)">二年级</div>
+            <div class="grade-item" data-g="3" onclick="pickGrade(3)">三年级</div>
+            <div class="grade-item" data-g="4" onclick="pickGrade(4)">四年级</div>
+            <div class="grade-item" data-g="5" onclick="pickGrade(5)">五年级</div>
+            <div class="grade-item" data-g="6" onclick="pickGrade(6)">六年级</div>
+        </div>
+    </div>
+    <button class="start-btn" id="startBtn" onclick="beginQuiz()" disabled>🚀 开始测评</button>
+    <div class="tip-bar">💡 试用版每次可体验10题，购买完整版解锁300题无限刷题</div>
+</div>
+
+<div class="page" id="page-quiz">
+    <div class="quiz-top">
+        <div style="display:flex;gap:8px">
+            <div class="quiz-pill" id="pillSub">数学</div>
+            <div class="quiz-pill grade" id="pillGrade">三年级</div>
+        </div>
+        <div class="quiz-progress" id="quizProgress">1 / 10</div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+    <div class="q-card">
+        <div class="q-label" id="qLabel">📌 第 1 题</div>
+        <div class="q-text" id="qText">题目加载中...</div>
+    </div>
+    <div class="opt-list" id="optList"></div>
+    <div class="parse-box" id="parseBox">
+        <div class="parse-title">📖 解析</div>
+        <div class="parse-text" id="parseText"></div>
+    </div>
+    <div class="bottom-nav">
+        <button class="nav-btn nav-prev" id="btnPrev" onclick="prevQ()">◀ 上一题</button>
+        <button class="nav-btn nav-next" id="btnNext" onclick="nextQ()">下一题 ▶</button>
+        <button class="nav-btn nav-end" id="btnEnd" onclick="endQ()">⏹ 结束</button>
+    </div>
+</div>
+
+<div class="page" id="page-result">
+    <div class="result-header">
+        <div class="score-ring" id="scoreRing" style="--deg:0deg">
+            <div class="score-inner"><div class="score-num" id="scoreNum">0</div><div class="score-total">/ 100</div></div>
+        </div>
+        <div class="result-title" id="resTitle">测评完成</div>
+        <div class="result-sub" id="resSub">答对 0 题 / 共 10 题</div>
+    </div>
+    <div id="reviewBox"></div>
+    <div class="result-btns">
+        <button class="res-btn res-home" onclick="goHome()">🏠 返回首页</button>
+        <button class="res-btn res-again" onclick="againQuiz()">🔄 再测一套</button>
+    </div>
+</div>
+
+<div class="modal" id="modal">
+    <div class="modal-box">
+        <div class="modal-icon" id="modalIcon">⚠️</div>
+        <div class="modal-title" id="modalTitle">提示</div>
+        <div class="modal-text" id="modalText">内容</div>
+        <button class="modal-btn modal-primary" id="modalBtn1" onclick="onModal1()">确定</button>
+        <button class="modal-btn modal-secondary" id="modalBtn2" onclick="onModal2()" style="display:none">取消</button>
+    </div>
+</div>
+
+<script>
+/* ==================== 配置 ==================== */
+const CFG={PER_QUIZ:10,BANK:300,AUTO_NEXT:1500,IS_FULL:false,MARK:'hxlman9981'};
+/* ==================== 状态 ==================== */
+let St={sub:null,grade:null,qs:[],idx:0,ans:[],done:false,tmr:null};
+let modalAction='';
+
+/* ==================== 工具函数 ==================== */
+function sr(seed){let x=Math.sin(seed*127.1+37.5)*43758.5453;return x-Math.floor(x);}
+function ri(seed,min,max){return min+Math.floor(sr(seed)*(max-min+1));}
+
+/* 数值型选项生成器 - 带严格去重 */
+function makeNumOpts(correct,seed){
+    let set=new Set([correct]);
+    let deltas=[1,-1,2,-2,10,-10,5,-5,3,-3,20,-20,7,-7,15,-15,25,-25,50,-50];
+    let i=0;
+    while(set.size<4 && i<deltas.length*4){
+        let d=deltas[i%deltas.length]*(Math.floor(i/deltas.length)+1);
+        let v=correct+d;
+        if(v>=0 && v!==correct) set.add(v);
+        i++;
+    }
+    let arr=Array.from(set).slice(0,4);
+    while(arr.length<4){
+        let extra=correct+arr.length*13+7;
+        if(!arr.includes(extra)) arr.push(extra);
+        else arr.push(extra+1);
+    }
+    let order=[0,1,2,3];
+    for(let k=3;k>0;k--){let j=Math.floor(sr(seed+k+999)*(k+1));[order[k],order[j]]=[order[j],order[k]];}
+    let final=order.map(i=>arr[i]);
+    let ans=order.indexOf(0);
+    final=final.map(v=>Number.isInteger(v)?String(v):parseFloat(v.toFixed(2)).toString());
+    return{options:final,answer:ans};
+}
+
+/* 选项打乱器 - 带正确答案索引重新映射 */
+function shuffleOpts(opts,correctIdx,seed){
+    if(opts.length!==4) throw new Error('opts must be 4 items');
+    let unique=new Set(opts);
+    if(unique.size!==4) throw new Error('duplicate options detected: '+JSON.stringify(opts));
+    let order=[0,1,2,3];
+    for(let k=3;k>0;k--){let j=Math.floor(sr(seed+k+500)*(k+1));[order[k],order[j]]=[order[j],order[k]];}
+    let final=order.map(i=>opts[i]);
+    let ans=order.indexOf(correctIdx);
+    return{options:final,answer:ans};
+}
+
+/* 质量门：验证题目合法性 */
+function validateQ(q){
+    if(!q||!q.options||q.options.length!==4)return false;
+    let set=new Set(q.options);
+    if(set.size!==4){console.warn('选项重复',q);return false;}
+    if(q.answer<0||q.answer>3)return false;
+    if(q.options.some(o=>o===undefined||o===null||String(o)===''))return false;
+    if(!q.question||q.question.length<3)return false;
+    if(!q.parse||q.parse.length<5)return false;
+    return true;
+}
+
+/* ==================== 首页交互 ==================== */
+function pickSub(s){
+    if(St.grade && St.grade<=2 && s==='english'){
+        showModal('根据教育部课程标准，英语课从三年级开始开设，一、二年级同学请选择数学、语文或常识。','📢','知道了');
+        return;
+    }
+    St.sub=s;
+    document.querySelectorAll('.subject-item').forEach(el=>el.classList.remove('selected'));
+    document.querySelector(`[data-sub="${s}"]`).classList.add('selected');
+    checkStart();
+}
+function pickGrade(g){
+    St.grade=g;
+    const eng=document.getElementById('subEng'),tip=document.getElementById('noEngTip');
+    if(g<=2){
+        eng.classList.add('disabled');
+        tip.style.display='block';
+        if(St.sub==='english'){
+            St.sub=null;
+            document.querySelectorAll('.subject-item').forEach(el=>el.classList.remove('selected'));
+        }
+    }else{
+        eng.classList.remove('disabled');
+        tip.style.display='none';
+    }
+    document.querySelectorAll('.grade-item').forEach(el=>el.classList.remove('selected'));
+    document.querySelector(`[data-g="${g}"]`).classList.add('selected');
+    checkStart();
+}
+function checkStart(){document.getElementById('startBtn').disabled=!(St.sub&&St.grade);}
+
+/* ==================== 名校联合题库 ==================== */
+const CHINESE_BANK={
+    1:[
+        {q:'"八"的拼音是？',o:['bā','bá','bǎ','bà'],a:0,p:'"八"读bā，第一声。'},
+        {q:'"大"的反义词是？',o:['小','多','高','长'],a:0,p:'"大"和"小"是一对反义词。'},
+        {q:'"日+月"组成什么字？',o:['明','早','星','阳'],a:0,p:'"日"加"月"组成"明"，表示光亮。'},
+        {q:'"木+木"组成什么字？',o:['林','森','树','材'],a:0,p:'两个"木"组成"林"，表示树林。'},
+        {q:'"一"加一笔变成？',o:['十','二','七','厂'],a:0,p:'"一"中间加一竖变成"十"。'},
+        {q:'"口"里面加一横是？',o:['日','目','中','回'],a:0,p:'"口"中间加一横是"日"。'},
+        {q:'"人+人"组成？',o:['从','众','仁','介'],a:0,p:'两个"人"组成"从"。'},
+        {q:'"水"字有几画？',o:['4画','3画','5画','6画'],a:0,p:'"水"笔顺：竖钩、横撇、撇、捺，共4画。'},
+        {q:'"山"的拼音是？',o:['shān','shán','shǎn','shàn'],a:0,p:'"山"读shān，第一声。'},
+        {q:'"上"的反义词是？',o:['下','左','右','前'],a:0,p:'"上"和"下"是一对反义词。'},
+        {q:'"火"字加一笔可变成？',o:['灭','灰','灯','炎'],a:0,p:'"火"上面加一横变成"灭"。'},
+        {q:'"天"减一笔变成？',o:['大','太','夫','夭'],a:0,p:'"天"去掉上面一横变成"大"。'},
+        {q:'"三"加一笔可变成？',o:['王','丰','土','干'],a:0,p:'"三"中间加一竖可变成"王"。'},
+        {q:'"十"加一笔可变成？',o:['干','土','千','士'],a:0,p:'"十"上面加一横变成"干"。'},
+        {q:'"了"加一笔变成？',o:['子','孑','孓','乃'],a:0,p:'"了"中间加一横变成"子"。'}
+    ],
+    2:[
+        {q:'"五颜六色"形容什么？',o:['颜色多','声音大','速度快','味道香'],a:0,p:'"五颜六色"形容色彩繁多。'},
+        {q:'"一心一意"的近义词是？',o:['专心致志','三心二意','马马虎虎','心不在焉'],a:0,p:'"一心一意"和"专心致志"都表示专心。'},
+        {q:'"美丽"的反义词是？',o:['丑陋','漂亮','好看','优美'],a:0,p:'"美丽"的反义词是"丑陋"。'},
+        {q:'"快乐"的近义词是？',o:['高兴','伤心','难过','痛苦'],a:0,p:'"快乐"和"高兴"意思相近。'},
+        {q:'"春回大地"描写什么季节？',o:['春天','夏天','秋天','冬天'],a:0,p:'"春回大地"描写春天到来。'},
+        {q:'"飞流直下三千尺"用了什么修辞？',o:['夸张','比喻','拟人','排比'],a:0,p:'"三千尺"夸大了瀑布高度，是夸张。'},
+        {q:'"床前明月光"的作者是？',o:['李白','杜甫','白居易','王维'],a:0,p:'李白被称为"诗仙"，《静夜思》是他的代表作。'},
+        {q:'"白日依山尽"的下一句是？',o:['黄河入海流','欲穷千里目','更上一层楼','遥知兄弟登高处'],a:0,p:'"白日依山尽，黄河入海流"出自王之涣《登鹳雀楼》。'},
+        {q:'下列哪个是ABB式词语？',o:['绿油油','绿色','绿的','绿绿'],a:0,p:'"绿油油"是ABB式重叠词语。'},
+        {q:'"一边...一边..."表示什么关系？',o:['同时进行','先后进行','因果关系','转折关系'],a:0,p:'"一边...一边..."表示两个动作同时进行。'},
+        {q:'"因为...所以..."表示什么关系？',o:['因果关系','并列关系','转折关系','假设关系'],a:0,p:'"因为...所以..."表示因果关系。'},
+        {q:'"虽然...但是..."表示什么关系？',o:['转折关系','因果关系','并列关系','递进关系'],a:0,p:'"虽然...但是..."表示转折关系。'},
+        {q:'"亡羊补牢"的意思是？',o:['出了问题及时补救','丢掉羊不管','把羊杀掉','把牢修好'],a:0,p:'"亡羊补牢"比喻出了问题后想办法补救。'},
+        {q:'"揠苗助长"告诉我们什么道理？',o:['违反规律急于求成','努力就能成功','要帮助植物生长','种田很辛苦'],a:0,p:'"揠苗助长"比喻违反事物规律，急于求成。'},
+        {q:'"坐井观天"比喻什么？',o:['眼界狭窄','喜欢观天','住在井里','青蛙很懒'],a:0,p:'"坐井观天"比喻眼界狭窄，见识短浅。'}
+    ],
+    3:[
+        {q:'"少壮不努力"的下一句是？',o:['老大徒伤悲','黄河入海流','更上一层楼','春风吹又生'],a:0,p:'"少壮不努力，老大徒伤悲"出自《长歌行》。'},
+        {q:'"谁言寸草心"的下一句是？',o:['报得三春晖','游子身上衣','意恐迟迟归','临行密密缝'],a:0,p:'"谁言寸草心，报得三春晖"出自孟郊《游子吟》。'},
+        {q:'"遥知兄弟登高处"的下一句是？',o:['遍插茱萸少一人','每逢佳节倍思亲','独在异乡为异客','异乡异客异思亲'],a:0,p:'出自王维《九月九日忆山东兄弟》。'},
+        {q:'"九月九日忆山东兄弟"的作者是？',o:['王维','李白','杜甫','白居易'],a:0,p:'王维，唐代诗人，擅长山水田园诗。'},
+        {q:'修改病句："我们要学习他刻苦钻研认真学习。"',o:['我们要学习他刻苦钻研认真学习的精神。','我们要学习他刻苦。','我们要认真学习。','他刻苦钻研认真学习。'],a:0,p:'原句缺少宾语，应在句末加"的精神"。'},
+        {q:'"发明"和"发现"的区别是？',o:['发明是创造新事物，发现是找到已存在事物','意思相同','发明是找到，发现是创造','没有区别'],a:0,p:'"发明"创造新事物，"发现"找到原本存在的事物。'},
+        {q:'"陆续"和"连续"的区别是？',o:['陆续有间隔，连续不间断','意思相同','陆续是继续，连续是连接','没有区别'],a:0,p:'"陆续"表示时断时续，"连续"表示不间断。'},
+        {q:'"居然"和"果然"的区别是？',o:['居然出乎意料，果然在意料中','意思相同','居然是真的，果然是假的','没有区别'],a:0,p:'"居然"表意外，"果然"表预料之中。'},
+        {q:'"激烈"一般形容什么？',o:['战斗、争论','颜色','声音','味道'],a:0,p:'"激烈"多形容战斗、争论等程度强烈。'},
+        {q:'"热烈"一般形容什么？',o:['掌声、气氛','战斗','争论','颜色'],a:0,p:'"热烈"多形容掌声、气氛等热情高涨。'}
+    ],
+    4:[
+        {q:'"先天下之忧而忧"的下一句是？',o:['后天下之乐而乐','天下之忧而忧','乐天下之乐而乐','忧天下之忧而忧'],a:0,p:'出自范仲淹《岳阳楼记》。'},
+        {q:'"岳阳楼记"的作者是？',o:['范仲淹','欧阳修','苏轼','王安石'],a:0,p:'范仲淹，北宋政治家、文学家。'},
+        {q:'"醉翁之意不在酒"的意思是？',o:['本意不在此而在别的方面','喜欢喝酒','醉翁不喜欢酒','酒不好喝'],a:0,p:'比喻本意不在此而在别的方面。'},
+        {q:'"记"是一种什么文体？',o:['散文体裁','诗歌体裁','小说体裁','戏剧体裁'],a:0,p:'"记"是古代一种散文体裁，可叙事、写景、状物。'},
+        {q:'"拟人"修辞的特点是？',o:['把事物人格化','把人比作物','夸大事实','结构对称'],a:0,p:'拟人是把事物赋予人的特征。'},
+        {q:'"排比"修辞的特点是？',o:['结构相似、意思相关、语气一致','夸大事实','把事物人格化','两两对称'],a:0,p:'排比是三个或以上结构相似的句子排列。'},
+        {q:'"对偶"修辞的特点是？',o:['两两对称、字数相等','结构相似三句以上','夸大事实','把事物人格化'],a:0,p:'对偶要求字数相等、结构相同、意义对称。'},
+        {q:'"反问"修辞的特点是？',o:['问中有答，加强语气','提出问题等待回答','自问自答','没有答案'],a:0,p:'反问是问句形式表达确定意思，加强语气。'},
+        {q:'"设问"修辞的特点是？',o:['自问自答','问中有答','只问不答','加强语气'],a:0,p:'设问是自己提出问题，自己回答。'},
+        {q:'"比喻"的构成要素是？',o:['本体、喻体、比喻词','只有本体','只有喻体','夸张成分'],a:0,p:'比喻由本体、喻体和比喻词三部分构成。'}
+    ],
+    5:[
+        {q:'"三国演义"的作者是？',o:['罗贯中','施耐庵','曹雪芹','吴承恩'],a:0,p:'罗贯中，元末明初小说家，《三国演义》作者。'},
+        {q:'"水浒传"的作者是？',o:['施耐庵','罗贯中','曹雪芹','吴承恩'],a:0,p:'施耐庵，元末明初小说家，《水浒传》作者。'},
+        {q:'"西游记"的作者是？',o:['吴承恩','罗贯中','施耐庵','曹雪芹'],a:0,p:'吴承恩，明代小说家，《西游记》作者。'},
+        {q:'"红楼梦"的作者是？',o:['曹雪芹','罗贯中','施耐庵','吴承恩'],a:0,p:'曹雪芹，清代小说家，《红楼梦》作者。'},
+        {q:'"草船借箭"出自哪部名著？',o:['三国演义','水浒传','西游记','红楼梦'],a:0,p:'"草船借箭"是《三国演义》中诸葛亮的故事。'},
+        {q:'"武松打虎"出自哪部名著？',o:['水浒传','三国演义','西游记','红楼梦'],a:0,p:'"武松打虎"是《水浒传》中的经典情节。'},
+        {q:'"大闹天宫"出自哪部名著？',o:['西游记','三国演义','水浒传','红楼梦'],a:0,p:'"大闹天宫"是《西游记》中孙悟空的故事。'},
+        {q:'"刘姥姥进大观园"出自哪部名著？',o:['红楼梦','三国演义','水浒传','西游记'],a:0,p:'"刘姥姥进大观园"出自《红楼梦》。'},
+        {q:'"说明文"的主要表达方式是？',o:['说明','记叙','议论','抒情'],a:0,p:'说明文以"说明"为主要表达方式。'},
+        {q:'"议论文"的三要素是？',o:['论点、论据、论证','时间、地点、人物','起因、经过、结果','开头、中间、结尾'],a:0,p:'议论文三要素：论点、论据、论证。'}
+    ],
+    6:[
+        {q:'"诗经"是我国第一部什么？',o:['诗歌总集','散文集','小说集','戏剧集'],a:0,p:'《诗经》是我国第一部诗歌总集，收录305篇。'},
+        {q:'"离骚"的作者是？',o:['屈原','李白','杜甫','苏轼'],a:0,p:'屈原，战国时期楚国诗人，《离骚》作者。'},
+        {q:'"史记"的作者是？',o:['司马迁','司马光','班固','范晔'],a:0,p:'司马迁，西汉史学家，《史记》作者。'},
+        {q:'"史记"是我国第一部什么？',o:['纪传体通史','编年体通史','国别体史书','断代史'],a:0,p:'《史记》是我国第一部纪传体通史。'},
+        {q:'"资治通鉴"的作者是？',o:['司马光','司马迁','班固','范晔'],a:0,p:'司马光，北宋史学家，《资治通鉴》作者。'},
+        {q:'"唐宋八大家"中唐朝的有几位？',o:['2位','3位','4位','5位'],a:0,p:'唐朝有韩愈、柳宗元两位，其余六位是宋朝的。'},
+        {q:'"文起八代之衰"赞颂的是？',o:['韩愈','柳宗元','欧阳修','苏轼'],a:0,p:'苏轼赞韩愈"文起八代之衰"。'},
+        {q:'"小李杜"指的是？',o:['李商隐和杜牧','李白和杜甫','李清照和杜牧','李商隐和杜甫'],a:0,p:'"小李杜"指晚唐诗人李商隐和杜牧。'},
+        {q:'"大李杜"指的是？',o:['李白和杜甫','李商隐和杜牧','李清照和杜甫','李白和杜牧'],a:0,p:'"大李杜"指盛唐诗人李白和杜甫。'},
+        {q:'"词"这种文学体裁盛行于哪个朝代？',o:['宋朝','唐朝','元朝','明朝'],a:0,p:'词是宋代最具代表性的文学体裁。'}
+    ]
+};
+
+const ENGLISH_BANK={
+    3:[
+        {q:'"apple"的中文意思是？',o:['苹果','香蕉','橘子','梨'],a:0,p:'apple是苹果的意思。'},
+        {q:'"red"的中文意思是？',o:['红色','蓝色','绿色','黄色'],a:0,p:'red是红色的意思。'},
+        {q:'"book"的中文意思是？',o:['书','笔','橡皮','尺子'],a:0,p:'book是书的意思。'},
+        {q:'"cat"的中文意思是？',o:['猫','狗','鸟','鱼'],a:0,p:'cat是猫的意思。'},
+        {q:'"dog"的中文意思是？',o:['狗','猫','猪','牛'],a:0,p:'dog是狗的意思。'},
+        {q:'"one"的中文意思是？',o:['一','二','三','四'],a:0,p:'one是一的意思。'},
+        {q:'"hello"的中文意思是？',o:['你好','再见','谢谢','对不起'],a:0,p:'hello是你好的意思。'},
+        {q:'"boy"的中文意思是？',o:['男孩','女孩','男人','女人'],a:0,p:'boy是男孩的意思。'},
+        {q:'"girl"的中文意思是？',o:['女孩','男孩','男人','女人'],a:0,p:'girl是女孩的意思。'},
+        {q:'"I am a student."的意思是？',o:['我是一名学生。','我是一名老师。','我是一名医生。','我是一名工人。'],a:0,p:'student是学生的意思。'}
+    ],
+    4:[
+        {q:'"hospital"的中文意思是？',o:['医院','学校','图书馆','商店'],a:0,p:'hospital是医院的意思。'},
+        {q:'"breakfast"的中文意思是？',o:['早餐','午餐','晚餐','夜宵'],a:0,p:'breakfast是早餐的意思。'},
+        {q:'"weather"的中文意思是？',o:['天气','季节','温度','湿度'],a:0,p:'weather是天气的意思。'},
+        {q:'"library"的中文意思是？',o:['图书馆','书店','学校','博物馆'],a:0,p:'library是图书馆的意思。'},
+        {q:'"usually"的中文意思是？',o:['通常','有时','很少','从不'],a:0,p:'usually是通常的意思。'},
+        {q:'"favorite"的中文意思是？',o:['最喜欢的','讨厌的','一般的','陌生的'],a:0,p:'favorite是最喜欢的意思。'},
+        {q:'"subject"的中文意思是？',o:['科目','项目','物体','主题'],a:0,p:'subject是科目的意思。'},
+        {q:'"difficult"的中文意思是？',o:['困难的','容易的','简单的','有趣的'],a:0,p:'difficult是困难的意思。'},
+        {q:'"I like reading books."的意思是？',o:['我喜欢读书。','我喜欢跑步。','我喜欢游泳。','我喜欢唱歌。'],a:0,p:'reading books是读书的意思。'},
+        {q:'"What time is it?"的意思是？',o:['几点了？','今天星期几？','今天几号？','天气怎么样？'],a:0,p:'What time is it?是询问时间。'}
+    ],
+    5:[
+        {q:'"delicious"的中文意思是？',o:['美味的','难吃的','一般的','辣的'],a:0,p:'delicious是美味的意思。'},
+        {q:'"tomorrow"的中文意思是？',o:['明天','今天','昨天','后天'],a:0,p:'tomorrow是明天的意思。'},
+        {q:'"exercise"的中文意思是？',o:['锻炼','休息','睡觉','吃饭'],a:0,p:'exercise是锻炼的意思。'},
+        {q:'"scientist"的中文意思是？',o:['科学家','医生','教师','工人'],a:0,p:'scientist是科学家的意思。'},
+        {q:'"invent"的中文意思是？',o:['发明','发现','创造','制造'],a:0,p:'invent是发明的意思。'},
+        {q:'"pollution"的中文意思是？',o:['污染','保护','清洁','环境'],a:0,p:'pollution是污染的意思。'},
+        {q:'"protect"的中文意思是？',o:['保护','破坏','污染','浪费'],a:0,p:'protect是保护的意思。'},
+        {q:'"The earth is our home."的意思是？',o:['地球是我们的家园。','地球是我们的学校。','地球是我们的国家。','地球是我们的城市。'],a:0,p:'home是家园的意思。'},
+        {q:'"We should protect the environment."的意思是？',o:['我们应该保护环境。','我们应该破坏环境。','我们应该污染环境。','我们应该浪费环境。'],a:0,p:'protect是保护，environment是环境。'},
+        {q:'选择正确形式："He ___ to school every day."',o:['goes','go','going','went'],a:0,p:'主语He是第三人称单数，一般现在时动词加-es。'}
+    ],
+    6:[
+        {q:'"environment"的中文意思是？',o:['环境','文明','发明','发现'],a:0,p:'environment是环境的意思。'},
+        {q:'"invention"的中文意思是？',o:['发明','发现','环境','文明'],a:0,p:'invention是发明的意思。'},
+        {q:'"civilization"的中文意思是？',o:['文明','环境','发明','发现'],a:0,p:'civilization是文明的意思。'},
+        {q:'"discovery"的中文意思是？',o:['发现','发明','环境','文明'],a:0,p:'discovery是发现的意思。'},
+        {q:'"technology"的中文意思是？',o:['技术','科学','数学','物理'],a:0,p:'technology是技术的意思。'},
+        {q:'"universe"的中文意思是？',o:['宇宙','地球','世界','国家'],a:0,p:'universe是宇宙的意思。'},
+        {q:'"tradition"的中文意思是？',o:['传统','现代','未来','过去'],a:0,p:'tradition是传统的意思。'},
+        {q:'"The bridge was built last year."是什么语态？',o:['被动语态','主动语态','进行时态','完成时态'],a:0,p:'was built是be+过去分词，表示被动语态。'},
+        {q:'"If I were you, I would study harder."是什么语气？',o:['虚拟语气','陈述语气','祈使语气','疑问语气'],a:0,p:'与现在事实相反的假设，用虚拟语气。'},
+        {q:'"Not only he but also I ___ wrong."',o:['was','were','am','are'],a:0,p:'not only...but also...遵循就近原则，I后面用was（过去时）。'}
+    ]
+};
+
+const COMMON_BANK={
+    1:[
+        {q:'过马路时应走____？',o:['斑马线','机动车道','绿化带','应急车道'],a:0,p:'过马路要走斑马线，遵守"红灯停绿灯行"。'},
+        {q:'发现火灾应拨打____？',o:['119','110','120','114'],a:0,p:'火警电话119，报警时要说清地址。'},
+        {q:'陌生人给糖果，你应该？',o:['拒绝并告诉家长','接过来吃掉','跟他走','谢谢但不说话'],a:0,p:'陌生人给的食物不能要，防止被拐骗。'},
+        {q:'预防近视，眼睛离书本应约____？',o:['33厘米','10厘米','5厘米','50厘米'],a:0,p:'"一拳一尺一寸"，眼睛离书本约一尺（33厘米）。'},
+        {q:'水在标准大气压下的沸点是____？',o:['100℃','90℃','80℃','110℃'],a:0,p:'标准大气压下，水烧到100℃会沸腾。'},
+        {q:'我国的国旗是____？',o:['五星红旗','青天白日旗','星条旗','米字旗'],a:0,p:'中华人民共和国国旗是五星红旗。'},
+        {q:'青蛙是____动物？',o:['两栖','爬行','哺乳','鱼类'],a:0,p:'青蛙幼体用鳃，成体用肺和皮肤，属于两栖动物。'},
+        {q:'一年有____个季节？',o:['4个','3个','5个','6个'],a:0,p:'一年有春夏秋冬四个季节。'},
+        {q:'太阳从____方升起？',o:['东','西','南','北'],a:0,p:'太阳从东方升起，西方落下。'},
+        {q:'星期一之后是____？',o:['星期二','星期三','星期四','星期五'],a:0,p:'星期顺序：一、二、三、四、五、六、日。'}
+    ],
+    2:[
+        {q:'植物进行光合作用需要吸收____？',o:['二氧化碳','氧气','氮气','氢气'],a:0,p:'光合作用吸收二氧化碳，释放氧气。'},
+        {q:'下列哪种行为是节约用水？',o:['随手关水龙头','长时间开水龙头','大量用水洗车','不关紧水龙头'],a:0,p:'随手关紧水龙头、一水多用是节约用水的好习惯。'},
+        {q:'人体最大的器官是____？',o:['皮肤','肝脏','心脏','肺'],a:0,p:'皮肤是人体最大的器官，具有保护作用。'},
+        {q:'彩虹一般有几种颜色？',o:['7种','5种','6种','8种'],a:0,p:'彩虹有红橙黄绿青蓝紫七种颜色。'},
+        {q:'磁铁能吸引____？',o:['铁','塑料','木头','纸'],a:0,p:'磁铁能吸引铁、钴、镍等金属。'},
+        {q:'冰融化变成____？',o:['水','蒸汽','雾','霜'],a:0,p:'冰是固态的水，融化后变成液态的水。'},
+        {q:'白天看不到星星是因为____？',o:['太阳光太强','星星消失了','星星睡着了','星星躲起来了'],a:0,p:'白天太阳光太亮，掩盖了星星的光。'},
+        {q:'树叶一般是____颜色？',o:['绿色','红色','黄色','蓝色'],a:0,p:'树叶含叶绿素，所以一般是绿色。'},
+        {q:'下列哪种动物会冬眠？',o:['熊','狗','猫','鸡'],a:0,p:'熊在冬季会冬眠，降低新陈代谢。'},
+        {q:'风是____的流动形成的？',o:['空气','水','土壤','阳光'],a:0,p:'风是空气流动形成的自然现象。'}
+    ],
+    3:[
+        {q:'电器着火时，首先应该？',o:['切断电源','用水浇','用湿布盖','赶紧逃跑'],a:0,p:'电器着火先断电，千万不能用水浇，水能导电。'},
+        {q:'人体需要的六大营养素不包括？',o:['酒精','蛋白质','维生素','碳水化合物'],a:0,p:'六大营养素：蛋白质、脂肪、碳水、维生素、矿物质、水。'},
+        {q:'我国最大的岛屿是____？',o:['台湾岛','海南岛','崇明岛','舟山岛'],a:0,p:'台湾岛面积约3.6万平方公里，是我国第一大岛。'},
+        {q:'地球自转一周大约是____？',o:['24小时','365天','30天','12小时'],a:0,p:'地球自转一圈约24小时，形成昼夜交替。'},
+        {q:'水的三种状态是____？',o:['固态、液态、气态','固态、液态、等离子态','固态、气态、液晶态','液态、气态、等离子态'],a:0,p:'水有固态（冰）、液态（水）、气态（蒸汽）三种状态。'},
+        {q:'声音在哪种介质中传播最快？',o:['固体','液体','气体','真空'],a:0,p:'声音在固体中传播最快，真空不能传声。'},
+        {q:'月球围绕____转动？',o:['地球','太阳','火星','金星'],a:0,p:'月球是地球的天然卫星，围绕地球转动。'},
+        {q:'下列哪种能源是不可再生能源？',o:['煤炭','太阳能','风能','水能'],a:0,p:'煤炭是古代植物遗体形成的，用一点少一点，不可再生。'},
+        {q:'我国的首都是____？',o:['北京','上海','广州','深圳'],a:0,p:'北京是中华人民共和国的首都。'},
+        {q:'下列哪种动物是哺乳动物？',o:['鲸鱼','鲨鱼','鳄鱼','乌龟'],a:0,p:'鲸鱼是哺乳动物，用肺呼吸，胎生哺乳。'}
+    ],
+    4:[
+        {q:'联合国的总部设在____？',o:['美国纽约','英国伦敦','法国巴黎','瑞士日内瓦'],a:0,p:'联合国总部在美国纽约市。'},
+        {q:'太阳系中最大的行星是____？',o:['木星','土星','地球','火星'],a:0,p:'木星是太阳系最大行星。'},
+        {q:'铁生锈是因为与____接触？',o:['氧气和水','只有氧气','只有水','氮气'],a:0,p:'铁生锈是铁与氧气、水共同作用的缓慢氧化。'},
+        {q:'牛顿因为____发现万有引力？',o:['苹果落地','太阳升起','潮汐涨落','彩虹出现'],a:0,p:'牛顿观察苹果落地，研究出万有引力定律。'},
+        {q:'光年是计量____的单位？',o:['距离','时间','速度','亮度'],a:0,p:'光年是光走一年的距离，约9.46万亿千米。'},
+        {q:'下列哪种物质是导体？',o:['铜','塑料','橡胶','玻璃'],a:0,p:'铜是金属，具有良好的导电性。'},
+        {q:'下列哪种物质是绝缘体？',o:['橡胶','铁','铝','铜'],a:0,p:'橡胶不容易导电，是绝缘体。'},
+        {q:'地球公转一周大约是____？',o:['365天','24小时','30天','12小时'],a:0,p:'地球公转一圈约365天，形成四季更替。'},
+        {q:'下列哪种现象是化学变化？',o:['铁生锈','冰融化','玻璃破碎','水蒸发'],a:0,p:'铁生锈生成了新物质（氧化铁），是化学变化。'},
+        {q:'下列哪种现象是物理变化？',o:['冰融化','铁生锈','食物腐烂','纸张燃烧'],a:0,p:'冰融化只是状态改变，没有新物质生成，是物理变化。'}
+    ],
+    5:[
+        {q:'DNA的中文名称是____？',o:['脱氧核糖核酸','核糖核酸','蛋白质','氨基酸'],a:0,p:'DNA是脱氧核糖核酸，携带遗传信息。'},
+        {q:'下列哪种能源是清洁能源？',o:['太阳能','煤炭','石油','天然气'],a:0,p:'太阳能清洁无污染，是可再生能源。'},
+        {q:'温室效应主要是____造成的？',o:['二氧化碳','氧气','氮气','氢气'],a:0,p:'二氧化碳等温室气体阻挡热量散失，造成温室效应。'},
+        {q:'下列哪种疾病可以通过接种疫苗预防？',o:['麻疹','近视','蛀牙','骨折'],a:0,p:'麻疹疫苗可以有效预防麻疹。'},
+        {q:'下列哪种血型被称为万能供血者？',o:['O型','A型','B型','AB型'],a:0,p:'O型血不含A、B抗原，紧急情况下可少量输给其他血型。'},
+        {q:'人体有多少块骨头？',o:['206块','216块','196块','226块'],a:0,p:'成年人有206块骨头，婴儿约有270块。'},
+        {q:'下列哪种器官属于消化系统？',o:['胃','心脏','肺','肾'],a:0,p:'胃是消化系统的重要器官，负责消化食物。'},
+        {q:'下列哪种器官属于呼吸系统？',o:['肺','心脏','胃','肝'],a:0,p:'肺是呼吸系统的主要器官，负责气体交换。'},
+        {q:'下列哪种器官属于循环系统？',o:['心脏','肺','胃','肾'],a:0,p:'心脏是循环系统的核心，负责泵血。'},
+        {q:'下列哪种器官属于泌尿系统？',o:['肾','心脏','肺','胃'],a:0,p:'肾是泌尿系统的主要器官，负责过滤血液。'}
+    ],
+    6:[
+        {q:'相对论是____提出的？',o:['爱因斯坦','牛顿','伽利略','霍金'],a:0,p:'爱因斯坦提出了狭义相对论和广义相对论。'},
+        {q:'元素周期表是____编制的？',o:['门捷列夫','居里夫人','诺贝尔','达尔文'],a:0,p:'门捷列夫发现了元素周期律，编制了元素周期表。'},
+        {q:'进化论是____提出的？',o:['达尔文','牛顿','爱因斯坦','孟德尔'],a:0,p:'达尔文提出了生物进化论，著作《物种起源》。'},
+        {q:'下列哪种元素是人体必需的微量元素？',o:['铁','碳','氢','氧'],a:0,p:'铁是人体必需的微量元素，参与血红蛋白合成。'},
+        {q:'下列哪种元素是地壳中含量最多的？',o:['氧','硅','铝','铁'],a:0,p:'氧占地壳质量的约48.6%，是含量最多的元素。'},
+        {q:'pH=7表示溶液呈____？',o:['中性','酸性','碱性','强酸性'],a:0,p:'pH=7为中性，小于7为酸性，大于7为碱性。'},
+        {q:'下列哪种力是四大基本力之一？',o:['引力','摩擦力','弹力','浮力'],a:0,p:'四大基本力：引力、电磁力、强核力、弱核力。'},
+        {q:'原子核由____组成？',o:['质子和中子','电子和质子','电子和中子','质子和离子'],a:0,p:'原子核由质子和中子组成，电子在核外运动。'},
+        {q:'下列哪种射线穿透力最强？',o:['γ射线','α射线','β射线','X射线'],a:0,p:'γ射线是电磁波，穿透力最强。'},
+        {q:'下列哪种能源属于核能源？',o:['铀','煤炭','石油','天然气'],a:0,p:'铀是核燃料，可用于核裂变发电。'}
+    ]
+};
+
+function genMath(grade,idx){
+    const s=idx*131+grade*1009;
+    const r=(off,min,max)=>ri(s+off,min,max);
+    let type=idx%12;
+
+    if(grade===1){
+        if(type<4){let a=r(1,1,9),b=r(2,1,9);return{q:`${a}+${b}=?`,a:a+b,p:`从${a}往后数${b}个，得到${a+b}。`};}
+        else if(type<7){let a=r(1,5,15),b=r(2,1,a);return{q:`${a}-${b}=?`,a:a-b,p:`想分成：${a}可以分成${b}和${a-b}。`};}
+        else if(type<9){let a=r(1,1,20),b=r(2,1,20);let sym=a>b?'>':a<b?'<':'=';let map={'=':2,'>':0,'<':1};return{q:`${a} ○ ${b}，○里应填？`,opts:['>','<','=','≠'],a:map[sym],p:`${a}${sym==='='?'等于':sym==='>'?'大于':'小于'}${b}，填"${sym}"。`};}
+        else if(type<11){let items=['苹果','橘子','糖果','铅笔'];let it=items[r(3,0,3)];let tot=r(4,3,10),use=r(5,1,tot-1);return{q:`有${tot}个${it}，吃掉${use}个，还剩几个？`,a:tot-use,p:`求剩余用减法：${tot}-${use}=${tot-use}。`};}
+        else{let shapes=['三角形','正方形','长方形','圆形'];let s1=shapes[r(3,0,3)];return{q:`下列哪个是${s1}？`,opts:[s1,'立方体','圆柱体','球体'],a:0,p:`${s1}是平面图形。`};}
+    }
+    else if(grade===2){
+        if(type<3){let a=r(1,10,80),b=r(2,5,19);return{q:`${a}+${b}=?`,a:a+b,p:`个位${a%10}+${b%10}=${(a%10)+(b%10)}，结果${a+b}。`};}
+        else if(type<6){let a=r(1,10,80),b=r(2,5,19);let m=Math.max(a,b),n=Math.min(a,b);return{q:`${m}-${n}=?`,a:m-n,p:`相同数位对齐，${m}-${n}=${m-n}。`};}
+        else if(type<9){let a=r(1,2,9),b=r(2,2,9);return{q:`${a}×${b}=?`,a:a*b,p:`口诀：${Math.min(a,b)}乘${Math.max(a,b)}得${a*b}。`};}
+        else if(type<11){let a=r(1,2,9),b=r(2,2,9);let p=a*b;return{q:`${p}÷${a}=?`,a:b,p:`想乘法算除法：${a}×${b}=${p}，商是${b}。`};}
+        else{let pr=r(4,2,9),nu=r(5,2,9);return{q:`1支笔${pr}元，买${nu}支多少钱？`,a:pr*nu,p:`单价×数量=${pr}×${nu}=${pr*nu}元。`};}
+    }
+    else if(grade===3){
+        if(type<3){let a=r(1,100,900),b=r(2,10,99);return{q:`${a}+${b}=?`,a:a+b,p:`三位数加两位数：${a}+${b}=${a+b}。`};}
+        else if(type<6){let a=r(1,100,900),b=r(2,10,99);let m=Math.max(a,b),n=Math.min(a,b);return{q:`${m}-${n}=?`,a:m-n,p:`三位数减两位数：${m}-${n}=${m-n}。`};}
+        else if(type<9){let a=r(1,10,99),b=r(2,2,9);return{q:`${a}×${b}=?`,a:a*b,p:`多位数乘一位数：${a}×${b}=${a*b}。`};}
+        else if(type<11){let all=r(1,2,8),part=r(2,1,all-1);return{q:`蛋糕平均分成${all}份，吃${part}份，吃了几分之几？`,opts:[`${part}/${all}`,`${all}/${part}`,`${part}/${all+1}`,`1/${part}`],a:0,p:`分母是总份数${all}，分子是吃的份数${part}。`};}
+        else{let l=r(1,3,9),w=r(2,2,6);return{q:`长方形长${l}cm、宽${w}cm，周长是？`,a:(l+w)*2,p:`周长=(${l}+${w})×2=${(l+w)*2}cm。`};}
+    }
+    else if(grade===4){
+        if(type<3){let a=r(1,1000,9999),b=r(2,100,999);return{q:`${a}+${b}=?`,a:a+b,p:`大数加法：${a}+${b}=${a+b}。`};}
+        else if(type<6){let a=r(1,1000,9999),b=r(2,100,999);let m=Math.max(a,b),n=Math.min(a,b);return{q:`${m}-${n}=?`,a:m-n,p:`大数减法：${m}-${n}=${m-n}。`};}
+        else if(type<9){let a=r(1,10,99),b=r(2,10,99);return{q:`${a}×${b}=?`,a:a*b,p:`两位数乘法：${a}×${b}=${a*b}。`};}
+        else if(type<11){let a=r(1,3,8),b=r(2,3,8),c=r(3,3,8);let ok=a+b>c&&a+c>b&&b+c>a;return{q:`三根小棒${a}cm、${b}cm、${c}cm，能围成三角形吗？`,opts:['能','不能','不一定','无法判断'],a:ok?0:1,p:`两边之和必须大于第三边。${a}+${b}=${a+b}${ok?'>':'<='}${c}。`};}
+        else{let x=(r(1,1,99)/10).toFixed(1),y=(r(2,1,99)/10).toFixed(1),sum=(parseFloat(x)+parseFloat(y)).toFixed(1);return{q:`${x}+${y}=?`,a:parseFloat(sum),p:`小数点对齐：${x}+${y}=${sum}。`};}
+    }
+    else if(grade===5){
+        if(type<3){let x=(r(1,1,99)/10).toFixed(1),y=r(2,2,9);let real=(parseFloat(x)*y).toFixed(1);return{q:`${x}×${y}=?`,a:parseFloat(real),p:`先按整数乘法算，再点小数点。`};}
+        else if(type<6){let a=r(1,2,9),b=r(2,2,9)*a;return{q:`解方程：${a}x=${b}`,a:b/a,p:`两边同除以${a}：x=${b/a}。`};}
+        else if(type<9){let l=r(1,2,8),w=r(2,2,6),h=r(3,2,5);return{q:`长方体长${l}cm、宽${w}cm、高${h}cm，体积是？`,a:l*w*h,p:`体积=${l}×${w}×${h}=${l*w*h}cm³。`};}
+        else if(type<11){let n=[r(1,60,100),r(2,60,100),r(3,60,100),r(4,60,100),r(5,60,100)];let sum=n.reduce((a,b)=>a+b,0),avg=Math.round(sum/5);return{q:`5次成绩：${n.join('、')}，平均分？`,a:avg,p:`平均数=${sum}÷5=${avg}。`};}
+        else{let a=r(1,1,50),b=r(2,51,100);return{q:`${a}是${b}的百分之几？`,a:Math.round(a/b*100),p:`${a}÷${b}×100%=${Math.round(a/b*100)}%。`};}
+    }
+    else{
+        if(type<3){let a=r(1,1,9),b=r(2,2,9),c=r(3,1,9),d=r(4,2,9);let num=a*d+c*b,den=b*d;let g=gcd(num,den);let res=g===den?`${num/den}`:`${num/g}/${den/g}`;return{q:`${a}/${b}+${c}/${d}=?`,opts:[res,`${a+c}/${b+d}`,`${num+1}/${den}`,`${a}/${b+c}`],a:0,p:`通分：${a}/${b}=${a*d}/${den}，${c}/${d}=${c*b}/${den}，相加得${res}。`};}
+        else if(type<6){let rad=r(1,2,9);let area=(3.14*rad*rad).toFixed(2);return{q:`半径${rad}的圆面积？（π=3.14）`,a:parseFloat(area),p:`S=πr²=3.14×${rad}²=${area}。`};}
+        else if(type<9){let x=r(1,2,8),y=r(2,2,8);return{q:`化简比：${x*3}:${y*3}`,opts:[`${x}:${y}`,`${x*3}:${y*3}`,`${x+y}:${y}`,`${x}:${x+y}`],a:0,p:`前后项同除以3，得${x}:${y}。`};}
+        else if(type<11){let cost=r(1,50,200),prof=r(2,10,50);let rate=(prof/cost*100).toFixed(1);return{q:`进价${cost}元，售价${cost+prof}元，利润率？`,opts:[`${rate}%`,`${(prof/(cost+prof)*100).toFixed(1)}%`,`${prof}%`,`${(cost/prof*100).toFixed(1)}%`],a:0,p:`利润率=利润÷成本=${prof}÷${cost}×100%=${rate}%。`};}
+        else{let prin=r(1,100,1000),rate=r(2,1,5),year=r(3,1,3);let int=Math.round(prin*rate*year/100);return{q:`本金${prin}元，年利率${rate}%，存${year}年，利息是？`,a:int,p:`利息=本金×利率×时间=${prin}×${rate}%×${year}=${int}元。`};}
+    }
+}
+
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){let t=b;b=a%b;a=t;}return a;}
+
+function genBank(sub,grade){
+    let bank=[];
+    for(let i=0;i<CFG.BANK;i++){
+        let q=genOne(sub,grade,i);
+        if(!validateQ(q)){q=genOne(sub,grade,i+7777);}
+        bank.push(q);
+    }
+    return bank;
+}
+
+function genOne(sub,grade,idx){
+    const s=idx*131+grade*1009+(sub==='math'?1:sub==='chinese'?2:sub==='english'?3:4)*7;
+    const r=(off,min,max)=>ri(s+off,min,max);
+
+    if(sub==='math'){
+        let m=genMath(grade,idx);
+        if(m.opts){
+            let sh=shuffleOpts(m.opts,m.a,s+100);
+            return{question:m.q,options:sh.options,answer:sh.answer,parse:m.p};
+        }else{
+            let sh=makeNumOpts(m.a,s+100);
+            return{question:m.q,options:sh.options,answer:sh.answer,parse:m.p};
+        }
+    }
+    else if(sub==='chinese'){
+        let pool=CHINESE_BANK[grade]||CHINESE_BANK[6];
+        let item=pool[r(1,0,pool.length-1)];
+        let sh=shuffleOpts(item.o,item.a,s);
+        return{question:item.q,options:sh.options,answer:sh.answer,parse:item.p};
+    }
+    else if(sub==='english'){
+        let pool=ENGLISH_BANK[grade]||ENGLISH_BANK[6];
+        let item=pool[r(1,0,pool.length-1)];
+        let sh=shuffleOpts(item.o,item.a,s);
+        return{question:item.q,options:sh.options,answer:sh.answer,parse:item.p};
+    }
+    else{
+        let pool=COMMON_BANK[grade]||COMMON_BANK[6];
+        let item=pool[r(1,0,pool.length-1)];
+        let sh=shuffleOpts(item.o,item.a,s);
+        return{question:item.q,options:sh.options,answer:sh.answer,parse:item.p};
+    }
+}
+
+/* ==================== 流程控制 ==================== */
+function beginQuiz(){
+    if(!St.sub||!St.grade)return;
+    let bank=genBank(St.sub,St.grade);
+    let used=new Set(),sel=[];
+    while(sel.length<CFG.PER_QUIZ&&used.size<bank.length){
+        let i=Math.floor(Math.random()*bank.length);
+        if(!used.has(i)){used.add(i);sel.push(bank[i]);}
+    }
+    while(sel.length<CFG.PER_QUIZ)sel.push(bank[sel.length%bank.length]);
+    St.qs=sel;St.idx=0;St.ans=new Array(CFG.PER_QUIZ).fill(null);St.done=false;
+    document.getElementById('watermark').innerHTML=`试用版 V3.0 · ${subName(St.sub)}${St.grade}年级<br>完整版联系 ${CFG.MARK}`;
+    showPage('page-quiz');drawQ();
+}
+function subName(s){return{math:'数学',chinese:'语文',english:'英语',common:'常识'}[s];}
+
+function drawQ(){
+    clearTimeout(St.tmr);St.done=false;
+    let q=St.qs[St.idx],rec=St.ans[St.idx];
+    document.getElementById('pillSub').textContent=subName(St.sub);
+    document.getElementById('pillGrade').textContent=St.grade+'年级';
+    document.getElementById('quizProgress').textContent=(St.idx+1)+' / '+CFG.PER_QUIZ;
+    document.getElementById('progressFill').style.width=(((St.idx+1)/CFG.PER_QUIZ)*100)+'%';
+    document.getElementById('qLabel').innerHTML='📌 第 '+(St.idx+1)+' 题';
+    document.getElementById('qText').textContent=q.question;
+    let box=document.getElementById('optList');box.innerHTML='';
+    let tags=['A','B','C','D'];
+    q.options.forEach((txt,i)=>{
+        let div=document.createElement('div');div.className='opt-item';
+        div.innerHTML='<div class="opt-tag">'+tags[i]+'</div><div class="opt-text">'+txt+'</div>';
+        if(rec!==null){div.classList.add('disabled');if(i===q.answer)div.classList.add('correct');else if(i===rec.pick)div.classList.add('wrong');}
+        else div.onclick=function(){pickOpt(i);};
+        box.appendChild(div);
+    });
+    let pbox=document.getElementById('parseBox'),ptxt=document.getElementById('parseText');
+    if(rec!==null){ptxt.textContent=q.parse;pbox.classList.add('show');St.done=true;}
+    else pbox.classList.remove('show');
+    document.getElementById('btnPrev').disabled=St.idx===0;
+    let nxt=document.getElementById('btnNext');
+    nxt.textContent=St.idx===CFG.PER_QUIZ-1?'查看结果 ▶':'下一题 ▶';
+    nxt.disabled=rec===null;
+    document.getElementById('btnEnd').style.display=St.idx===CFG.PER_QUIZ-1?'none':'inline-flex';
+}
+
+function pickOpt(idx){
+    if(St.done)return;St.done=true;
+    let q=St.qs[St.idx],ok=idx===q.answer;
+    St.ans[St.idx]={pick:idx,ok:ok};
+    let items=document.querySelectorAll('.opt-item');
+    items.forEach((el,i)=>{
+        el.classList.add('disabled');el.onclick=null;
+        if(i===q.answer)el.classList.add('correct');
+        else if(i===idx&&!ok)el.classList.add('wrong');
+    });
+    document.getElementById('parseText').textContent=q.parse;
+    document.getElementById('parseBox').classList.add('show');
+    document.getElementById('btnNext').disabled=false;
+    if(St.idx===CFG.PER_QUIZ-1)document.getElementById('btnNext').textContent='查看结果 ▶';
+    if(St.idx<CFG.PER_QUIZ-1)St.tmr=setTimeout(nextQ,CFG.AUTO_NEXT);
+}
+
+function prevQ(){if(St.idx>0){St.idx--;drawQ();}}
+function nextQ(){
+    clearTimeout(St.tmr);
+    if(!St.done){showModal('请先选择答案！','💡','知道了');return;}
+    if(St.idx<CFG.PER_QUIZ-1){St.idx++;drawQ();}
+    else{
+        showResult();
+        setTimeout(function(){
+            showModal('试用版仅能体验10题，购买完整版解锁300题无限刷题！','🔒','返回首页','明天再来','trialEnd');
+        },800);
+    }
+}
+function endQ(){
+    clearTimeout(St.tmr);
+    showResult();
+    setTimeout(function(){
+        showModal('试用版结束，购买完整版解锁全部功能！','🔒','返回首页','明天再来','trialEnd');
+    },800);
+}
+
+function showResult(){
+    showPage('page-result');
+    let correct=St.ans.filter(a=>a&&a.ok).length;
+    let score=Math.round(correct*100/CFG.PER_QUIZ);
+    document.getElementById('scoreNum').textContent=score;
+    document.getElementById('scoreRing').style.setProperty('--deg',score*3.6+'deg');
+    document.getElementById('resTitle').textContent=score>=90?'太棒了！🎉':score>=60?'不错哦！👍':'继续加油！💪';
+    document.getElementById('resSub').textContent='答对 '+correct+' 题 / 共 '+CFG.PER_QUIZ+' 题 · 正确率 '+score+'%';
+    let box=document.getElementById('reviewBox');box.innerHTML='';
+    let tags=['A','B','C','D'];
+    St.qs.forEach((q,i)=>{
+        let a=St.ans[i],isOk=a&&a.ok;
+        let card=document.createElement('div');card.className='review-card '+(isOk?'correct':'wrong');
+        card.innerHTML='<div class="review-head"><div class="review-num">'+(i+1)+'</div><span class="review-status">'+(isOk?'✅':'❌')+'</span></div><div class="review-q">'+q.question+'</div><div class="review-ans">你选：'+(a?tags[a.pick]:'-')+' | 答案：'+tags[q.answer]+'</div><div class="review-parse">'+q.parse+'</div>';
+        card.onclick=function(){card.classList.toggle('expanded');};
+        box.appendChild(card);
+    });
+}
+
+function goHome(){
+    clearTimeout(St.tmr);
+    St={sub:null,grade:null,qs:[],idx:0,ans:[],done:false,tmr:null};
+    document.querySelectorAll('.subject-item,.grade-item').forEach(el=>el.classList.remove('selected'));
+    document.getElementById('noEngTip').style.display='none';
+    document.getElementById('startBtn').disabled=true;
+    showPage('page-home');
+}
+function againQuiz(){
+    showModal('试用版每次仅能体验10题，购买完整版可无限刷题！','🔒','返回首页','明天再来','trialEnd');
+}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+
+function showModal(text,icon,btn1,btn2,action){
+    modalAction=action||'';
+    document.getElementById('modalText').textContent=text;
+    document.getElementById('modalIcon').textContent=icon||'💡';
+    document.getElementById('modalBtn1').textContent=btn1||'确定';
+    let b2=document.getElementById('modalBtn2');
+    if(btn2){b2.textContent=btn2;b2.style.display='block';}else{b2.style.display='none';}
+    document.getElementById('modal').classList.add('show');
+}
+function onModal1(){
+    document.getElementById('modal').classList.remove('show');
+    if(modalAction==='trialEnd')goHome();
+}
+function onModal2(){
+    document.getElementById('modal').classList.remove('show');
+    if(modalAction==='trialEnd')goHome();
+}
+</script>
+</body>
+</html>
